@@ -1,8 +1,9 @@
-#include <iostream>
-
+# include "position.h"
 
 int main()
 {
-    std::cout << "Hello Pitrolls! Let's play chess?" << std::endl;
+    Position P;
+    std::cout << P.print() << std::endl;
+
     return 0;
 }

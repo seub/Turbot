@@ -3,6 +3,7 @@
 
 # include "tools.h"
 # include "piece.h"
+# include "square.h"
 
 class Position
 {
@@ -14,7 +15,7 @@ public:
 
     void reset();
 
-    std::string printSquare(uint index);
+    std::string print() const;
 
     uint materialCount() const;
 
@@ -31,7 +32,7 @@ private:
     bool whiteCastled;
     bool blackCastled;
     bool enPassantPossible;
-    uint enPassantSquare;
+    uint enPassantTargetSquare;
     bool drawOffered;
     uint nbReversibleMovesPlayed; //For 50 move draw rule
     //NB For draw purposes, we need the list of past positions to determine threefold repetition
