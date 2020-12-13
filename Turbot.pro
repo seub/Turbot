@@ -5,4 +5,11 @@ CONFIG -= app_bundle
 CONFIG -= qt
 
 SOURCES += \
-        main.cpp
+        main.cpp \
+        position.cpp \
+        tools.cpp
+
+HEADERS += \
+    position.h \
+    tools.h \
+    types.h
