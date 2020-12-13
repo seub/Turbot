@@ -14,12 +14,12 @@ public:
     //Position(const Position &initialPosition, const MoveSeq &seq);
 
     void reset();
+    void inputFENString(const std::string &in);
 
-    std::string print() const;
+    std::string printString() const;
+    std::string printFENString() const;
 
-    uint materialCount() const;
-
-
+    double materialCount() const;
 
     //bool isLegal(const Move &move) const;
 
@@ -29,12 +29,12 @@ private:
 
     std::vector<Piece> pieces;
     Color turn;
-    bool whiteCastled;
-    bool blackCastled;
+    bool whiteCastlingRightK, whiteCastlingRightQ, blackCastlingRightK, blackCastlingRightQ;
     bool enPassantPossible;
     uint enPassantTargetSquare;
     bool drawOffered;
-    uint nbReversibleMovesPlayed; //For 50 move draw rule
+    uint moveNumber;
+    uint nbReversibleHalfMovesPlayed; //For 50 move draw rule
     //NB For draw purposes, we need the list of past positions to determine threefold repetition
 };
 

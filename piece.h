@@ -15,9 +15,13 @@ public:
     bool isNull() const;
     std::string name() const;
     Color getColor() const;
+    double value() const;
+    char FENchar() const;
 
 private:
-    static inline const std::vector< std::string > piecenames = {"", "K", "Q", "R", "B", "N", "p"};
+    static inline const std::vector< std::string > piecenames = {"", "K", "Q", "R", "B", "N", "P"};
+    static inline const std::vector<char> FENpiecenames = {(char) 0, 'K', 'Q', 'R', 'B', 'N', 'P', (char) 0, 'k', 'q', 'r', 'b', 'n', 'p'};
+    static inline const std::vector<double> piecevalues = {0, 0, 9.5, 5.63, 3.33, 3.05, 1};
     PieceType type;
     Color color;
 };
