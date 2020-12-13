@@ -6,11 +6,13 @@ CONFIG -= qt
 
 SOURCES += \
         main.cpp \
+        piece.cpp \
         position.cpp \
         square.cpp \
         tools.cpp
 
 HEADERS += \
+    piece.h \
     position.h \
     square.h \
     tools.h \
