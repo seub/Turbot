@@ -6,6 +6,14 @@ Color Piece::getColor() const
     return color;
 }
 
+bool Piece::operator==(const Piece &other) const
+{
+    bool res=true;
+    res &= (type == other.type);
+    res &= (color == other.color);
+    return res;
+}
+
 bool Piece::isNull() const
 {
     return (type == PieceType::Null);

@@ -12,12 +12,14 @@ class Position
 public:
     Position();
     //Position(const Position &initialPosition, const MoveSeq &seq);
+    bool operator==(Position const& other) const;
 
     void reset();
-    void inputFENString(const std::string &in);
+    void clear();
+    void setFromFENString(const std::string &str);
 
     std::string printString() const;
-    std::string printFENString() const;
+    std::string exportFENString() const;
 
     double materialCount() const;
 
