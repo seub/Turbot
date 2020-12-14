@@ -28,21 +28,21 @@ void Position::reset()
 {
     resetPieces();
 
-    turn = Color::White;
-    whiteCastlingRightK = true;
-    whiteCastlingRightQ = true;
-    blackCastlingRightK = true;
-    blackCastlingRightQ = true;
-    enPassantPossible = false;
-    enPassantTargetSquare = 0;
-    drawOffered = false;
-    moveNumber = 1;
-    nbReversibleHalfMovesPlayed = 0;
+    this->turn = Color::White;
+    this->whiteCastlingRightK = true;
+    this->whiteCastlingRightQ = true;
+    this->blackCastlingRightK = true;
+    this->blackCastlingRightQ = true;
+    this->enPassantPossible = false;
+    this->enPassantTargetSquare = 0;
+    this->drawOffered = false;
+    this->moveNumber = 1;
+    this->nbReversibleHalfMovesPlayed = 0;
 }
 
 void Position::resetPieces()
 {
-    pieces = std::vector<Piece>(64, Piece());
+    this->pieces = std::vector<Piece>(64, Piece());
 
     std::vector<PieceType> firstRank = {PieceType::Rook, PieceType::Knight, PieceType::Bishop, PieceType::Queen, PieceType::King, PieceType::Bishop, PieceType::Knight, PieceType::Rook};
 
@@ -57,24 +57,24 @@ void Position::resetPieces()
 
 void Position::clear()
 {
-    pieces = std::vector<Piece>(64, Piece());
+    this->pieces = std::vector<Piece>(64, Piece());
 
-    turn = Color::White;
-    whiteCastlingRightK = false;
-    whiteCastlingRightQ = false;
-    blackCastlingRightK = false;
-    blackCastlingRightQ = false;
-    enPassantPossible = false;
-    enPassantTargetSquare = 0;
-    drawOffered = false;
-    moveNumber = 0;
-    nbReversibleHalfMovesPlayed = 0;
+    this->turn = Color::White;
+    this->whiteCastlingRightK = false;
+    this->whiteCastlingRightQ = false;
+    this->blackCastlingRightK = false;
+    this->blackCastlingRightQ = false;
+    this->enPassantPossible = false;
+    this->enPassantTargetSquare = 0;
+    this->drawOffered = false;
+    this->moveNumber = 0;
+    this->nbReversibleHalfMovesPlayed = 0;
 }
 
 double Position::materialCount() const
 {
     double res=0;
-    for (const auto & piece : pieces)
+    for (const auto & piece : this->pieces)
     {
         if (!piece.isNull())
         {
@@ -93,7 +93,7 @@ std::string Position::printString() const
     Piece piece;
     for (uint i=0; i!=64; ++i)
     {
-        piece = pieces[i];
+        piece = this->pieces[i];
         if (!piece.isNull())
         {
             if (piece.getColor() == Color::White) whitePieces.push_back(" "+piece.name()+Square(i).name());
@@ -120,24 +120,24 @@ std::string Position::printString() const
 
     res += "\n";
     res += "Move number: ";
-    res += Tools::convertToString(moveNumber);
+    res += Tools::convertToString(this->moveNumber);
     res += ".";
 
     res += "\n";
     res += "Side to play: ";
-    res += (turn==Color::White) ? "White" : "Black";
+    res += (this->turn==Color::White) ? "White" : "Black";
 
     res += "\n";
     res += "Castling rights (kingside|queenside) : White = ";
-    res += whiteCastlingRightK ? "Yes|" : "No|";
-    res += whiteCastlingRightQ ? "Yes" : "No";
+    res += this->whiteCastlingRightK ? "Yes|" : "No|";
+    res += this->whiteCastlingRightQ ? "Yes" : "No";
     res += ", Black = ";
-    res += blackCastlingRightK ? "Yes|" : "No|";
-    res += blackCastlingRightQ ? "Yes" : "No";
+    res += this->blackCastlingRightK ? "Yes|" : "No|";
+    res += this->blackCastlingRightQ ? "Yes" : "No";
 
     res += "\n";
     res += "Draw offered by opponent? ";
-    res += drawOffered ? "Yes" : "No";
+    res += this->drawOffered ? "Yes" : "No";
 
     res += "\n";
     res += "Number of reversible half-moves played: " + Tools::convertToString(nbReversibleHalfMovesPlayed);
@@ -153,7 +153,7 @@ std::string Position::exportFENString() const
     uint emptySquares = 0;
     while (rank!=-1)
     {
-        piece = pieces[file + 8*rank];
+        piece = this->pieces[file + 8*rank];
         if (piece.isNull())
         {
             ++emptySquares;
@@ -180,24 +180,24 @@ std::string Position::exportFENString() const
     res.pop_back();
 
     res += ' ';
-    res += (turn==Color::White) ? 'w' : 'b';
+    res += (this->turn==Color::White) ? 'w' : 'b';
 
     res += ' ';
     std::string castlingRights = {};
-    if (whiteCastlingRightK) castlingRights += 'K';
-    if (whiteCastlingRightQ) castlingRights += 'Q';
-    if (blackCastlingRightK) castlingRights += 'k';
-    if (blackCastlingRightK) castlingRights += 'q';
+    if (this->whiteCastlingRightK) castlingRights += 'K';
+    if (this->whiteCastlingRightQ) castlingRights += 'Q';
+    if (this->blackCastlingRightK) castlingRights += 'k';
+    if (this->blackCastlingRightK) castlingRights += 'q';
     res += (castlingRights.empty()) ? "-" : castlingRights;
 
     res += ' ';
-    res += (enPassantPossible)? Square(enPassantTargetSquare).name() : "-";
+    res += (this->enPassantPossible)? Square(this->enPassantTargetSquare).name() : "-";
 
     res += ' ';
-    res += Tools::convertToString(nbReversibleHalfMovesPlayed);
+    res += Tools::convertToString(this->nbReversibleHalfMovesPlayed);
 
     res += ' ';
-    res += Tools::convertToString(moveNumber);
+    res += Tools::convertToString(this->moveNumber);
 
     return res;
 }
@@ -215,18 +215,18 @@ void Position::setFromFENString(const std::string &str)
         switch (letter)
         {
         case ' ' : break;
-        case 'K' : pieces[file + 8*rank] = Piece(PieceType::King, Color::White); ++file; break;
-        case 'Q' : pieces[file + 8*rank] = Piece(PieceType::Queen, Color::White);  ++file; break;
-        case 'R' : pieces[file + 8*rank] = Piece(PieceType::Rook, Color::White);  ++file; break;
-        case 'B' : pieces[file + 8*rank] = Piece(PieceType::Bishop, Color::White);  ++file; break;
-        case 'N' : pieces[file + 8*rank] = Piece(PieceType::Knight, Color::White);  ++file ;break;
-        case 'P' : pieces[file + 8*rank] = Piece(PieceType::Pawn, Color::White);  ++file; break;
-        case 'k' : pieces[file + 8*rank] = Piece(PieceType::King, Color::Black); ++file; break;
-        case 'q' : pieces[file + 8*rank] = Piece(PieceType::Queen, Color::Black);  ++file; break;
-        case 'r' : pieces[file + 8*rank] = Piece(PieceType::Rook, Color::Black);  ++file; break;
-        case 'b' : pieces[file + 8*rank] = Piece(PieceType::Bishop, Color::Black);  ++file; break;
-        case 'n' : pieces[file + 8*rank] = Piece(PieceType::Knight, Color::Black);  ++file ;break;
-        case 'p' : pieces[file + 8*rank] = Piece(PieceType::Pawn, Color::Black);  ++file; break;
+        case 'K' : this->pieces[file + 8*rank] = Piece(PieceType::King, Color::White); ++file; break;
+        case 'Q' : this->pieces[file + 8*rank] = Piece(PieceType::Queen, Color::White);  ++file; break;
+        case 'R' : this->pieces[file + 8*rank] = Piece(PieceType::Rook, Color::White);  ++file; break;
+        case 'B' : this->pieces[file + 8*rank] = Piece(PieceType::Bishop, Color::White);  ++file; break;
+        case 'N' : this->pieces[file + 8*rank] = Piece(PieceType::Knight, Color::White);  ++file ;break;
+        case 'P' : this->pieces[file + 8*rank] = Piece(PieceType::Pawn, Color::White);  ++file; break;
+        case 'k' : this->pieces[file + 8*rank] = Piece(PieceType::King, Color::Black); ++file; break;
+        case 'q' : this->pieces[file + 8*rank] = Piece(PieceType::Queen, Color::Black);  ++file; break;
+        case 'r' : this->pieces[file + 8*rank] = Piece(PieceType::Rook, Color::Black);  ++file; break;
+        case 'b' : this->pieces[file + 8*rank] = Piece(PieceType::Bishop, Color::Black);  ++file; break;
+        case 'n' : this->pieces[file + 8*rank] = Piece(PieceType::Knight, Color::Black);  ++file ;break;
+        case 'p' : this->pieces[file + 8*rank] = Piece(PieceType::Pawn, Color::Black);  ++file; break;
         case '1' : file += 1; break;
         case '2' : file += 2; break;
         case '3' : file += 3; break;
@@ -244,8 +244,8 @@ void Position::setFromFENString(const std::string &str)
     letter = str[i];
     switch (letter)
     {
-    case 'w' : turn = Color::White; break;
-    case 'b' : turn = Color::Black; break;
+    case 'w' : this->turn = Color::White; break;
+    case 'b' : this->turn = Color::Black; break;
     default : throw("Invalid FEN string");
     }
     ++i;
@@ -255,20 +255,20 @@ void Position::setFromFENString(const std::string &str)
     ++i;
 
     letter = str[i];
-    whiteCastlingRightK = false;
-    whiteCastlingRightQ = false;
-    blackCastlingRightK = false;
-    blackCastlingRightQ = false;
+    this->whiteCastlingRightK = false;
+    this->whiteCastlingRightQ = false;
+    this->blackCastlingRightK = false;
+    this->blackCastlingRightQ = false;
     while (letter != ' ')
     {
         letter = str[i];
         switch (letter)
         {
         case ' ' : break;
-        case 'K' : whiteCastlingRightK = true; break;
-        case 'Q' : whiteCastlingRightQ = true; break;
-        case 'k' : blackCastlingRightK = true; break;
-        case 'q' : blackCastlingRightQ = true; break;
+        case 'K' : this->whiteCastlingRightK = true; break;
+        case 'Q' : this->whiteCastlingRightQ = true; break;
+        case 'k' : this->blackCastlingRightK = true; break;
+        case 'q' : this->blackCastlingRightQ = true; break;
         case '-' : break;
         default : throw("Invalid FEN string");
         }
@@ -278,19 +278,19 @@ void Position::setFromFENString(const std::string &str)
     letter = str[i];
     if (letter == '-')
     {
-        enPassantPossible = false;
-        enPassantTargetSquare = 0;
+        this->enPassantPossible = false;
+        this->enPassantTargetSquare = 0;
         ++i;
     }
     else
     {
-        enPassantPossible = true;
+        this->enPassantPossible = true;
         std::string enPassantSquareName = {};
         enPassantSquareName += letter;
         ++i;
         letter = str[i];
         enPassantSquareName += letter;
-        enPassantTargetSquare = Square(enPassantSquareName).getIndex();
+        this->enPassantTargetSquare = Square(enPassantSquareName).getIndex();
         ++i;
     }
 
@@ -299,9 +299,9 @@ void Position::setFromFENString(const std::string &str)
     ++i;
 
     uint j = str.find(' ', i);
-    nbReversibleHalfMovesPlayed = std::stoi(str.substr(i, j));
+    this->nbReversibleHalfMovesPlayed = std::stoi(str.substr(i, j));
     i = j+1;
 
-    moveNumber = std::stoi(str.substr(i, std::string::npos));
+    this->moveNumber = std::stoi(str.substr(i, std::string::npos));
 }
 
