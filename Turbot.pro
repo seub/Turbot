@@ -17,3 +17,6 @@ HEADERS += \
     square.h \
     tools.h \
     types.h
+
+OTHER_FILES += \
+    todo.md

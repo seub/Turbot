@@ -3,7 +3,7 @@
 int main()
 {
     Position P1;
-    std::cout << P1.printString() << std::endl;
+    std::cout << P1 << std::endl;
     std::cout << std::endl;
     std::cout << "Material count: " << P1.materialCount() << std::endl;
     std::cout << std::endl;

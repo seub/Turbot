@@ -11,10 +11,7 @@ bool Position::operator==(const Position &other) const
     res &= (pieces==other.pieces);
 
     res &= (turn == other.turn);
-    res &= (whiteCastlingRightK == other.whiteCastlingRightK);
-    res &= (whiteCastlingRightQ == other.whiteCastlingRightQ);
-    res &= (blackCastlingRightK == other.blackCastlingRightK);
-    res &= (blackCastlingRightQ == other.blackCastlingRightQ);
+    res &= (castlingRights == other.castlingRights);
     res &= (enPassantPossible == other.enPassantPossible);
     res &= (enPassantTargetSquare == other. enPassantTargetSquare);
     res &= (drawOffered == other.drawOffered);
@@ -29,10 +26,7 @@ void Position::reset()
     resetPieces();
 
     this->turn = Color::White;
-    this->whiteCastlingRightK = true;
-    this->whiteCastlingRightQ = true;
-    this->blackCastlingRightK = true;
-    this->blackCastlingRightQ = true;
+    this->castlingRights.fill(true);
     this->enPassantPossible = false;
     this->enPassantTargetSquare = 0;
     this->drawOffered = false;
@@ -42,7 +36,8 @@ void Position::reset()
 
 void Position::resetPieces()
 {
-    this->pieces = std::vector<Piece>(64, Piece());
+    pieces.fill(Piece());
+
 
     std::vector<PieceType> firstRank = {PieceType::Rook, PieceType::Knight, PieceType::Bishop, PieceType::Queen, PieceType::King, PieceType::Bishop, PieceType::Knight, PieceType::Rook};
 
@@ -57,13 +52,10 @@ void Position::resetPieces()
 
 void Position::clear()
 {
-    this->pieces = std::vector<Piece>(64, Piece());
+    pieces.fill(Piece());
 
     this->turn = Color::White;
-    this->whiteCastlingRightK = false;
-    this->whiteCastlingRightQ = false;
-    this->blackCastlingRightK = false;
-    this->blackCastlingRightQ = false;
+    this->castlingRights.fill(false);
     this->enPassantPossible = false;
     this->enPassantTargetSquare = 0;
     this->drawOffered = false;
@@ -129,11 +121,11 @@ std::string Position::printString() const
 
     res += "\n";
     res += "Castling rights (kingside|queenside) : White = ";
-    res += this->whiteCastlingRightK ? "Yes|" : "No|";
-    res += this->whiteCastlingRightQ ? "Yes" : "No";
+    res += this->castlingRights[0] ? "Yes|" : "No|";
+    res += this->castlingRights[1] ? "Yes" : "No";
     res += ", Black = ";
-    res += this->blackCastlingRightK ? "Yes|" : "No|";
-    res += this->blackCastlingRightQ ? "Yes" : "No";
+    res += this->castlingRights[2] ? "Yes|" : "No|";
+    res += this->castlingRights[3] ? "Yes" : "No";
 
     res += "\n";
     res += "Draw offered by opponent? ";
@@ -184,10 +176,10 @@ std::string Position::exportFENString() const
 
     res += ' ';
     std::string castlingRights = {};
-    if (this->whiteCastlingRightK) castlingRights += 'K';
-    if (this->whiteCastlingRightQ) castlingRights += 'Q';
-    if (this->blackCastlingRightK) castlingRights += 'k';
-    if (this->blackCastlingRightK) castlingRights += 'q';
+    if (this->castlingRights[0]) castlingRights += 'K';
+    if (this->castlingRights[1]) castlingRights += 'Q';
+    if (this->castlingRights[2]) castlingRights += 'k';
+    if (this->castlingRights[3]) castlingRights += 'q';
     res += (castlingRights.empty()) ? "-" : castlingRights;
 
     res += ' ';
@@ -255,20 +247,17 @@ void Position::setFromFENString(const std::string &str)
     ++i;
 
     letter = str[i];
-    this->whiteCastlingRightK = false;
-    this->whiteCastlingRightQ = false;
-    this->blackCastlingRightK = false;
-    this->blackCastlingRightQ = false;
+    this->castlingRights.fill(false);
     while (letter != ' ')
     {
         letter = str[i];
         switch (letter)
         {
         case ' ' : break;
-        case 'K' : this->whiteCastlingRightK = true; break;
-        case 'Q' : this->whiteCastlingRightQ = true; break;
-        case 'k' : this->blackCastlingRightK = true; break;
-        case 'q' : this->blackCastlingRightQ = true; break;
+        case 'K' : this->castlingRights[0] = true; break;
+        case 'Q' : this->castlingRights[1] = true; break;
+        case 'k' : this->castlingRights[2] = true; break;
+        case 'q' : this->castlingRights[3] = true; break;
         case '-' : break;
         default : throw("Invalid FEN string");
         }
@@ -303,5 +292,11 @@ void Position::setFromFENString(const std::string &str)
     i = j+1;
 
     this->moveNumber = std::stoi(str.substr(i, std::string::npos));
+}
+
+std::ostream & operator <<(std::ostream &out, const Position &P)
+{
+    out << P.printString();
+    return out;
 }
 

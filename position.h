@@ -29,9 +29,9 @@ public:
 private:
     void resetPieces();
 
-    std::vector<Piece> pieces;
+    std::array<Piece, 64> pieces;
     Color turn;
-    bool whiteCastlingRightK, whiteCastlingRightQ, blackCastlingRightK, blackCastlingRightQ;
+    std::array<bool, 4> castlingRights;// White Kside, White Qside, Black Kside, Black Qside
     bool enPassantPossible;
     uint enPassantTargetSquare;
     bool drawOffered;
