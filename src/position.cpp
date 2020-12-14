@@ -1,15 +1,27 @@
 # include "position.h"
 
-Position::Position()
+Position::Position(bool initialPos)
 {
-    reset();
+    if (initialPos)
+    {
+        reset();
+    }
+    else
+    {
+        clear();
+    }
+}
+
+Position::Position(const std::string &FENstr)
+{
+    setFromFENString(FENstr);
 }
 
 bool Position::operator==(const Position &other) const
 {
     bool res = true;
-    res &= (pieces==other.pieces);
 
+    res &= (pieces==other.pieces);
     res &= (turn == other.turn);
     res &= (castlingRights == other.castlingRights);
     res &= (enPassantPossible == other.enPassantPossible);
@@ -63,20 +75,6 @@ void Position::clear()
     this->nbReversibleHalfMovesPlayed = 0;
 }
 
-double Position::materialCount() const
-{
-    double res=0;
-    for (const auto & piece : this->pieces)
-    {
-        if (!piece.isNull())
-        {
-            if (piece.getColor() == Color::White) res += piece.value();
-            if (piece.getColor() == Color::Black) res -= piece.value();
-        }
-    }
-    return res;
-}
-
 std::string Position::printString() const
 {
     std::string res = {};
@@ -88,7 +86,7 @@ std::string Position::printString() const
         piece = this->pieces[i];
         if (!piece.isNull())
         {
-            if (piece.getColor() == Color::White) whitePieces.push_back(" "+piece.name()+Square(i).name());
+            if (piece.getColor() == Color::White) whitePieces.push_back(piece.name()+Square(i).name());
             if (piece.getColor() == Color::Black) blackPieces.push_back(piece.name()+Square(i).name());
         }
     }
@@ -136,7 +134,7 @@ std::string Position::printString() const
     return res;
 }
 
-std::string Position::exportFENString() const
+std::string Position::printFENString() const
 {
     std::string res = {};
 
@@ -194,7 +192,7 @@ std::string Position::exportFENString() const
     return res;
 }
 
-void Position::setFromFENString(const std::string &str)
+bool Position::setFromFENString(const std::string &str)
 {
     clear();
 
@@ -228,7 +226,7 @@ void Position::setFromFENString(const std::string &str)
         case '7' : file += 7; break;
         case '8' : file += 8; break;
         case '/' : file = 0; --rank; break;
-        default : throw("Invalid FEN string");
+        default : return false;
         }
         ++i;
     }
@@ -238,7 +236,7 @@ void Position::setFromFENString(const std::string &str)
     {
     case 'w' : this->turn = Color::White; break;
     case 'b' : this->turn = Color::Black; break;
-    default : throw("Invalid FEN string");
+    default : return false;
     }
     ++i;
 
@@ -259,7 +257,7 @@ void Position::setFromFENString(const std::string &str)
         case 'k' : this->castlingRights[2] = true; break;
         case 'q' : this->castlingRights[3] = true; break;
         case '-' : break;
-        default : throw("Invalid FEN string");
+        default : return false;
         }
         ++i;
     }
@@ -284,7 +282,7 @@ void Position::setFromFENString(const std::string &str)
     }
 
     letter = str[i];
-    if (letter != ' ') throw("Invalid FEN string");
+    if (letter != ' ') return false;
     ++i;
 
     uint j = str.find(' ', i);
@@ -292,6 +290,7 @@ void Position::setFromFENString(const std::string &str)
     i = j+1;
 
     this->moveNumber = std::stoi(str.substr(i, std::string::npos));
+    return true;
 }
 
 std::ostream & operator <<(std::ostream &out, const Position &P)

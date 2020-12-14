@@ -10,24 +10,21 @@ class Position
     friend std::ostream & operator<<(std::ostream &out, const Position &P);
 
 public:
-    Position();
-    //Position(const Position &initialPosition, const MoveSeq &seq);
+    Position(bool initialPos=false);
+    Position(const std::string &FENstr);
+    //Position(const Position &P, const MoveSeq &M);
+
     bool operator==(Position const& other) const;
 
-    void reset();
-    void clear();
-    void setFromFENString(const std::string &str);
-
     std::string printString() const;
-    std::string exportFENString() const;
-
-    double materialCount() const;
-
-    //bool isLegal(const Move &move) const;
+    std::string printFENString() const;
 
 
 private:
+    void clear();
+    void reset();
     void resetPieces();
+    bool setFromFENString(const std::string &str);
 
     std::array<Piece, 64> pieces;
     Color turn;
@@ -37,7 +34,7 @@ private:
     bool drawOffered;
     uint moveNumber;
     uint nbReversibleHalfMovesPlayed; //For 50 move draw rule
-    //NB For draw purposes, we need the list of past positions to determine threefold repetition
+    //NB For draw purposes, we would need the list of past positions to determine threefold repetition
 };
 
 
