@@ -18,6 +18,7 @@ public:
     bool isNull() const;
     std::string name() const;
     Color getColor() const;
+    PieceType getType() const;
     char FENchar() const;
 
 private:

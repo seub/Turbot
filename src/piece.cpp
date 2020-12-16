@@ -1,10 +1,7 @@
 #include "piece.h"
 
 
-Color Piece::getColor() const
-{
-    return color;
-}
+
 
 bool Piece::operator==(const Piece &other) const
 {
@@ -15,6 +12,16 @@ bool Piece::operator==(const Piece &other) const
         res &= (color == other.color);
     }
     return res;
+}
+
+Color Piece::getColor() const
+{
+    return color;
+}
+
+PieceType Piece::getType() const
+{
+    return type;
 }
 
 bool Piece::isNull() const
