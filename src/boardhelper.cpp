@@ -1,19 +1,19 @@
-#include "positionhelper.h"
-#include "position.h"
+#include "boardhelper.h"
+#include "board.h"
 
-PositionHelper::PositionHelper(const Position * const position) : pieces(&(position->pieces))
+BoardHelper::BoardHelper(const Board * const board) : board(board)
 {
     updateBitboards();
 }
 
-void PositionHelper::updateBitboards()
+void BoardHelper::updateBitboards()
 {
     PieceType type;
     Color color;
     for (uint i=0; i!=64; ++i)
     {
-        type = pieces->at(i).getType();
-        color = pieces->at(i).getColor();
+        type = board->pieces[i].getType();
+        color = board->pieces[i].getColor();
         switch (type)
         {
         case PieceType::Empty :

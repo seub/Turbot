@@ -8,11 +8,12 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 include_directories(include)
 
 set(SOURCES
+    src/board.cpp
+    src/boardhelper.cpp
     src/legalmover.cpp
     src/main.cpp
     src/piece.cpp
     src/position.cpp
-    src/positionhelper.cpp
     src/square.cpp
     src/tools.cpp
     )

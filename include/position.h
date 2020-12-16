@@ -1,18 +1,14 @@
 #ifndef POSITION_H
 #define POSITION_H
 
-# include "tools.h"
-# include "piece.h"
-# include "square.h"
-# include "positionhelper.h"
+# include "board.h"
 
 class Position
 {
     friend std::ostream & operator<<(std::ostream &out, const Position &P);
-    friend PositionHelper::PositionHelper(const Position * const);
 
 public:
-    Position(bool initialPos=false);
+    Position(bool gamestart=false);
     Position(const std::string &FENstr);
     //Position(const Position &P, const MoveSeq &M);
 
@@ -26,11 +22,9 @@ private:
     void clear();
     void reset();
     void resetPieces();
-    bool setFromFENString(const std::string &str);
+    bool setFromFENString(const std::string &FENstr, bool setBoard=true);
 
-    void kingMoves(std::vector<Square> &res, Color color, const Square &origin) const;
-
-    std::array<Piece, 64> pieces;
+    Board board;
     Color turn;
     std::array<bool, 4> castlingRights;// White Kside, White Qside, Black Kside, Black Qside
     bool enPassantPossible;
