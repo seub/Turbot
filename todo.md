@@ -15,19 +15,6 @@ Position:
     - fromFEM(FENfile) -> bool (valid or not)
     - static newboard() -> position
 
-Piece:
-    Ne contient pas la piecevalues:
-    Celles-ci sont dans evaluator 
-    En particulier on peut creer un algorithme de ML qui donne une valeur au pieces pour voir si yen a pas une meilleure
-    Ou une valeur peut varier en fonction du nombre de coup jouee ou de la position...
-
-Move
-    -contient une list de paires de cases:
-        - generalement une, 
-        - deux dans le cas d'un roque ou d'une prise
-        - la seconde case est "out" si la piece est prise
-    Move special pour proposer un draw ou  une defaite?
-
 Positionevaluator:
     -virtual evaluate(Position)
 
@@ -53,3 +40,6 @@ BranchComparator:
 MoveGeneratorbyMinMax(MoveGenerator):
     - takes an evaluator as parameter:
     - takes a branchComparator as as parameter
+    
+Remarque :
+Quand on voudra optimiser, quand on calcule l'arbre des coups, je pense que ça vaut le coup de passer en "kc chess" (king capture allowed)

@@ -12,6 +12,7 @@ set(SOURCES
     src/boardhelper.cpp
     src/legalmover.cpp
     src/main.cpp
+    src/move.cpp
     src/piece.cpp
     src/position.cpp
     src/square.cpp

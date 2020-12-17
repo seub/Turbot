@@ -6,6 +6,7 @@
 class Position
 {
     friend std::ostream & operator<<(std::ostream &out, const Position &P);
+    friend class LegalMover;
 
 public:
     Position(bool gamestart=false);

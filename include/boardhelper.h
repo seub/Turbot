@@ -7,6 +7,8 @@ class Board;
 
 class BoardHelper
 {
+    friend class LegalMover;
+
 public:
     explicit BoardHelper(const Board * const board);
     BoardHelper() = delete;
@@ -16,9 +18,8 @@ public:
 private:
     void updateBitboards();
 
-    bitboard whiteKings, whiteQueens, whiteRooks, whiteBishops, whiteKnights,  whitePawns;
-    bitboard blackKings, blackQueens, blackRooks, blackBishops, blackKnights,  blackPawns;
-    bitboard whitePieces, blackPieces, occupiedSquares, emptySquares;
+    bitboard kings, queens, rooks, bishops, knights, pawns;
+    bitboard whitePieces, blackPieces, occupiedSquares;
     const Board * const  board;
 };
 
