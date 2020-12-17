@@ -457,8 +457,81 @@ Position Mover::applyKCMove(const Move &m) const
     if (m.resign || m.claimDraw) throw("Move cannot be applied");
     else
     {
-        res.turn = (position->turn==Color::White) ? Color::Black : Color::White;
+        bool white = (position->turn==Color::White);
+        res.turn = white ? Color::Black : Color::White;
         res.drawOffered = m.offerDraw;
         if (res.turn==Color::White) res.moveNumber++;
+        if (isReversible(m)) res.nbReversibleHalfMovesPlayed++;
+
+        uint origin = m.origin.getIndex();
+        uint target = m.target.getIndex();
+        Piece p = position->board.pieces[origin];
+
+        res.board.pieces[origin] = Piece();
+        if (m.promotion) res.board.pieces[target] = Piece(m.promotedPiece, white ? Color::White : Color::Black);
+        else res.board.pieces[target] = p;
+
+
+        // En passant move
+        if (p.isPawn() && position->enPassantPossible && (target==position->enPassantTargetSquare))
+        {
+            uint opPawn = (position->turn==Color::White) ? target+8 : target-8;
+            res.board.pieces[opPawn] = Piece();
+        }
+
+        // Pawn move allowing en passant or not
+        if (p.isPawn() && white && (target==origin+16))
+        {
+            res.enPassantPossible = true;
+            res.enPassantTargetSquare = origin+8;
+        }
+        else if (p.isPawn() && (!white) && (origin==target+16))
+        {
+            res.enPassantPossible = true;
+            res.enPassantTargetSquare = target+8;
+        }
+        else
+        {
+            res.enPassantPossible = false;
+            res.enPassantTargetSquare = 0;
+        }
+
+        //Castling and losing castling rights with King move
+        if (p.isKing())
+        {
+            if (target==origin-2)
+            {
+                res.board.pieces[target+1] = res.board.pieces[target-4];
+                res.board.pieces[target-4] = Piece();
+            }
+            else if (target==origin+2)
+            {
+                res.board.pieces[target-1] = res.board.pieces[target+3];
+                res.board.pieces[target+3] = Piece();
+            }
+
+            if (white)
+            {
+                res.castlingRights[0] = false;
+                res.castlingRights[1] = false;
+            }
+            else
+            {
+                res.castlingRights[2] = false;
+                res.castlingRights[3] = false;
+            }
+        }
+
+        //Losing castling rights with Rook move
+        if (p.isRook())
+        {
+            if (origin==7) res.castlingRights[0] = false;
+            if (origin==0) res.castlingRights[1] = false;
+            if (origin==63) res.castlingRights[2] = false;
+            if (origin==56) res.castlingRights[3] = false;
+        }
     }
+
+
+    return res;
 }

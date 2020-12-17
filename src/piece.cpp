@@ -24,9 +24,24 @@ PieceType Piece::getType() const
     return type;
 }
 
-bool Piece::isNull() const
+bool Piece::isEmpty() const
 {
     return (type == PieceType::Empty);
+}
+
+bool Piece::isKing() const
+{
+    return (type == PieceType::King);
+}
+
+bool Piece::isRook() const
+{
+    return (type == PieceType::Rook);
+}
+
+bool Piece::isPawn() const
+{
+    return (type == PieceType::Pawn);
 }
 
 std::string Piece::name() const

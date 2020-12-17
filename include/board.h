@@ -5,11 +5,13 @@
 # include "piece.h"
 # include "square.h"
 # include "boardhelper.h"
+# include "move.h"
 
 class Board
 {
     friend class Position;
     friend class BoardHelper;
+    friend class Mover;
     friend std::ostream & operator<<(std::ostream &out, const Board &B);
 
 public:
@@ -20,7 +22,6 @@ public:
 
     std::string printString() const;
     std::string printFENString() const;
-
 
 private:
     void clear();

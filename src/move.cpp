@@ -19,6 +19,17 @@ std::string Move::name() const
     return res;
 }
 
+Square Move::getOrigin() const
+{
+    return origin;
+}
+
+Square Move::getTarget() const
+{
+    return target;
+}
+
+
 std::ostream & operator <<(std::ostream &out, const Move &M)
 {
     out << M.name();

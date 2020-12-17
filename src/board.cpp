@@ -52,7 +52,7 @@ std::string Board::printString() const
     for (uint i=0; i!=64; ++i)
     {
         piece = pieces[i];
-        if (!piece.isNull())
+        if (!piece.isEmpty())
         {
             if (piece.getColor() == Color::White) whitePieces.push_back(piece.name()+Square(i).name());
             if (piece.getColor() == Color::Black) blackPieces.push_back(piece.name()+Square(i).name());
@@ -89,7 +89,7 @@ std::string Board::printFENString() const
     while (rank!=-1)
     {
         piece = pieces[file + 8*rank];
-        if (piece.isNull())
+        if (piece.isEmpty())
         {
             ++emptySquares;
         }
@@ -160,4 +160,3 @@ std::ostream & operator <<(std::ostream &out, const Board &B)
     out << B.printString();
     return out;
 }
-

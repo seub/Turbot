@@ -16,9 +16,13 @@ public:
     Piece(PieceType type, Color color) : type(type), color(color) {}
     bool operator==(const Piece &other) const;
 
-    bool isNull() const;
+
     std::string name() const;
     Color getColor() const;
+    bool isEmpty() const;
+    bool isKing() const;
+    bool isRook() const;
+    bool isPawn() const;
     PieceType getType() const;
     char FENchar() const;
 

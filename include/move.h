@@ -14,6 +14,8 @@ public:
          bool promotion = false, PieceType promotedPiece= PieceType::Empty, bool offerDraw = false, bool claimDraw = false, bool resign = false);
 
     std::string name() const;
+    Square getOrigin() const;
+    Square getTarget() const;
 
 private:
     Move(uint originIndex, uint targetIndex);
