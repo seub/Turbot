@@ -9,12 +9,8 @@
 class Board
 {
     friend class Position;
-
-public:
-    Board();
-
-    friend std::ostream & operator<<(std::ostream &out, const Board &B);
     friend class BoardHelper;
+    friend std::ostream & operator<<(std::ostream &out, const Board &B);
 
 public:
     Board(bool gamestart=false);

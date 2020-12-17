@@ -94,7 +94,7 @@ void BoardHelper::updateBitboards()
             occupiedSquares[i] = true;
             break;
         }
-        case PieceType::Pawn : break;
+        case PieceType::Pawn :
         {
             kings[i] = false;
             queens[i] = false;

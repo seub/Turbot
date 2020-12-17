@@ -12,6 +12,7 @@ class Piece
 
 public:
     Piece() : type(PieceType::Empty) {}
+    Piece(PieceType type) : type(type) {}
     Piece(PieceType type, Color color) : type(type), color(color) {}
     bool operator==(const Piece &other) const;
 

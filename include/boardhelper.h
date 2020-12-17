@@ -7,7 +7,7 @@ class Board;
 
 class BoardHelper
 {
-    friend class LegalMover;
+    friend class Mover;
 
 public:
     explicit BoardHelper(const Board * const board);

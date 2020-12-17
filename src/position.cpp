@@ -198,6 +198,8 @@ bool Position::setFromFENString(const std::string &FENstr, bool setBoard)
 
 }
 
+
+
 std::ostream & operator <<(std::ostream &out, const Position &P)
 {
     out << P.printString();

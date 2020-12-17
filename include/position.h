@@ -2,22 +2,21 @@
 #define POSITION_H
 
 # include "board.h"
+# include "move.h"
 
 class Position
 {
-    friend std::ostream & operator<<(std::ostream &out, const Position &P);
-    friend class LegalMover;
+    friend std::ostream & operator<<(std::ostream &out, const Position &p);
+    friend class Mover;
 
 public:
     Position(bool gamestart=false);
     Position(const std::string &FENstr);
-    //Position(const Position &P, const MoveSeq &M);
 
     bool operator==(Position const& other) const;
 
     std::string printString() const;
     std::string printFENString() const;
-
 
 private:
     void clear();
