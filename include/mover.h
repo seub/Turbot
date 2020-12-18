@@ -15,21 +15,24 @@ public:
     Mover(const Mover &) = delete;
     Mover & operator=(Mover) = delete;
 
-    std::string printKCMoves() const;
+    std::string printKCLegalMoves() const;
+    std::string printLegalMoves() const;
+    std::vector<Move> getlegalMoves() const {return legalMoves;}
     bool isCapture(const Move &m) const;
     bool isPawnMove(const Move &m) const;
     bool isReversible(const Move &m) const;
-
+    bool checkIsLegalList(const Move &m) const;
 
     Position applyKCMove(const Move &m) const;
 
 private:
     bool initialize();
-    bool updatekcLegalMoves();
+    bool updateKCLegalMoves();
     void updateLegalMoves();
-
+    bool isLegalConstruct(const Move &m, bool checkKClegal = true);
 
     void addkcLegalMove(uint origin, uint target, bool attack=true);
+    void addkcLegalMovePromotions(uint origin, uint target, bool attack=false);
     void addkcLegalMovesKing(uint i);
     void addkcLegalMovesQueen(uint i);
     void addkcLegalMovesRook(uint i);

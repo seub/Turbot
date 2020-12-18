@@ -9,6 +9,7 @@ public:
     explicit Square(uint index) : index(index) {assert(index < 64);}
     Square(uint fileIndex, uint rankIndex);
     Square(const std::string &name);
+    bool operator==(const Square &other) const {return (index==other.index);}
 
     uint getIndex() const;
     uint fileIndex() const;

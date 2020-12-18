@@ -17,6 +17,7 @@ public:
 
     std::string printString() const;
     std::string printFENString() const;
+    uint getMoveNumber() const {return moveNumber;}
 
 private:
     void clear();

@@ -13,7 +13,7 @@ bool Mover::initialize()
     squaresAttacked.fill(false);
     legalMoves.clear();
 
-    bool res = updatekcLegalMoves();
+    bool res = updateKCLegalMoves();
 
     const bitboard *opPieces = (position->turn==Color::White) ? &(boardHelper.blackPieces) : &(boardHelper.whitePieces);
     uint i = 0;
@@ -38,7 +38,7 @@ bool Mover::initialize()
 }
 
 
-bool Mover::updatekcLegalMoves()
+bool Mover::updateKCLegalMoves()
 {
     kCLegalMoves.clear();
 
@@ -46,6 +46,7 @@ bool Mover::updatekcLegalMoves()
 
     for (uint i=0; i!=64; ++i)
     {
+
         if (myPieces->at(i))
         {
             if (boardHelper.kings[i]) addkcLegalMovesKing(i);
@@ -67,6 +68,15 @@ bool Mover::updatekcLegalMoves()
 void Mover::addkcLegalMove(uint origin, uint target, bool attack)
 {
     kCLegalMoves.push_back(Move(origin, target));
+    if (attack) squaresAttacked[target] = true;
+}
+
+void Mover::addkcLegalMovePromotions(uint origin, uint target, bool attack)
+{
+    kCLegalMoves.push_back(Move(origin, target, true, PieceType::Queen));
+    kCLegalMoves.push_back(Move(origin, target, true, PieceType::Rook));
+    kCLegalMoves.push_back(Move(origin, target, true, PieceType::Bishop));
+    kCLegalMoves.push_back(Move(origin, target, true, PieceType::Knight));
     if (attack) squaresAttacked[target] = true;
 }
 
@@ -366,6 +376,10 @@ void Mover::addkcLegalMovesPawn(uint i)
                 if (!boardHelper.occupiedSquares[i+16]) addkcLegalMove(i, i+16, false);
             }
         }
+        else if (rank==6)
+        {
+            if (!boardHelper.occupiedSquares[i+8]) addkcLegalMovePromotions(i, i+8);
+        }
         else
         {
             if (!boardHelper.occupiedSquares[i+8]) addkcLegalMove(i, i+8, false);
@@ -374,15 +388,23 @@ void Mover::addkcLegalMovesPawn(uint i)
         if (file>0)
         {
             target = i+7;
-            if ((boardHelper.blackPieces[target]) || ((position->enPassantPossible==true) && (position->enPassantTargetSquare==target))) addkcLegalMove(i, target);
+            if ((boardHelper.blackPieces[target]) || ((position->enPassantPossible==true) && (position->enPassantTargetSquare==target)))
+            {
+                if (rank==6) addkcLegalMovePromotions(i,target,true);
+                else addkcLegalMove(i, target);
+            }
             else if (!boardHelper.occupiedSquares[target]) squaresAttacked[target] = true;
 
-            //NB: We put by convention that if en passant is possible, the e.p. target square is "under attack", but it does not matter
+            //NB: We put by convention that if en passant is theoretically, but not actually, possible, the e.p. target square is "under attack", but it does not matter
         }
         if (file<7)
         {
             target = i+9;
-            if ((boardHelper.blackPieces[target]) || ((position->enPassantPossible==true) && (position->enPassantTargetSquare==target))) addkcLegalMove(i, target);
+            if ((boardHelper.blackPieces[target]) || ((position->enPassantPossible==true) && (position->enPassantTargetSquare==target)))
+            {
+                if (rank==6) addkcLegalMovePromotions(i,target, true);
+                else addkcLegalMove(i, target);
+            }
             else if (!boardHelper.occupiedSquares[target]) squaresAttacked[target] = true;
         }
     }
@@ -397,6 +419,10 @@ void Mover::addkcLegalMovesPawn(uint i)
                 if (!boardHelper.occupiedSquares[i-16]) addkcLegalMove(i, i-16, false);
             }
         }
+        else if (rank==1)
+        {
+            if (!boardHelper.occupiedSquares[i-8]) addkcLegalMovePromotions(i, i-8);
+        }
         else
         {
             if (!boardHelper.occupiedSquares[i-8]) addkcLegalMove(i, i-8, false);
@@ -405,13 +431,21 @@ void Mover::addkcLegalMovesPawn(uint i)
         if (file>0)
         {
             target = i-9;
-            if ((boardHelper.blackPieces[target]) || ((position->enPassantPossible==true) && (position->enPassantTargetSquare==target))) addkcLegalMove(i, target);
+            if ((boardHelper.whitePieces[target]) || ((position->enPassantPossible==true) && (position->enPassantTargetSquare==target)))
+            {
+                if (rank==1) addkcLegalMovePromotions(i,target,true);
+                else addkcLegalMove(i, target);
+            }
             else if (!boardHelper.occupiedSquares[target]) squaresAttacked[target] = true;
         }
         if (file<7)
         {
             target = i-7;
-            if ((boardHelper.blackPieces[target]) || ((position->enPassantPossible==true) && (position->enPassantTargetSquare==target))) addkcLegalMove(i, target);
+            if ((boardHelper.whitePieces[target]) || ((position->enPassantPossible==true) && (position->enPassantTargetSquare==target)))
+            {
+                if (rank==1) addkcLegalMovePromotions(i,target,true);
+                else addkcLegalMove(i, target);
+            }
             else if (!boardHelper.occupiedSquares[target]) squaresAttacked[target] = true;
         }
     }
@@ -419,19 +453,35 @@ void Mover::addkcLegalMovesPawn(uint i)
 
 void Mover::updateLegalMoves()
 {
-
+    legalMoves.clear();
+    for (const auto & move : kCLegalMoves)
+    {
+        if (isLegalConstruct(move, false)) legalMoves.push_back(move);
+    }
 }
 
-std::string Mover::printKCMoves() const
+std::string Mover::printKCLegalMoves() const
 {
     std::string res = {};
     for (auto move : kCLegalMoves)
     {
-        res += move.name();
+        res += move.longAlgebraicNotation();
         res += ", ";
     }
-    res.erase (res.end()-2, res.end());
+    if (!kCLegalMoves.empty()) res.erase (res.end()-2, res.end());
 
+    return res;
+}
+
+std::string Mover::printLegalMoves() const
+{
+    std::string res = {};
+    for (auto move : legalMoves)
+    {
+        res += move.longAlgebraicNotation();
+        res += ", ";
+    }
+    if (!legalMoves.empty()) res.erase (res.end()-2, res.end());
     return res;
 }
 
@@ -447,91 +497,129 @@ bool Mover::isPawnMove(const Move &m) const
 
 bool Mover::isReversible(const Move &m) const
 {
-    return (!(isCapture(m)) && !(isReversible(m)));
+    return (!(isCapture(m)) && !(isPawnMove(m)));
 }
 
 Position Mover::applyKCMove(const Move &m) const
 {
     Position res(*position);
 
-    if (m.resign || m.claimDraw) throw("Move cannot be applied");
+
+    /*if (m.resign || m.claimDraw)
+    {
+        throw("Move cannot be applied");
+    }*/
+    // The code above is not quite right: I should only exclude the case where a resignation occurs or a draw is claimed BEFORE playing the move
+
+    bool white = (position->turn==Color::White);
+    res.turn = white ? Color::Black : Color::White;
+    res.drawOffered = m.offerDraw;
+
+    if (res.turn==Color::White) res.moveNumber++;
+    if (isReversible(m)) res.nbReversibleHalfMovesPlayed++;
+    else res.nbReversibleHalfMovesPlayed = 0;
+    uint origin = m.origin.getIndex();
+    uint target = m.target.getIndex();
+    Piece p = position->board.pieces[origin];
+
+    res.board.pieces[origin] = Piece();
+    if (m.promotion) res.board.pieces[target] = Piece(m.promotedPiece, white ? Color::White : Color::Black);
+    else res.board.pieces[target] = p;
+
+
+    // En passant move
+    if (p.isPawn() && position->enPassantPossible && (target==position->enPassantTargetSquare))
+    {
+        uint opPawn = (position->turn==Color::White) ? target+8 : target-8;
+        res.board.pieces[opPawn] = Piece();
+    }
+
+    // Pawn move allowing en passant or not
+    if (p.isPawn() && white && (target==origin+16))
+    {
+        res.enPassantPossible = true;
+        res.enPassantTargetSquare = origin+8;
+    }
+    else if (p.isPawn() && (!white) && (origin==target+16))
+    {
+        res.enPassantPossible = true;
+        res.enPassantTargetSquare = target+8;
+    }
     else
     {
-        bool white = (position->turn==Color::White);
-        res.turn = white ? Color::Black : Color::White;
-        res.drawOffered = m.offerDraw;
-        if (res.turn==Color::White) res.moveNumber++;
-        if (isReversible(m)) res.nbReversibleHalfMovesPlayed++;
+        res.enPassantPossible = false;
+        res.enPassantTargetSquare = 0;
+    }
 
-        uint origin = m.origin.getIndex();
-        uint target = m.target.getIndex();
-        Piece p = position->board.pieces[origin];
-
-        res.board.pieces[origin] = Piece();
-        if (m.promotion) res.board.pieces[target] = Piece(m.promotedPiece, white ? Color::White : Color::Black);
-        else res.board.pieces[target] = p;
-
-
-        // En passant move
-        if (p.isPawn() && position->enPassantPossible && (target==position->enPassantTargetSquare))
+    //Castling and losing castling rights with King move
+    if (p.isKing())
+    {
+        if (target==origin-2)
         {
-            uint opPawn = (position->turn==Color::White) ? target+8 : target-8;
-            res.board.pieces[opPawn] = Piece();
+            res.board.pieces[target+1] = res.board.pieces[target-4];
+            res.board.pieces[target-4] = Piece();
+        }
+        else if (target==origin+2)
+        {
+            res.board.pieces[target-1] = res.board.pieces[target+3];
+            res.board.pieces[target+3] = Piece();
         }
 
-        // Pawn move allowing en passant or not
-        if (p.isPawn() && white && (target==origin+16))
+        if (white)
         {
-            res.enPassantPossible = true;
-            res.enPassantTargetSquare = origin+8;
-        }
-        else if (p.isPawn() && (!white) && (origin==target+16))
-        {
-            res.enPassantPossible = true;
-            res.enPassantTargetSquare = target+8;
+            res.castlingRights[0] = false;
+            res.castlingRights[1] = false;
         }
         else
         {
-            res.enPassantPossible = false;
-            res.enPassantTargetSquare = 0;
-        }
-
-        //Castling and losing castling rights with King move
-        if (p.isKing())
-        {
-            if (target==origin-2)
-            {
-                res.board.pieces[target+1] = res.board.pieces[target-4];
-                res.board.pieces[target-4] = Piece();
-            }
-            else if (target==origin+2)
-            {
-                res.board.pieces[target-1] = res.board.pieces[target+3];
-                res.board.pieces[target+3] = Piece();
-            }
-
-            if (white)
-            {
-                res.castlingRights[0] = false;
-                res.castlingRights[1] = false;
-            }
-            else
-            {
-                res.castlingRights[2] = false;
-                res.castlingRights[3] = false;
-            }
-        }
-
-        //Losing castling rights with Rook move
-        if (p.isRook())
-        {
-            if (origin==7) res.castlingRights[0] = false;
-            if (origin==0) res.castlingRights[1] = false;
-            if (origin==63) res.castlingRights[2] = false;
-            if (origin==56) res.castlingRights[3] = false;
+            res.castlingRights[2] = false;
+            res.castlingRights[3] = false;
         }
     }
 
+    //Losing castling rights with Rook move
+    if (p.isRook())
+    {
+        if (origin==7) res.castlingRights[0] = false;
+        if (origin==0) res.castlingRights[1] = false;
+        if (origin==63) res.castlingRights[2] = false;
+        if (origin==56) res.castlingRights[3] = false;
+    }
 
     return res;
+}
+
+bool Mover::checkIsLegalList(const Move &m) const
+{
+    return (std::find(legalMoves.begin(), legalMoves.end(), m) != legalMoves.end());
+}
+
+bool Mover::isLegalConstruct(const Move &m, bool checkKClegal) //NB: Legal move = KC legal + king cannot be captured next move (+ including while castling)
+{
+    if (checkKClegal)
+    {
+        if  (!(std::find(kCLegalMoves.begin(), kCLegalMoves.end(), m) != kCLegalMoves.end())) return false;
+    }
+
+    Position newPos = applyKCMove(m);
+    Mover newMover(&newPos, false);
+
+    if (newMover.opponentKingUnderAttack) return false;
+
+    uint origin = m.origin.getIndex();
+    uint target = m.target.getIndex();
+    Piece p = position->board.pieces[origin];
+    if (p.isKing())
+    {
+        if (target==origin-2)
+        {
+            if (newMover.opponentKsideCastleUnderAttack) return false;
+        }
+        else if (target==origin+2)
+        {
+            if (newMover.opponentQsideCastleUnderAttack) return false;
+        }
+    }
+
+    return true;
 }

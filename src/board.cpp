@@ -65,7 +65,7 @@ std::string Board::printString() const
         res += p;
         res += ", ";
     }
-    res.erase (res.end()-2, res.end());
+    if (!whitePieces.empty()) res.erase (res.end()-2, res.end());
     res += "\n";
 
     res += "Black pieces: ";
@@ -74,7 +74,7 @@ std::string Board::printString() const
         res += p;
         res += ", ";
     }
-    res.erase (res.end()-2, res.end());
+    if (!blackPieces.empty()) res.erase (res.end()-2, res.end());
 
     return res;
 }
@@ -107,7 +107,7 @@ std::string Board::printFENString() const
         {
             --rank;
             file=0;
-            if (emptySquares==8) res += Tools::convertToString(emptySquares);
+            if (emptySquares>0) res += Tools::convertToString(emptySquares);
             emptySquares=0;
             res += '/';
         }
