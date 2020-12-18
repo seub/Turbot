@@ -19,7 +19,7 @@ int main()
         ++j;
     }
 
-    std::cout << P.printFENString() << std::endl;
+    std::cout << P.toFENstring() << std::endl;
 
     }
     catch (char const *errorMessage)

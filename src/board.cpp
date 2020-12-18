@@ -12,12 +12,6 @@ Board::Board(bool gamestart)
     }
 }
 
-Board::Board(const std::string &FENstr)
-{
-    if (setFromFENString(FENstr));
-    else throw("Error in Board constructor: Bad FEN String");
-}
-
 bool Board::operator==(const Board &other) const
 {
     return (pieces==other.pieces);
@@ -79,7 +73,7 @@ std::string Board::printString() const
     return res;
 }
 
-std::string Board::printFENString() const
+std::string Board::toFENstring() const
 {
     std::string res = {};
 
@@ -117,9 +111,9 @@ std::string Board::printFENString() const
     return res;
 }
 
-bool Board::setFromFENString(const std::string &str)
+bool Board::fromFENstring(Board &res, const std::string &str)
 {
-    clear();
+    res.clear();
 
     int rank=7, file=0;
     for (const auto & letter : str)
@@ -127,18 +121,18 @@ bool Board::setFromFENString(const std::string &str)
         switch (letter)
         {
         case ' ' : break;
-        case 'K' : pieces[file + 8*rank] = Piece(PieceType::King, Color::White); ++file; break;
-        case 'Q' : pieces[file + 8*rank] = Piece(PieceType::Queen, Color::White);  ++file; break;
-        case 'R' : pieces[file + 8*rank] = Piece(PieceType::Rook, Color::White);  ++file; break;
-        case 'B' : pieces[file + 8*rank] = Piece(PieceType::Bishop, Color::White);  ++file; break;
-        case 'N' : pieces[file + 8*rank] = Piece(PieceType::Knight, Color::White);  ++file ;break;
-        case 'P' : pieces[file + 8*rank] = Piece(PieceType::Pawn, Color::White);  ++file; break;
-        case 'k' : pieces[file + 8*rank] = Piece(PieceType::King, Color::Black); ++file; break;
-        case 'q' : pieces[file + 8*rank] = Piece(PieceType::Queen, Color::Black);  ++file; break;
-        case 'r' : pieces[file + 8*rank] = Piece(PieceType::Rook, Color::Black);  ++file; break;
-        case 'b' : pieces[file + 8*rank] = Piece(PieceType::Bishop, Color::Black);  ++file; break;
-        case 'n' : pieces[file + 8*rank] = Piece(PieceType::Knight, Color::Black);  ++file ;break;
-        case 'p' : pieces[file + 8*rank] = Piece(PieceType::Pawn, Color::Black);  ++file; break;
+        case 'K' : res.pieces[file + 8*rank] = Piece(PieceType::King, Color::White); ++file; break;
+        case 'Q' : res.pieces[file + 8*rank] = Piece(PieceType::Queen, Color::White);  ++file; break;
+        case 'R' : res.pieces[file + 8*rank] = Piece(PieceType::Rook, Color::White);  ++file; break;
+        case 'B' : res.pieces[file + 8*rank] = Piece(PieceType::Bishop, Color::White);  ++file; break;
+        case 'N' : res.pieces[file + 8*rank] = Piece(PieceType::Knight, Color::White);  ++file ;break;
+        case 'P' : res.pieces[file + 8*rank] = Piece(PieceType::Pawn, Color::White);  ++file; break;
+        case 'k' : res.pieces[file + 8*rank] = Piece(PieceType::King, Color::Black); ++file; break;
+        case 'q' : res.pieces[file + 8*rank] = Piece(PieceType::Queen, Color::Black);  ++file; break;
+        case 'r' : res.pieces[file + 8*rank] = Piece(PieceType::Rook, Color::Black);  ++file; break;
+        case 'b' : res.pieces[file + 8*rank] = Piece(PieceType::Bishop, Color::Black);  ++file; break;
+        case 'n' : res.pieces[file + 8*rank] = Piece(PieceType::Knight, Color::Black);  ++file ;break;
+        case 'p' : res.pieces[file + 8*rank] = Piece(PieceType::Pawn, Color::Black);  ++file; break;
         case '1' : file += 1; break;
         case '2' : file += 2; break;
         case '3' : file += 3; break;

@@ -1,65 +1,55 @@
 #include "move.h"
 
-Move::Move(const Square & origin, const Square & target, bool promotion, PieceType promotedPiece,
-           bool offerDraw, bool claimDraw, bool resign) :
-    origin(origin), target(target), promotion(promotion), promotedPiece(promotedPiece), offerDraw(offerDraw), claimDraw(claimDraw), resign(resign)
+Move::Move(const Square & origin, const Square & target, bool promotion, PieceType promotedPiece) :
+    origin(origin), target(target), promotion(promotion), promotedPiece(promotedPiece)
 {
 
 }
 
-Move::Move(uint originIndex, uint targetIndex, bool promotion, PieceType promotedPiece, bool offerDraw, bool claimDraw, bool resign) :
-    origin(originIndex), target(targetIndex), promotion(promotion), promotedPiece(promotedPiece), offerDraw(offerDraw), claimDraw(claimDraw), resign(resign)
+Move::Move(uint originIndex, uint targetIndex, bool promotion, PieceType promotedPiece) :
+    origin(originIndex), target(targetIndex), promotion(promotion), promotedPiece(promotedPiece)
 {
 
 }
 
-Move::Move(std::string & longAlgebraicNotation, bool offerDraw, bool claimDraw, bool resign) :
-    origin(longAlgebraicNotation.substr(0, 2)),
-    target(longAlgebraicNotation.substr(2, 4)),
-    offerDraw(offerDraw), claimDraw(claimDraw), resign(resign)
+bool Move::fromLAN(Move & res, std::string & LANstring)
 {
-    if (longAlgebraicNotation.size()==4)
+    uint size = LANstring.size();
+    if (!(size==4 || size==6)) return false;
+
+    res.origin = LANstring.substr(0, 2);
+    res.target = LANstring.substr(2, 4);
+
+    if (size==4)
     {
-        promotion=false;
-        promotedPiece=PieceType::Empty;
+        res.promotion=false;
+        res.promotedPiece=PieceType::Empty;
     }
     else
     {
-        assert(longAlgebraicNotation.size()==6);
-        char c = longAlgebraicNotation[4];
-        assert(c=='=');
-        c = longAlgebraicNotation[5];
+        char c = LANstring[4];
+        if (c!='=') return false;
+        c = LANstring[5];
         switch (c)
         {
-        case 'Q' : promotedPiece=PieceType::Queen; break;
-        case 'R' : promotedPiece=PieceType::Rook; break;
-        case 'B' : promotedPiece=PieceType::Bishop; break;
-        case 'N': promotedPiece=PieceType::Knight; break;
-        default : throw("Bad promoted piece name"); break;
+        case 'Q' : res.promotedPiece=PieceType::Queen; break;
+        case 'R' : res.promotedPiece=PieceType::Rook; break;
+        case 'B' : res.promotedPiece=PieceType::Bishop; break;
+        case 'N': res.promotedPiece=PieceType::Knight; break;
+        default : return false; break;
         }
-        promotion=true;
+        res.promotion=true;
     }
+
+    return true;
 }
 
 bool Move::operator==(const Move &other) const
 {
-    bool res = true;
-
-    if (claimDraw) res = other.claimDraw;
-    else if (resign) res = other.resign;
-    else
-    {
-        res &= (other.origin==origin);
-        res &= (other.target==target);
-        res &= (other.offerDraw==offerDraw);
-        res &= (other.promotion==promotion);
-        if (promotion) res &= (other.promotedPiece==promotedPiece);
-    }
-
-    return res;
+    return (other.origin==origin) && (other.target==target) && (other.promotion==promotion) && ((!promotion) || (other.promotedPiece==promotedPiece));
 }
 
-std::string Move::longAlgebraicNotation() const
+std::string Move::toLAN() const
 {
     std::string res = origin.name()+target.name();
     if (promotion) res += "=" + Piece(promotedPiece).name();
@@ -79,6 +69,6 @@ Square Move::getTarget() const
 
 std::ostream & operator <<(std::ostream &out, const Move &M)
 {
-    out << M.longAlgebraicNotation();
+    out << M.toLAN();
     return out;
 }

@@ -1,22 +1,17 @@
-To do
+TODO
 
-Questions:
+Question :
     Sur la class position, il y a une fonction reset. Est ce qu'on ne veut pas plutot une class immutable?
+Réponse :
+    Je crois que y a pas vraiment de classe "immutable", mais on peut faire en sorte que 1. toutes les méthodes publiques de la classe sont const, et 2. on peut utiliser
+    le mot-clé const quand on définit un élément de la classe.
+
+
 
 Proposition de classes:
 
-Position:
-    - generatelegalmoves() -> vector< move >
-    - applymove(move) -> position
-    - islegal(move) -> bool
-    - ismate() -> bool
-    - ispat() -> bool
-    - isdraw() -> bool (avec le probleme de du draw par repetition)
-    - fromFEM(FENfile) -> bool (valid or not)
-    - static newboard() -> position
-
 Positionevaluator:
-    -virtual evaluate(Position)
+    (classe virtuelle)
 
 BasicEvaluator(Positionevaluator):
     piecevalues
@@ -36,10 +31,12 @@ BranchComparator:
         - Evaluation
         - depth of position in the three
 
-
 MoveGeneratorbyMinMax(MoveGenerator):
     - takes an evaluator as parameter:
     - takes a branchComparator as as parameter
     
 Remarque :
 Quand on voudra optimiser, quand on calcule l'arbre des coups, je pense que ça vaut le coup de passer en "kc chess" (king capture allowed)
+
+Idée :
+claim draw, resign, offer draw ne drevraient pas faire partie de Move, c'est une action séparée. Elle fera partie d'une classe "Game"!

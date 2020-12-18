@@ -15,13 +15,12 @@ public:
     Mover(const Mover &) = delete;
     Mover & operator=(Mover) = delete;
 
-    std::string printKCLegalMoves() const;
     std::string printLegalMoves() const;
     std::vector<Move> getlegalMoves() const {return legalMoves;}
     bool isCapture(const Move &m) const;
     bool isPawnMove(const Move &m) const;
     bool isReversible(const Move &m) const;
-    bool checkIsLegalList(const Move &m) const;
+    bool isInLegalMovesList(const Move &m) const;
 
     Position applyKCMove(const Move &m) const;
 
@@ -41,9 +40,9 @@ private:
     void addkcLegalMovesPawn(uint i);
     void addkcLegalMovesRow(uint i, const std::vector<uint> row);
 
-    std::vector<Move> kCLegalMoves; // We call "KC Chess" the variation of chess where king capture is allowed. It is convenient to first consider this case.
-    bitboard squaresAttacked; //NB: We put by convention that if en passant is possible, the e.p. target square is "under attack", but it does not matter (the opponent king cannot be on that square)
-    std::vector<Move> legalMoves;
+    std::vector<Move> kCLegalMoves, legalMoves; // We call "KC Chess" the variation of chess where king capture is allowed.
+    bool kCLegalMovesGenerated, legalMovesGenerated;
+    bitboard squaresAttacked;
     bool opponentKsideCastleUnderAttack, opponentQsideCastleUnderAttack;
     bool opponentKingUnderAttack;
 

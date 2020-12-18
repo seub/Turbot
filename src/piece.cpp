@@ -49,7 +49,7 @@ std::string Piece::name() const
     return piecenames[uint(type)];
 }
 
-char Piece::FENchar() const
+char Piece::toFENchar() const
 {
     return FENpiecenames[uint(type) + 7*(color==Color::Black)];
 }

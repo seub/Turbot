@@ -16,17 +16,16 @@ class Board
 
 public:
     Board(bool gamestart=false);
-    Board(const std::string &FENstr);
 
     bool operator==(Board const& other) const;
 
     std::string printString() const;
-    std::string printFENString() const;
+    std::string toFENstring() const;
+    static bool fromFENstring(Board &res, const std::string &str);
 
 private:
     void clear();
     void reset();
-    bool setFromFENString(const std::string &str);
 
     std::array<Piece, 64> pieces;
 };

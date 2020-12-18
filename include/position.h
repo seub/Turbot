@@ -11,29 +11,26 @@ class Position
 
 public:
     Position(bool gamestart=false);
-    Position(const std::string &FENstr);
 
     bool operator==(Position const& other) const;
 
     std::string printString() const;
-    std::string printFENString() const;
+    std::string toFENstring() const;
+    static bool fromFENstring(Position &res, const std::string &FENstr);
     uint getMoveNumber() const {return moveNumber;}
 
 private:
     void clear();
     void reset();
     void resetPieces();
-    bool setFromFENString(const std::string &FENstr, bool setBoard=true);
 
     Board board;
     Color turn;
     std::array<bool, 4> castlingRights;// White Kside, White Qside, Black Kside, Black Qside
     bool enPassantPossible;
     uint enPassantTargetSquare;
-    bool drawOffered;
     uint moveNumber;
-    uint nbReversibleHalfMovesPlayed; //For 50 move draw rule
-    //NB For draw purposes, we would need the list of past positions to determine threefold repetition
+    uint nbReversibleHalfMoves; //For 50 and 75 move rules for draw
 };
 
 

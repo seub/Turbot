@@ -4,7 +4,7 @@ Mover::Mover(const Position * const position, bool generateLegalMoves) : positio
 {
     initialize();
     if (generateLegalMoves) updateLegalMoves();
-
+    legalMovesConstructed = generateLegalMoves;
 }
 
 bool Mover::initialize()
@@ -14,6 +14,7 @@ bool Mover::initialize()
     legalMoves.clear();
 
     bool res = updateKCLegalMoves();
+    kCLegalMovesConstructed = res;
 
     const bitboard *opPieces = (position->turn==Color::White) ? &(boardHelper.blackPieces) : &(boardHelper.whitePieces);
     uint i = 0;
@@ -460,25 +461,12 @@ void Mover::updateLegalMoves()
     }
 }
 
-std::string Mover::printKCLegalMoves() const
-{
-    std::string res = {};
-    for (auto move : kCLegalMoves)
-    {
-        res += move.longAlgebraicNotation();
-        res += ", ";
-    }
-    if (!kCLegalMoves.empty()) res.erase (res.end()-2, res.end());
-
-    return res;
-}
-
 std::string Mover::printLegalMoves() const
 {
     std::string res = {};
     for (auto move : legalMoves)
     {
-        res += move.longAlgebraicNotation();
+        res += move.toLAN();
         res += ", ";
     }
     if (!legalMoves.empty()) res.erase (res.end()-2, res.end());
@@ -513,11 +501,10 @@ Position Mover::applyKCMove(const Move &m) const
 
     bool white = (position->turn==Color::White);
     res.turn = white ? Color::Black : Color::White;
-    res.drawOffered = m.offerDraw;
 
     if (res.turn==Color::White) res.moveNumber++;
-    if (isReversible(m)) res.nbReversibleHalfMovesPlayed++;
-    else res.nbReversibleHalfMovesPlayed = 0;
+    if (isReversible(m)) res.nbReversibleHalfMoves++;
+    else res.nbReversibleHalfMoves = 0;
     uint origin = m.origin.getIndex();
     uint target = m.target.getIndex();
     Piece p = position->board.pieces[origin];
@@ -589,7 +576,7 @@ Position Mover::applyKCMove(const Move &m) const
     return res;
 }
 
-bool Mover::checkIsLegalList(const Move &m) const
+bool Mover::isInLegalMovesList(const Move &m) const
 {
     return (std::find(legalMoves.begin(), legalMoves.end(), m) != legalMoves.end());
 }

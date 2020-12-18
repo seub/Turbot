@@ -12,11 +12,6 @@ Position::Position(bool gamestart) : board(gamestart)
     }
 }
 
-Position::Position(const std::string &FENstr) : board(FENstr.substr(0, FENstr.find(' ')))
-{
-    setFromFENString(FENstr, false);
-}
-
 bool Position::operator==(const Position &other) const
 {
     bool res = true;
@@ -26,9 +21,8 @@ bool Position::operator==(const Position &other) const
     res &= (castlingRights == other.castlingRights);
     res &= (enPassantPossible == other.enPassantPossible);
     res &= (enPassantTargetSquare == other. enPassantTargetSquare);
-    res &= (drawOffered == other.drawOffered);
     res &= (moveNumber == other.moveNumber);
-    res &= (nbReversibleHalfMovesPlayed == other.nbReversibleHalfMovesPlayed);
+    res &= (nbReversibleHalfMoves == other.nbReversibleHalfMoves);
 
     return res;
 }
@@ -40,9 +34,8 @@ void Position::reset()
     castlingRights.fill(true);
     enPassantPossible = false;
     enPassantTargetSquare = 0;
-    drawOffered = false;
     moveNumber = 1;
-    nbReversibleHalfMovesPlayed = 0;
+    nbReversibleHalfMoves = 0;
 }
 
 void Position::clear()
@@ -52,9 +45,8 @@ void Position::clear()
     castlingRights.fill(false);
     enPassantPossible = false;
     enPassantTargetSquare = 0;
-    drawOffered = false;
     moveNumber = 0;
-    nbReversibleHalfMovesPlayed = 0;
+    nbReversibleHalfMoves = 0;
 }
 
 std::string Position::printString() const
@@ -79,17 +71,13 @@ std::string Position::printString() const
     res += castlingRights[3] ? "Yes" : "No";
 
     res += "\n";
-    res += "Draw offered by opponent? ";
-    res += drawOffered ? "Yes" : "No";
-
-    res += "\n";
-    res += "Number of reversible half-moves played: " + Tools::convertToString(nbReversibleHalfMovesPlayed);
+    res += "Number of reversible half-moves played: " + Tools::convertToString(nbReversibleHalfMoves);
     return res;
 }
 
-std::string Position::printFENString() const
+std::string Position::toFENstring() const
 {
-    std::string res = board.printFENString();
+    std::string res = board.toFENstring();
 
     res += ' ';
     res += (turn==Color::White) ? 'w' : 'b';
@@ -106,7 +94,7 @@ std::string Position::printFENString() const
     res += (enPassantPossible)? Square(enPassantTargetSquare).name() : "-";
 
     res += ' ';
-    res += Tools::convertToString(nbReversibleHalfMovesPlayed);
+    res += Tools::convertToString(nbReversibleHalfMoves);
 
     res += ' ';
     res += Tools::convertToString(moveNumber);
@@ -114,88 +102,80 @@ std::string Position::printFENString() const
     return res;
 }
 
-bool Position::setFromFENString(const std::string &FENstr, bool setBoard)
+bool Position::fromFENstring(Position &res, const std::string &FENstr)
 {
-    bool res = true;
-    clear();
+    res.clear();
 
     std::stringstream ss(FENstr);
     std::string word;
 
     if (ss>>word)
     {
-        if (setBoard)
-        {
-            res &= board.setFromFENString(word);
-        }
+        if(!(Board::fromFENstring(res.board, word))) return false;
     }
     else return false;
 
 
     if (ss>>word)
     {
-    res &= (word.size()==1);
-    switch (word[0])
-    {
-    case 'w' : turn = Color::White; break;
-    case 'b' : turn = Color::Black; break;
-    default : res = false;
-    }
+        if (word.size()!=1) return false;
+        switch (word[0])
+        {
+        case 'w' : res.turn = Color::White; break;
+        case 'b' : res.turn = Color::Black; break;
+        default : return false;
+        }
     }
     else return false;
 
     if (ss>>word)
     {
-    castlingRights.fill(false);
-    for (auto letter : word)
-    {
-        switch (letter)
+        res.castlingRights.fill(false);
+        for (auto letter : word)
         {
-        case 'K' : castlingRights[0] = true; break;
-        case 'Q' : castlingRights[1] = true; break;
-        case 'k' : castlingRights[2] = true; break;
-        case 'q' : castlingRights[3] = true; break;
-        case '-' : break;
-        default : res = false;
+            switch (letter)
+            {
+            case 'K' : res.castlingRights[0] = true; break;
+            case 'Q' : res.castlingRights[1] = true; break;
+            case 'k' : res.castlingRights[2] = true; break;
+            case 'q' : res.castlingRights[3] = true; break;
+            case '-' : break;
+            default : return false;
+            }
         }
-    }
     }
     else return false;
 
     if(ss>>word)
     {
-    if (word[0] == '-')
-    {
-        enPassantPossible = false;
-        enPassantTargetSquare = 0;
-    }
-    else
-    {
-        res &= (word.size()==2);
-        enPassantPossible = true;
-        enPassantTargetSquare = Square(word).getIndex();
-    }
-    }
-    else return false;
-
-    if (ss>>word)
-    {
-    nbReversibleHalfMovesPlayed = std::stoi(word);
+        if (word[0] == '-')
+        {
+            res.enPassantPossible = false;
+            res.enPassantTargetSquare = 0;
+        }
+        else
+        {
+            if (word.size()!=2) return false;
+            res.enPassantPossible = true;
+            res.enPassantTargetSquare = Square(word).getIndex();
+        }
     }
     else return false;
 
     if (ss>>word)
     {
-            moveNumber = std::stoi(word);
+        res.nbReversibleHalfMoves = std::stoi(word);
     }
-     else return false;
+    else return false;
 
     if (ss>>word)
     {
-        return false;
+        res.moveNumber = std::stoi(word);
     }
-    else return res;
+    else return false;
 
+    if (ss>>word) return false;
+    return true;
 }
 
 
