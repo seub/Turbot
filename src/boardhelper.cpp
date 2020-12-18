@@ -111,3 +111,39 @@ void BoardHelper::updateBitboards()
         }
     }
 }
+
+bool BoardHelper::firstOccurrence(Square &res, const Piece &piece) const
+{
+    uint i=0;
+    while ((i!=64) && (!(board->pieces[i]==piece))) ++i;
+    if (i==64) return false;
+    else
+    {
+        res = Square(i);
+        return true;
+    }
+}
+
+bool BoardHelper::firstOccurrenceOnFile(Square &res, uint file, const Piece &piece) const
+{
+    uint i=file;
+    while ((i!=64+file) && (!(board->pieces[i]==piece))) i+=8;
+    if (i==64+file) return false;
+    else
+    {
+        res = Square(i);
+        return true;
+    }
+}
+
+bool BoardHelper::firstOccurrenceOnRank(Square &res, uint rank, const Piece &piece) const
+{
+    uint i=8*rank;
+    while ((i<8*rank+8) && (!(board->pieces[i]==piece))) ++i;
+    if (i==8*rank+8) return false;
+    else
+    {
+        res = Square(i);
+        return true;
+    }
+}

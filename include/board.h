@@ -23,6 +23,10 @@ public:
     std::string toFENstring() const;
     static bool fromFENstring(Board &res, const std::string &str);
 
+    static bool fileIndex(uint &res, const char &c);
+    static bool rankIndex(uint &res, const char &c);
+
+
 private:
     void clear();
     void reset();

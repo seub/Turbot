@@ -10,6 +10,7 @@ include_directories(include)
 set(SOURCES
     src/board.cpp
     src/boardhelper.cpp
+    src/game.cpp
     src/main.cpp
     src/move.cpp
     src/mover.cpp

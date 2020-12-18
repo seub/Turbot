@@ -2,6 +2,7 @@
 #define BOARDHELPER_H
 
 #include "piece.h"
+#include "square.h"
 
 class Board;
 
@@ -14,6 +15,10 @@ public:
     BoardHelper() = delete;
     BoardHelper(const BoardHelper &) = delete;
     BoardHelper & operator=(BoardHelper) = delete;
+
+    bool firstOccurrence(Square &res, const Piece &piece) const;
+    bool firstOccurrenceOnFile(Square &res, uint file, const Piece &piece) const;
+    bool firstOccurrenceOnRank(Square &res, uint rank, const Piece &piece) const;
 
 private:
     void updateBitboards();

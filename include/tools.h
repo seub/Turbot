@@ -18,6 +18,7 @@ namespace Tools
 
 int intRound(double x);
 double randDouble(double min, double max);
+int stoi(const std::string& str, int* p_value, std::size_t* pos = 0, int base = 10);
 
 
 template <typename T> T exponentiation(T base, int power)

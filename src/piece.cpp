@@ -44,10 +44,31 @@ bool Piece::isPawn() const
     return (type == PieceType::Pawn);
 }
 
-std::string Piece::name() const
+char Piece::name() const
+{
+    return name(type);
+}
+
+char Piece::name(PieceType type)
 {
     return piecenames[uint(type)];
 }
+
+bool Piece::fromName(PieceType &res, char c)
+{
+    switch(c)
+    {
+    case 'E': res=PieceType::Empty; return true;
+    case 'K': res=PieceType::King; return true;
+    case 'Q': res=PieceType::Queen; return true;
+    case 'R': res=PieceType::Rook; return true;
+    case 'B': res=PieceType::Bishop; return true;
+    case 'N': res=PieceType::Knight; return true;
+    case 'P': res=PieceType::Pawn; return true;
+    default: return false;
+    }
+}
+
 
 char Piece::toFENchar() const
 {

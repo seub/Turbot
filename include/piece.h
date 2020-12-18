@@ -17,17 +17,20 @@ public:
     bool operator==(const Piece &other) const;
 
 
-    std::string name() const;
+    char name() const;
+    static char name(PieceType type);
+    static bool fromName(PieceType &res, char c);
+
     Color getColor() const;
     bool isEmpty() const;
     bool isKing() const;
     bool isRook() const;
     bool isPawn() const;
     PieceType getType() const;
-    char FENchar() const;
+    char toFENchar() const;
 
 private:
-    static inline const std::vector< std::string > piecenames = {"E", "K", "Q", "R", "B", "N", "P"};
+    static inline const std::vector<char> piecenames = {'E', 'K', 'Q', 'R', 'B', 'N', 'P'};
     static inline const std::vector<char> FENpiecenames = {(char) 0, 'K', 'Q', 'R', 'B', 'N', 'P', (char) 0, 'k', 'q', 'r', 'b', 'n', 'p'};
     PieceType type;
     Color color;

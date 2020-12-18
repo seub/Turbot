@@ -21,6 +21,10 @@ public:
     bool isPawnMove(const Move &m) const;
     bool isReversible(const Move &m) const;
     bool isInLegalMovesList(const Move &m) const;
+    bool isCheck() const;
+    bool isCheck(const Move &m) const;
+    bool isCheckmate() const;
+    bool isCheckmate(const Move &m) const;
 
     Position applyKCMove(const Move &m) const;
 

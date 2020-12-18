@@ -93,7 +93,7 @@ std::string Board::toFENstring() const
             {
                 res += Tools::convertToString(emptySquares);
             }
-            res += piece.FENchar();
+            res += piece.toFENchar();
             emptySquares=0;
         }
         ++file;
@@ -148,6 +148,39 @@ bool Board::fromFENstring(Board &res, const std::string &str)
 
     return true;
 }
+
+bool Board::fileIndex(uint &res, const char &c)
+{
+    switch (c)
+    {
+    case 'a' : res = 0; return true; break;
+    case 'b' : res = 1; return true; break;
+    case 'c' : res = 2; return true; break;
+    case 'd' : res = 3; return true; break;
+    case 'e' : res = 4; return true; break;
+    case 'f' : res = 5; return true; break;
+    case 'g' : res = 6; return true; break;
+    case 'h' : res = 7; return true; break;
+    default : return false;
+    }
+}
+
+bool Board::rankIndex(uint &res, const char &c)
+{
+    switch (c)
+    {
+    case '1' : res = 0; return true; break;
+    case '2' : res = 1; return true; break;
+    case '3' : res = 2; return true; break;
+    case '4' : res = 3; return true; break;
+    case '5' : res = 4; return true; break;
+    case '6' : res = 5; return true; break;
+    case '7' : res = 6; return true; break;
+    case '8' : res = 7; return true; break;
+    default : return false;
+    }
+}
+
 
 std::ostream & operator <<(std::ostream &out, const Board &B)
 {

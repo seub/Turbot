@@ -4,7 +4,7 @@ Mover::Mover(const Position * const position, bool generateLegalMoves) : positio
 {
     initialize();
     if (generateLegalMoves) updateLegalMoves();
-    legalMovesConstructed = generateLegalMoves;
+    legalMovesGenerated = generateLegalMoves;
 }
 
 bool Mover::initialize()
@@ -14,7 +14,7 @@ bool Mover::initialize()
     legalMoves.clear();
 
     bool res = updateKCLegalMoves();
-    kCLegalMovesConstructed = res;
+    kCLegalMovesGenerated = res;
 
     const bitboard *opPieces = (position->turn==Color::White) ? &(boardHelper.blackPieces) : &(boardHelper.whitePieces);
     uint i = 0;
@@ -488,16 +488,15 @@ bool Mover::isReversible(const Move &m) const
     return (!(isCapture(m)) && !(isPawnMove(m)));
 }
 
+bool Mover::isCheck(const Move &m) const
+{
+    //Position Pnew = applyKCMove(m);
+    return true;
+}
+
 Position Mover::applyKCMove(const Move &m) const
 {
     Position res(*position);
-
-
-    /*if (m.resign || m.claimDraw)
-    {
-        throw("Move cannot be applied");
-    }*/
-    // The code above is not quite right: I should only exclude the case where a resignation occurs or a draw is claimed BEFORE playing the move
 
     bool white = (position->turn==Color::White);
     res.turn = white ? Color::Black : Color::White;
