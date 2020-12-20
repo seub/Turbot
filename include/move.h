@@ -1,4 +1,4 @@
-#ifndef MOVE_H
+﻿#ifndef MOVE_H
 #define MOVE_H
 
 #include "square.h"
@@ -12,52 +12,51 @@ class Move
     friend std::ostream & operator<<(std::ostream &out, const Move &M);
 
 public:
-    Move(const Square &origin, const Square &target, bool promotion = false, PieceType promotedPiece= PieceType::Empty);
+    Move() {}
+    Move(const Square &origin, const Square &target, bool promotion = false, PieceType promotedPiece= PieceType::EMPTY);
     bool operator==(const Move &other) const;
 
     static bool fromLAN(Move & res, std::string &LANstring); // LAN = Long Algebraic Notation // NB: static const function not possible in C++ :/
     std::string toLAN() const;
 
-    Square getOrigin() const;
-    Square getTarget() const;
+    Square getOrigin() const {return origin;}
+    Square getTarget() const {return target;}
+    bool getPromotion() const {return promotion;}
+    PieceType getPromotedPiece() const {return promotedPiece;}
 
 protected:
-    Move(uint originIndex, uint targetIndex, bool promotion = false, PieceType promotedPiece= PieceType::Empty);
+    Move(uint originIndex, uint targetIndex, bool promotion = false, PieceType promotedPiece= PieceType::EMPTY);
     Square origin, target;
     bool promotion;
     PieceType promotedPiece;
 };
 
-class MovePGN : Move
+
+class Mover;
+
+class MovePGN : public Move
 {
+    // Remark: The MovePGN class is not responsible for writing the move number, any draw offers (=) before or after playing a move,
+    // nor the move annotation symbols (https://en.wikipedia.org/wiki/Chess_annotation_symbols), nor the game result (1-0, 0-1, or 1/2-1/2).
     friend std::ostream & operator<<(std::ostream &out, const MovePGN &M);
 
-    MovePGN(const Move &M);
+public:
+    MovePGN() {}
+    MovePGN(const Move &move, const Mover *mover);
 
-    static bool fromPGN(MovePGN &res, const std::string &PGNstring, const Board &board); // Board is necessary to determine origin square
-    static bool fromPGN(MovePGN &res, const std::string &PGNstring, const Board &board, Color side);
+    static bool fromPGN(MovePGN &res, const std::string &PGNstring, const Mover *mover);
+    static bool fromPGN(Move &res, const std::string &PGNstring, const Mover *mover);
+    static bool fromMove(MovePGN &res, const Move &m, const Mover *mover);
 
-    std::string toPGN(bool includeMoveNumber = false, bool includeActualMove=false,
-                      bool includedDrawOfferBefore = false, bool includeDrawOfferAfter = false, bool includeGameResult=false) const;
-
-
+    std::string toPGN() const;
 
 private:
-    static bool extractMoveNumberAndSide(uint &move, Color &side, std::string &outputTruncatedString, const std::string &PGNstring);
-    static bool fromPGNwithoutMoveNum(MovePGN &res, const std::string &PGNstring, const Board &board, Color side);
-
     PieceType piecetype;
-    Color side;
+    Color turn;
     bool pieceOriginAmbiguous, ambiguityLiftedByFile, ambiguityLiftedByRank;
     bool capture;
     bool castleShort, castleLong;
     bool check, checkmate;
-    bool drawOfferBeforeIncluded, drawOfferAfterIncluded;
-    bool moveNumberIncluded;
-    uint moveNumber;
-    bool actualMoveIncluded;
-    bool gameResultIncluded;
-    GameResult result;
 };
 
 

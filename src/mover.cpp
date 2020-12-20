@@ -16,7 +16,7 @@ bool Mover::initialize()
     bool res = updateKCLegalMoves();
     kCLegalMovesGenerated = res;
 
-    const bitboard *opPieces = (position->turn==Color::White) ? &(boardHelper.blackPieces) : &(boardHelper.whitePieces);
+    const bitboard *opPieces = (position->turn==Color::WHITE) ? &(boardHelper.blackPieces) : &(boardHelper.whitePieces);
     uint i = 0;
     while(i<64)
     {
@@ -25,7 +25,7 @@ bool Mover::initialize()
     }
     opponentKingUnderAttack = squaresAttacked[i];
 
-    if (position->turn==Color::White)
+    if (position->turn==Color::WHITE)
     {
         opponentKsideCastleUnderAttack = (squaresAttacked[60] || squaresAttacked[61] || squaresAttacked[62]);
         opponentQsideCastleUnderAttack = (squaresAttacked[58] || squaresAttacked[59] || squaresAttacked[60]);
@@ -43,19 +43,19 @@ bool Mover::updateKCLegalMoves()
 {
     kCLegalMoves.clear();
 
-    const bitboard *myPieces = (position->turn==Color::White) ? &(boardHelper.whitePieces) : &(boardHelper.blackPieces);
+    const bitboard *myPieces = (position->turn==Color::WHITE) ? &(boardHelper.whitePieces) : &(boardHelper.blackPieces);
+
 
     for (uint i=0; i!=64; ++i)
     {
-
         if (myPieces->at(i))
         {
-            if (boardHelper.kings[i]) addkcLegalMovesKing(i);
-            else if (boardHelper.queens[i]) addkcLegalMovesQueen(i);
-            else if (boardHelper.rooks[i]) addkcLegalMovesRook(i);
-            else if (boardHelper.bishops[i]) addkcLegalMovesBishop(i);
-            else if (boardHelper.knights[i]) addkcLegalMovesKnight(i);
-            else if (boardHelper.pawns[i]) addkcLegalMovesPawn(i);
+            if (boardHelper.kings[i]) {addkcLegalMovesKing(i);}
+            else if (boardHelper.queens[i]) {addkcLegalMovesQueen(i);}
+            else if (boardHelper.rooks[i]) {addkcLegalMovesRook(i);}
+            else if (boardHelper.bishops[i]) {addkcLegalMovesBishop(i);}
+            else if (boardHelper.knights[i]) {addkcLegalMovesKnight(i);}
+            else if (boardHelper.pawns[i]) {addkcLegalMovesPawn(i);}
             else
             {
                 throw("Error in LegalMover::initialize()");
@@ -74,19 +74,20 @@ void Mover::addkcLegalMove(uint origin, uint target, bool attack)
 
 void Mover::addkcLegalMovePromotions(uint origin, uint target, bool attack)
 {
-    kCLegalMoves.push_back(Move(origin, target, true, PieceType::Queen));
-    kCLegalMoves.push_back(Move(origin, target, true, PieceType::Rook));
-    kCLegalMoves.push_back(Move(origin, target, true, PieceType::Bishop));
-    kCLegalMoves.push_back(Move(origin, target, true, PieceType::Knight));
+    kCLegalMoves.push_back(Move(origin, target, true, PieceType::QUEEN));
+    kCLegalMoves.push_back(Move(origin, target, true, PieceType::ROOK));
+    kCLegalMoves.push_back(Move(origin, target, true, PieceType::BISHOP));
+    kCLegalMoves.push_back(Move(origin, target, true, PieceType::KNIGHT));
     if (attack) squaresAttacked[target] = true;
 }
 
 void Mover::addkcLegalMovesKing(uint i)
 {
+
     uint file = i % 8;
     uint rank = i / 8;
 
-    const bitboard *myPieces = (position->turn==Color::White) ? &(boardHelper.whitePieces) : &(boardHelper.blackPieces);
+    const bitboard *myPieces = (position->turn==Color::WHITE) ? &(boardHelper.whitePieces) : &(boardHelper.blackPieces);
 
     if (rank==0)
     {
@@ -165,7 +166,7 @@ void Mover::addkcLegalMovesKing(uint i)
         }
     }
 
-    if (position->turn==Color::White)
+    if (position->turn==Color::WHITE)
     {
         if (position->castlingRights[0])
         {
@@ -306,7 +307,7 @@ void Mover::addkcLegalMovesBishop(uint i)
 
 void Mover::addkcLegalMovesRow(uint i, const std::vector<uint> row)
 {
-    const bitboard *myPieces = (position->turn==Color::White) ? &(boardHelper.whitePieces) : &(boardHelper.blackPieces);
+    const bitboard *myPieces = (position->turn==Color::WHITE) ? &(boardHelper.whitePieces) : &(boardHelper.blackPieces);
 
     uint k=0, target;
     while (k<row.size())
@@ -323,7 +324,7 @@ void Mover::addkcLegalMovesKnight(uint i)
     uint file = i % 8;
     uint rank = i / 8;
 
-    const bitboard *myPieces = (position->turn==Color::White) ? &(boardHelper.whitePieces) : &(boardHelper.blackPieces);
+    const bitboard *myPieces = (position->turn==Color::WHITE) ? &(boardHelper.whitePieces) : &(boardHelper.blackPieces);
 
     if ((rank>1) && (file>0))
     {
@@ -366,7 +367,7 @@ void Mover::addkcLegalMovesPawn(uint i)
     uint rank = i / 8;
     uint target;
 
-    if (position->turn==Color::White)
+    if (position->turn==Color::WHITE)
     {
         if ((rank==0) || (rank==7)) throw("Pawn is on first/last row!?");
         else if (rank==1)
@@ -473,35 +474,57 @@ std::string Mover::printLegalMoves() const
     return res;
 }
 
-bool Mover::isCapture(const Move &m) const
+bool Mover::isCapture(const Move &move) const
 {
-    return boardHelper.occupiedSquares[m.target.getIndex()];
+    return boardHelper.occupiedSquares[move.target.getIndex()];
 }
 
-bool Mover::isPawnMove(const Move &m) const
+bool Mover::isPawnMove(const Move &move) const
 {
-    return boardHelper.pawns[m.origin.getIndex()];
+    return boardHelper.pawns[move.origin.getIndex()];
 }
 
-bool Mover::isReversible(const Move &m) const
+bool Mover::isReversible(const Move &move) const
 {
-    return (!(isCapture(m)) && !(isPawnMove(m)));
+    return (!(isCapture(move)) && !(isPawnMove(move)));
 }
 
-bool Mover::isCheck(const Move &m) const
+bool Mover::isCheck() const
 {
-    //Position Pnew = applyKCMove(m);
-    return true;
+    Position switchTurn(*position);
+    switchTurn.turn = (position->turn==Color::WHITE) ? Color::BLACK : Color::WHITE;
+    Mover newMover(&switchTurn, false);
+    return newMover.opponentKingUnderAttack;
+}
+
+bool Mover::isCheck(const Move &move) const
+{
+    Position newPos = applyKCMove(move);
+    Mover newMover(&newPos, false);
+    return newMover.isCheck();
+}
+
+bool Mover::isCheckmate() const
+{
+    if (!legalMovesGenerated) throw("Legal moves not generated!");
+    return (isCheck() && (legalMoves.empty()));
+}
+
+bool Mover::isCheckmate(const Move &move) const
+{
+    Position newPos = applyKCMove(move);
+    Mover newMover(&newPos, true);
+    return newMover.isCheckmate();
 }
 
 Position Mover::applyKCMove(const Move &m) const
 {
     Position res(*position);
 
-    bool white = (position->turn==Color::White);
-    res.turn = white ? Color::Black : Color::White;
+    bool white = (position->turn==Color::WHITE);
+    res.turn = white ? Color::BLACK : Color::WHITE;
 
-    if (res.turn==Color::White) res.moveNumber++;
+    if (res.turn==Color::WHITE) res.moveNumber++;
     if (isReversible(m)) res.nbReversibleHalfMoves++;
     else res.nbReversibleHalfMoves = 0;
     uint origin = m.origin.getIndex();
@@ -509,14 +532,14 @@ Position Mover::applyKCMove(const Move &m) const
     Piece p = position->board.pieces[origin];
 
     res.board.pieces[origin] = Piece();
-    if (m.promotion) res.board.pieces[target] = Piece(m.promotedPiece, white ? Color::White : Color::Black);
+    if (m.promotion) res.board.pieces[target] = Piece(m.promotedPiece, white ? Color::WHITE : Color::BLACK);
     else res.board.pieces[target] = p;
 
 
     // En passant move
     if (p.isPawn() && position->enPassantPossible && (target==position->enPassantTargetSquare))
     {
-        uint opPawn = (position->turn==Color::White) ? target+8 : target-8;
+        uint opPawn = (position->turn==Color::WHITE) ? target+8 : target-8;
         res.board.pieces[opPawn] = Piece();
     }
 
@@ -608,4 +631,95 @@ bool Mover::isLegalConstruct(const Move &m, bool checkKClegal) //NB: Legal move 
     }
 
     return true;
+}
+
+Color Mover::turn() const
+{
+    return position->turn;
+}
+
+bool Mover::uniqueOrigin(Square &resOrigin, const Square &target, PieceType type) const
+{
+    if (legalMovesGenerated)
+    {
+        uint nbOccurrences = 0;
+        Square res;
+        for (const auto &move : legalMoves)
+        {
+            if ((move.target==target) && (position->board.pieces[move.origin.getIndex()].getType()==type))
+            {
+                ++nbOccurrences;
+                if (nbOccurrences==1) {res=move.origin;}
+            }
+        }
+        if (nbOccurrences==1)
+        {
+            resOrigin = res;
+            return true;
+        }
+        else {return false;}
+    }
+    else {throw("Legal moves have not been generated!");}
+}
+
+
+bool Mover::uniqueOriginOnFile(Square &resOrigin, const Square &target, uint fileIndex, PieceType type) const
+{
+    if (legalMovesGenerated)
+    {
+        uint nbOccurrences = 0;
+        Square res;
+        for (const auto &move : legalMoves)
+        {
+            if ((move.target==target) && (position->board.pieces[move.origin.getIndex()].getType()==type) && (move.origin.fileIndex()==fileIndex))
+            {
+                ++nbOccurrences;
+                if (nbOccurrences==1) {res=move.origin;}
+            }
+        }
+        if (nbOccurrences==1)
+        {
+            resOrigin = res;
+            return true;
+        }
+        else {return false;}
+    }
+    else {throw("Legal moves have not been generated!");}
+}
+
+
+
+bool Mover::uniqueOriginOnRank(Square &resOrigin, const Square &target, uint rankIndex, PieceType type) const
+{
+    if (legalMovesGenerated)
+    {
+        uint nbOccurrences = 0;
+        Square res;
+        for (const auto &move : legalMoves)
+        {
+            if ((move.target==target) && (position->board.pieces[move.origin.getIndex()].getType()==type) && (move.origin.rankIndex()==rankIndex))
+            {
+                ++nbOccurrences;
+                if (nbOccurrences==1) {res=move.origin;}
+            }
+
+        }
+        if (nbOccurrences==1)
+        {
+            resOrigin = res;
+            return true;
+        }
+        else {return false;}
+    }
+    else {throw("Legal moves have not been generated!");}
+}
+
+bool Mover::isCastleShort(const Move &move) const
+{
+    return (((position->turn==Color::WHITE) && (move==Move(4, 6))) || ((position->turn==Color::BLACK) && (move==Move(60, 62))));
+}
+
+bool Mover::isCastleLong(const Move &move) const
+{
+    return (((position->turn==Color::WHITE) && (move==Move(4, 2))) || ((position->turn==Color::BLACK) && (move==Move(60, 58))));
 }

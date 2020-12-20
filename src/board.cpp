@@ -21,14 +21,14 @@ void Board::reset()
 {
     pieces.fill(Piece());
 
-    std::vector<PieceType> firstRank = {PieceType::Rook, PieceType::Knight, PieceType::Bishop, PieceType::Queen, PieceType::King, PieceType::Bishop, PieceType::Knight, PieceType::Rook};
+    std::vector<PieceType> firstRank = {PieceType::ROOK, PieceType::KNIGHT, PieceType::BISHOP, PieceType::QUEEN, PieceType::KING, PieceType::BISHOP, PieceType::KNIGHT, PieceType::ROOK};
 
     for (uint i=0; i!=8; ++i)
     {
-        pieces[i] = Piece(firstRank[i], Color::White);
-        pieces[8+i] = Piece(PieceType::Pawn, Color::White);
-        pieces[56+i] = Piece(firstRank[i], Color::Black);
-        pieces[48+i] = Piece(PieceType::Pawn, Color::Black);
+        pieces[i] = Piece(firstRank[i], Color::WHITE);
+        pieces[8+i] = Piece(PieceType::PAWN, Color::WHITE);
+        pieces[56+i] = Piece(firstRank[i], Color::BLACK);
+        pieces[48+i] = Piece(PieceType::PAWN, Color::BLACK);
     }
 }
 
@@ -48,8 +48,8 @@ std::string Board::printString() const
         piece = pieces[i];
         if (!piece.isEmpty())
         {
-            if (piece.getColor() == Color::White) whitePieces.push_back(piece.name()+Square(i).name());
-            if (piece.getColor() == Color::Black) blackPieces.push_back(piece.name()+Square(i).name());
+            if (piece.getColor() == Color::WHITE) whitePieces.push_back(piece.name()+Square(i).name());
+            if (piece.getColor() == Color::BLACK) blackPieces.push_back(piece.name()+Square(i).name());
         }
     }
 
@@ -121,18 +121,18 @@ bool Board::fromFENstring(Board &res, const std::string &str)
         switch (letter)
         {
         case ' ' : break;
-        case 'K' : res.pieces[file + 8*rank] = Piece(PieceType::King, Color::White); ++file; break;
-        case 'Q' : res.pieces[file + 8*rank] = Piece(PieceType::Queen, Color::White);  ++file; break;
-        case 'R' : res.pieces[file + 8*rank] = Piece(PieceType::Rook, Color::White);  ++file; break;
-        case 'B' : res.pieces[file + 8*rank] = Piece(PieceType::Bishop, Color::White);  ++file; break;
-        case 'N' : res.pieces[file + 8*rank] = Piece(PieceType::Knight, Color::White);  ++file ;break;
-        case 'P' : res.pieces[file + 8*rank] = Piece(PieceType::Pawn, Color::White);  ++file; break;
-        case 'k' : res.pieces[file + 8*rank] = Piece(PieceType::King, Color::Black); ++file; break;
-        case 'q' : res.pieces[file + 8*rank] = Piece(PieceType::Queen, Color::Black);  ++file; break;
-        case 'r' : res.pieces[file + 8*rank] = Piece(PieceType::Rook, Color::Black);  ++file; break;
-        case 'b' : res.pieces[file + 8*rank] = Piece(PieceType::Bishop, Color::Black);  ++file; break;
-        case 'n' : res.pieces[file + 8*rank] = Piece(PieceType::Knight, Color::Black);  ++file ;break;
-        case 'p' : res.pieces[file + 8*rank] = Piece(PieceType::Pawn, Color::Black);  ++file; break;
+        case 'K' : res.pieces[file + 8*rank] = Piece(PieceType::KING, Color::WHITE); ++file; break;
+        case 'Q' : res.pieces[file + 8*rank] = Piece(PieceType::QUEEN, Color::WHITE);  ++file; break;
+        case 'R' : res.pieces[file + 8*rank] = Piece(PieceType::ROOK, Color::WHITE);  ++file; break;
+        case 'B' : res.pieces[file + 8*rank] = Piece(PieceType::BISHOP, Color::WHITE);  ++file; break;
+        case 'N' : res.pieces[file + 8*rank] = Piece(PieceType::KNIGHT, Color::WHITE);  ++file ;break;
+        case 'P' : res.pieces[file + 8*rank] = Piece(PieceType::PAWN, Color::WHITE);  ++file; break;
+        case 'k' : res.pieces[file + 8*rank] = Piece(PieceType::KING, Color::BLACK); ++file; break;
+        case 'q' : res.pieces[file + 8*rank] = Piece(PieceType::QUEEN, Color::BLACK);  ++file; break;
+        case 'r' : res.pieces[file + 8*rank] = Piece(PieceType::ROOK, Color::BLACK);  ++file; break;
+        case 'b' : res.pieces[file + 8*rank] = Piece(PieceType::BISHOP, Color::BLACK);  ++file; break;
+        case 'n' : res.pieces[file + 8*rank] = Piece(PieceType::KNIGHT, Color::BLACK);  ++file ;break;
+        case 'p' : res.pieces[file + 8*rank] = Piece(PieceType::PAWN, Color::BLACK);  ++file; break;
         case '1' : file += 1; break;
         case '2' : file += 2; break;
         case '3' : file += 3; break;
@@ -180,6 +180,13 @@ bool Board::rankIndex(uint &res, const char &c)
     default : return false;
     }
 }
+
+bool Board::getPiece(Piece &res, const Square &square) const
+{
+    res = pieces[square.getIndex()];
+    return !(res.isEmpty());
+}
+
 
 
 std::ostream & operator <<(std::ostream &out, const Board &B)

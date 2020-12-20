@@ -10,11 +10,24 @@ Square::Square(uint fileIndex, uint rankIndex)
 
 Square::Square(const std::string &name)
 {
-    assert(name.size() == 2);
-    char fileChar = name[0], rankChar = name[1];
-    uint fileIndex, rankIndex;
-    if (Board::fileIndex(fileIndex, fileChar) && Board::rankIndex(rankIndex, rankChar)) index = fileIndex + 8*rankIndex;
-    else throw ("Bad square name");
+    if (fromName(index, name)) {}
+    else {throw ("Bad square name");}
+}
+
+bool Square::fromName(uint &resIndex, const std::string &name)
+{
+    if (name.size()==2)
+    {
+        char fileChar = name[0], rankChar = name[1];
+        uint fileIndex, rankIndex;
+        if (Board::fileIndex(fileIndex, fileChar) && Board::rankIndex(rankIndex, rankChar))
+        {
+            resIndex = fileIndex + 8*rankIndex;
+            return true;
+        }
+        else {return false;}
+    }
+    else {return false;}
 }
 
 uint Square::getIndex() const
@@ -32,7 +45,25 @@ uint Square::rankIndex() const
     return index / 8;
 }
 
+char Square::fileName() const
+{
+    return filenames[fileIndex()];
+}
+
+char Square::rankName() const
+{
+    return ranknames[rankIndex()];
+}
+
 std::string Square::name() const
 {
-    return filenames[fileIndex()]+ranknames[rankIndex()];
+    std::string res(1, fileName());
+    res += rankName();
+    return res;
+}
+
+std::ostream & operator <<(std::ostream &out, const Square &square)
+{
+    out << square.name();
+    return out;
 }

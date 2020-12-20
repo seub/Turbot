@@ -20,7 +20,6 @@ int intRound(double x);
 double randDouble(double min, double max);
 int stoi(const std::string& str, int* p_value, std::size_t* pos = 0, int base = 10);
 
-
 template <typename T> T exponentiation(T base, int power)
 {
     T res = 1;
@@ -119,7 +118,7 @@ template<typename T> void pop_front(std::vector<T> &vector)
 template<typename T> std::ostream & operator<<(std::ostream &out, const std::vector<T> &V)
 {
     out << "[";
-    for (uint i = 0; i+1 != V.size(); ++i)
+    for (uint i = 0; i+1 < V.size(); ++i)
     {
         out << V[i] << ", ";
     }

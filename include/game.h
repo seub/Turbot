@@ -2,7 +2,7 @@
 #define GAME_H
 
 
-enum class GameResult {WhiteWins, BlackWins, Draw};
+enum class GameResult {WHITE_WINS, BLACK_WINS, DRAW};
 
 class Game
 {

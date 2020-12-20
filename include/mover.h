@@ -9,6 +9,8 @@
 
 class Mover
 {
+    friend class MovePGN;
+
 public:
     explicit Mover(const Position * const position, bool generateLegalMoves = true);
     Mover() = delete;
@@ -17,14 +19,22 @@ public:
 
     std::string printLegalMoves() const;
     std::vector<Move> getlegalMoves() const {return legalMoves;}
-    bool isCapture(const Move &m) const;
-    bool isPawnMove(const Move &m) const;
-    bool isReversible(const Move &m) const;
-    bool isInLegalMovesList(const Move &m) const;
+    bool isCapture(const Move &move) const;
+    bool isPawnMove(const Move &move) const;
+    bool isReversible(const Move &move) const;
+    bool isInLegalMovesList(const Move &move) const;
     bool isCheck() const;
-    bool isCheck(const Move &m) const;
+    bool isCheck(const Move &move) const;
     bool isCheckmate() const;
-    bool isCheckmate(const Move &m) const;
+    bool isCheckmate(const Move &move) const;
+    bool isCastleShort(const Move &move) const;
+    bool isCastleLong(const Move &move) const;
+    Color turn() const;
+
+    bool uniqueOrigin(Square &resOrigin, const Square &target, PieceType type) const;
+    bool uniqueOriginOnFile(Square &resOrigin, const Square &target, uint fileIndex, PieceType type) const;
+    bool uniqueOriginOnRank(Square &resOrigin, const Square &target, uint rankIndex, PieceType type) const;
+
 
     Position applyKCMove(const Move &m) const;
 

@@ -19,6 +19,8 @@ public:
 
     bool operator==(Board const& other) const;
 
+    bool getPiece(Piece &res, const Square &square) const;
+
     std::string printString() const;
     std::string toFENstring() const;
     static bool fromFENstring(Board &res, const std::string &str);

@@ -16,8 +16,10 @@ public:
 
     std::string printString() const;
     std::string toFENstring() const;
+    std::string toLichessURL() const;
     static bool fromFENstring(Position &res, const std::string &FENstr);
     uint getMoveNumber() const {return moveNumber;}
+    bool getPiece(Piece &res, const Square &square) const {return board.getPiece(res, square);}
 
 private:
     void clear();

@@ -3,15 +3,15 @@
 
 # include "tools.h"
 
-enum class PieceType {Empty, King, Queen, Rook, Bishop, Knight, Pawn};
-enum class Color {White, Black};
+enum class PieceType {EMPTY, KING, QUEEN, ROOK, BISHOP, KNIGHT, PAWN};
+enum class Color {WHITE, BLACK};
 
 class Piece
 {
-    friend std::ostream & operator<<(std::ostream &out, const Piece &P);
+    friend std::ostream & operator<<(std::ostream &out, const Piece &square);
 
 public:
-    Piece() : type(PieceType::Empty) {}
+    Piece() : type(PieceType::EMPTY) {}
     Piece(PieceType type) : type(type) {}
     Piece(PieceType type, Color color) : type(type), color(color) {}
     bool operator==(const Piece &other) const;

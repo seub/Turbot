@@ -7,7 +7,7 @@ bool Piece::operator==(const Piece &other) const
 {
     bool res=true;
     res &= (type == other.type);
-    if (type!=PieceType::Empty)
+    if (type!=PieceType::EMPTY)
     {
         res &= (color == other.color);
     }
@@ -26,22 +26,22 @@ PieceType Piece::getType() const
 
 bool Piece::isEmpty() const
 {
-    return (type == PieceType::Empty);
+    return (type == PieceType::EMPTY);
 }
 
 bool Piece::isKing() const
 {
-    return (type == PieceType::King);
+    return (type == PieceType::KING);
 }
 
 bool Piece::isRook() const
 {
-    return (type == PieceType::Rook);
+    return (type == PieceType::ROOK);
 }
 
 bool Piece::isPawn() const
 {
-    return (type == PieceType::Pawn);
+    return (type == PieceType::PAWN);
 }
 
 char Piece::name() const
@@ -58,13 +58,13 @@ bool Piece::fromName(PieceType &res, char c)
 {
     switch(c)
     {
-    case 'E': res=PieceType::Empty; return true;
-    case 'K': res=PieceType::King; return true;
-    case 'Q': res=PieceType::Queen; return true;
-    case 'R': res=PieceType::Rook; return true;
-    case 'B': res=PieceType::Bishop; return true;
-    case 'N': res=PieceType::Knight; return true;
-    case 'P': res=PieceType::Pawn; return true;
+    case 'E': res=PieceType::EMPTY; return true;
+    case 'K': res=PieceType::KING; return true;
+    case 'Q': res=PieceType::QUEEN; return true;
+    case 'R': res=PieceType::ROOK; return true;
+    case 'B': res=PieceType::BISHOP; return true;
+    case 'N': res=PieceType::KNIGHT; return true;
+    case 'P': res=PieceType::PAWN; return true;
     default: return false;
     }
 }
@@ -72,11 +72,11 @@ bool Piece::fromName(PieceType &res, char c)
 
 char Piece::toFENchar() const
 {
-    return FENpiecenames[uint(type) + 7*(color==Color::Black)];
+    return FENpiecenames[uint(type) + 7*(color==Color::BLACK)];
 }
 
-std::ostream & operator <<(std::ostream &out, const Piece &P)
+std::ostream & operator <<(std::ostream &out, const Piece &piece)
 {
-    out << (P.color==Color::White ? "White" : "Black") << " " << P.name();
+    out << (piece.color==Color::WHITE ? "White" : "Black") << " " << piece.name();
     return out;
 }

@@ -30,7 +30,7 @@ bool Position::operator==(const Position &other) const
 void Position::reset()
 {
     board.reset();
-    turn = Color::White;
+    turn = Color::WHITE;
     castlingRights.fill(true);
     enPassantPossible = false;
     enPassantTargetSquare = 0;
@@ -41,7 +41,7 @@ void Position::reset()
 void Position::clear()
 {
     board.clear();
-    turn = Color::White;
+    turn = Color::WHITE;
     castlingRights.fill(false);
     enPassantPossible = false;
     enPassantTargetSquare = 0;
@@ -60,7 +60,7 @@ std::string Position::printString() const
 
     res += "\n";
     res += "Side to play: ";
-    res += (turn==Color::White) ? "White" : "Black";
+    res += (turn==Color::WHITE) ? "White" : "Black";
 
     res += "\n";
     res += "Castling rights (kingside|queenside) : White = ";
@@ -80,7 +80,7 @@ std::string Position::toFENstring() const
     std::string res = board.toFENstring();
 
     res += ' ';
-    res += (turn==Color::White) ? 'w' : 'b';
+    res += (turn==Color::WHITE) ? 'w' : 'b';
 
     res += ' ';
     std::string castlingRightsStr = {};
@@ -99,6 +99,17 @@ std::string Position::toFENstring() const
     res += ' ';
     res += Tools::convertToString(moveNumber);
 
+    return res;
+}
+
+std::string Position::toLichessURL() const
+{
+    std::string res = "https://lichess.org/analysis/standard/";
+    std::string fen = toFENstring();
+    for (auto c : fen)
+    {
+        res += (c==' ') ? '_' : c;
+    }
     return res;
 }
 
@@ -121,8 +132,8 @@ bool Position::fromFENstring(Position &res, const std::string &FENstr)
         if (word.size()!=1) return false;
         switch (word[0])
         {
-        case 'w' : res.turn = Color::White; break;
-        case 'b' : res.turn = Color::Black; break;
+        case 'w' : res.turn = Color::WHITE; break;
+        case 'b' : res.turn = Color::BLACK; break;
         default : return false;
         }
     }

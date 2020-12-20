@@ -16,7 +16,7 @@ void BoardHelper::updateBitboards()
         color = board->pieces[i].getColor();
         switch (type)
         {
-        case PieceType::Empty :
+        case PieceType::EMPTY :
         {
             kings[i] = false;
             queens[i] = false;
@@ -29,7 +29,7 @@ void BoardHelper::updateBitboards()
             occupiedSquares[i] = false;
             break;
         }
-        case PieceType::King :
+        case PieceType::KING :
         {
             kings[i] = true;
             queens[i] = false;
@@ -37,12 +37,12 @@ void BoardHelper::updateBitboards()
             bishops[i] = false;
             knights[i] = false;
             pawns[i] = false;
-            whitePieces[i] = ((color==Color::White) ? true : false);
-            blackPieces[i] = ((color==Color::Black) ? true : false);
+            whitePieces[i] = ((color==Color::WHITE) ? true : false);
+            blackPieces[i] = ((color==Color::BLACK) ? true : false);
             occupiedSquares[i] = true;
             break;
         }
-        case PieceType::Queen :
+        case PieceType::QUEEN :
         {
             kings[i] = false;
             queens[i] = true;
@@ -50,12 +50,12 @@ void BoardHelper::updateBitboards()
             bishops[i] = false;
             knights[i] = false;
             pawns[i] = false;
-            whitePieces[i] = ((color==Color::White) ? true : false);
-            blackPieces[i] = ((color==Color::Black) ? true : false);
+            whitePieces[i] = ((color==Color::WHITE) ? true : false);
+            blackPieces[i] = ((color==Color::BLACK) ? true : false);
             occupiedSquares[i] = true;
             break;
         }
-        case PieceType::Rook :
+        case PieceType::ROOK :
         {
             kings[i] = false;
             queens[i] = false;
@@ -63,12 +63,12 @@ void BoardHelper::updateBitboards()
             bishops[i] = false;
             knights[i] = false;
             pawns[i] = false;
-            whitePieces[i] = ((color==Color::White) ? true : false);
-            blackPieces[i] = ((color==Color::Black) ? true : false);
+            whitePieces[i] = ((color==Color::WHITE) ? true : false);
+            blackPieces[i] = ((color==Color::BLACK) ? true : false);
             occupiedSquares[i] = true;
             break;
         }
-        case PieceType::Bishop :
+        case PieceType::BISHOP :
         {
             kings[i] = false;
             queens[i] = false;
@@ -76,12 +76,12 @@ void BoardHelper::updateBitboards()
             bishops[i] = true;
             knights[i] = false;
             pawns[i] = false;
-            whitePieces[i] = ((color==Color::White) ? true : false);
-            blackPieces[i] = ((color==Color::Black) ? true : false);
+            whitePieces[i] = ((color==Color::WHITE) ? true : false);
+            blackPieces[i] = ((color==Color::BLACK) ? true : false);
             occupiedSquares[i] = true;
             break;
         }
-        case PieceType::Knight :
+        case PieceType::KNIGHT :
         {
             kings[i] = false;
             queens[i] = false;
@@ -89,12 +89,12 @@ void BoardHelper::updateBitboards()
             bishops[i] = false;
             knights[i] = true;
             pawns[i] = false;
-            whitePieces[i] = ((color==Color::White) ? true : false);
-            blackPieces[i] = ((color==Color::Black) ? true : false);
+            whitePieces[i] = ((color==Color::WHITE) ? true : false);
+            blackPieces[i] = ((color==Color::BLACK) ? true : false);
             occupiedSquares[i] = true;
             break;
         }
-        case PieceType::Pawn :
+        case PieceType::PAWN :
         {
             kings[i] = false;
             queens[i] = false;
@@ -102,48 +102,12 @@ void BoardHelper::updateBitboards()
             bishops[i] = false;
             knights[i] = false;
             pawns[i] = true;
-            whitePieces[i] = ((color==Color::White) ? true : false);
-            blackPieces[i] = ((color==Color::Black) ? true : false);
+            whitePieces[i] = ((color==Color::WHITE) ? true : false);
+            blackPieces[i] = ((color==Color::BLACK) ? true : false);
             occupiedSquares[i] = true;
             break;
         }
         default: throw("Error in updateBitboards");
         }
-    }
-}
-
-bool BoardHelper::firstOccurrence(Square &res, const Piece &piece) const
-{
-    uint i=0;
-    while ((i!=64) && (!(board->pieces[i]==piece))) ++i;
-    if (i==64) return false;
-    else
-    {
-        res = Square(i);
-        return true;
-    }
-}
-
-bool BoardHelper::firstOccurrenceOnFile(Square &res, uint file, const Piece &piece) const
-{
-    uint i=file;
-    while ((i!=64+file) && (!(board->pieces[i]==piece))) i+=8;
-    if (i==64+file) return false;
-    else
-    {
-        res = Square(i);
-        return true;
-    }
-}
-
-bool BoardHelper::firstOccurrenceOnRank(Square &res, uint rank, const Piece &piece) const
-{
-    uint i=8*rank;
-    while ((i<8*rank+8) && (!(board->pieces[i]==piece))) ++i;
-    if (i==8*rank+8) return false;
-    else
-    {
-        res = Square(i);
-        return true;
     }
 }
