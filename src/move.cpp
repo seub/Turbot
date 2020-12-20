@@ -267,14 +267,15 @@ bool MovePGN::fromPGN(Move &res, const std::string &PGNstring, const Mover *move
         }
         else if (Board::rankIndex(rank, c))
         {
-            if (((PGNstring.size()>pos+1) && Square::fromName(squareIndexTarget, PGNstring.substr(pos, 2))) ||
-                    ((PGNstring.size()>pos+2) && (PGNstring[pos]=='x') && Square::fromName(squareIndexTarget, PGNstring.substr(pos+1, 2))))
+            if (((PGNstring.size()>pos+2) && Square::fromName(squareIndexTarget, PGNstring.substr(pos+1, 2))) ||
+                    ((PGNstring.size()>pos+3) && (PGNstring[pos]=='x') && Square::fromName(squareIndexTarget, PGNstring.substr(pos+2, 2))))
             {
                 target = Square(squareIndexTarget);
                 rankIndexOrigin = rank;
                 if (mover->uniqueOriginOnRank(origin, target, rankIndexOrigin, piecetype)) {}
                 else {std::cout << "Ambiguous or incorrect move" << std::endl; return false;}
             }
+            else {std::cout << "Ambiguous or incorrect move" << std::endl; return false;}
         }
         else {std::cout << "Incorrect piece move" << std::endl; return false;}
     }
@@ -312,7 +313,8 @@ bool MovePGN::fromMove(MovePGN &res, const Move &move, const Mover *mover)
 
     if (!mover->isInLegalMovesList(move))
     {
-        std::cout << "Illegal move" << std::endl;
+        std::cout << std::endl << "Illegal move" << std::endl;
+        std::cout << "Move is " << move << std::endl;
         return false;
     }
 

@@ -1,10 +1,16 @@
 TODO
 
+BUGS:
+I fixed a bug but the program still crashes sometimes, need to figure out the issue and solve it.
+
+
 Question :
     Sur la class position, il y a une fonction reset. Est ce qu'on ne veut pas plutot une class immutable?
 Réponse :
     Je crois que y a pas vraiment de classe "immutable", mais on peut faire en sorte que 1. toutes les méthodes publiques de la classe sont const, et 2. on peut utiliser
     le mot-clé const quand on définit un élément de la classe.
+
+
 
 
 

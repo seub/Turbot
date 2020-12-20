@@ -369,7 +369,12 @@ void Mover::addkcLegalMovesPawn(uint i)
 
     if (position->turn==Color::WHITE)
     {
-        if ((rank==0) || (rank==7)) throw("Pawn is on first/last row!?");
+        if ((rank==0) || (rank==7))
+        {
+            std::cout << "turn = WHITE" << std::endl;
+            std::cout << "i = " << i << std::endl;
+            throw("Pawn is on first/last row!?");
+        }
         else if (rank==1)
         {
             if (!boardHelper.occupiedSquares[i+8])
@@ -412,7 +417,12 @@ void Mover::addkcLegalMovesPawn(uint i)
     }
     else
     {
-        if ((rank==0) || (rank==7)) throw("Pawn is on first/last row!?");
+        if ((rank==0) || (rank==7))
+        {
+            std::cout << "i = " << i << std::endl;
+            std::cout << "turn = BLACK" << std::endl;
+            throw("Pawn is on first/last row!?");
+        }
         else if (rank==6)
         {
             if (!boardHelper.occupiedSquares[i-8])
@@ -476,7 +486,10 @@ std::string Mover::printLegalMoves() const
 
 bool Mover::isCapture(const Move &move) const
 {
-    return boardHelper.occupiedSquares[move.target.getIndex()];
+    uint target = move.target.getIndex();
+    bool enPassant = (isPawnMove(move) && (position->enPassantPossible==true) && (position->enPassantTargetSquare==target));
+
+    return (enPassant || boardHelper.occupiedSquares[target]);
 }
 
 bool Mover::isPawnMove(const Move &move) const
@@ -609,6 +622,7 @@ bool Mover::isLegalConstruct(const Move &m, bool checkKClegal) //NB: Legal move 
     {
         if  (!(std::find(kCLegalMoves.begin(), kCLegalMoves.end(), m) != kCLegalMoves.end())) return false;
     }
+
 
     Position newPos = applyKCMove(m);
     Mover newMover(&newPos, false);
