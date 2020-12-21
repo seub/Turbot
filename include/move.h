@@ -43,6 +43,7 @@ class MovePGN : public Move
 public:
     MovePGN() {}
     MovePGN(const Move &move, const Mover *mover);
+    bool operator==(const MovePGN &other) const;
 
     static bool fromPGN(MovePGN &res, const std::string &PGNstring, const Mover *mover);
     static bool fromPGN(Move &res, const std::string &PGNstring, const Mover *mover);

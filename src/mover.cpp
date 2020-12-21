@@ -174,7 +174,7 @@ void Mover::addkcLegalMovesKing(uint i)
         }
         else if (position->castlingRights[1])
         {
-            if ((!boardHelper.occupiedSquares[2]) && (!boardHelper.occupiedSquares[3])) addkcLegalMove(4, 2, false);
+            if ((!boardHelper.occupiedSquares[1]) && (!boardHelper.occupiedSquares[2]) && (!boardHelper.occupiedSquares[3])) addkcLegalMove(4, 2, false);
         }
     }
     else
@@ -185,7 +185,7 @@ void Mover::addkcLegalMovesKing(uint i)
         }
         else if (position->castlingRights[3])
         {
-            if ((!boardHelper.occupiedSquares[58]) && (!boardHelper.occupiedSquares[59])) addkcLegalMove(60, 58, false);
+            if ((!boardHelper.occupiedSquares[57]) && (!boardHelper.occupiedSquares[58]) && (!boardHelper.occupiedSquares[59])) addkcLegalMove(60, 58, false);
         }
     }
 }
@@ -497,6 +497,11 @@ bool Mover::isPawnMove(const Move &move) const
     return boardHelper.pawns[move.origin.getIndex()];
 }
 
+bool Mover::isKingMove(const Move &move) const
+{
+    return boardHelper.kings[move.origin.getIndex()];
+}
+
 bool Mover::isReversible(const Move &move) const
 {
     return (!(isCapture(move)) && !(isPawnMove(move)));
@@ -578,13 +583,13 @@ Position Mover::applyKCMove(const Move &m) const
     {
         if (target==origin-2)
         {
-            res.board.pieces[target+1] = res.board.pieces[target-4];
-            res.board.pieces[target-4] = Piece();
+            res.board.pieces[target+1] = res.board.pieces[target-2];
+            res.board.pieces[target-2] = Piece();
         }
         else if (target==origin+2)
         {
-            res.board.pieces[target-1] = res.board.pieces[target+3];
-            res.board.pieces[target+3] = Piece();
+            res.board.pieces[target-1] = res.board.pieces[target+1];
+            res.board.pieces[target+1] = Piece();
         }
 
         if (white)
@@ -730,10 +735,10 @@ bool Mover::uniqueOriginOnRank(Square &resOrigin, const Square &target, uint ran
 
 bool Mover::isCastleShort(const Move &move) const
 {
-    return (((position->turn==Color::WHITE) && (move==Move(4, 6))) || ((position->turn==Color::BLACK) && (move==Move(60, 62))));
+    return isKingMove(move) && (((position->turn==Color::WHITE) && (move==Move(4, 6))) || ((position->turn==Color::BLACK) && (move==Move(60, 62))));
 }
 
 bool Mover::isCastleLong(const Move &move) const
 {
-    return (((position->turn==Color::WHITE) && (move==Move(4, 2))) || ((position->turn==Color::BLACK) && (move==Move(60, 58))));
+    return isKingMove(move) && (((position->turn==Color::WHITE) && (move==Move(4, 2))) || ((position->turn==Color::BLACK) && (move==Move(60, 58))));
 }

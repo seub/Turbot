@@ -1,20 +1,17 @@
 TODO
 
 BUGS:
-I fixed a bug but the program still crashes sometimes, need to figure out the issue and solve it.
+Fixed
 
 
 Question :
     Sur la class position, il y a une fonction reset. Est ce qu'on ne veut pas plutot une class immutable?
 Réponse :
     Je crois que y a pas vraiment de classe "immutable", mais on peut faire en sorte que 1. toutes les méthodes publiques de la classe sont const, et 2. on peut utiliser
-    le mot-clé const quand on définit un élément de la classe.
+    le mot-clé const quand on crée un élément de la classe.
 
 
-
-
-
-Proposition de classes:
+PROPOSITIONS DE CLASSES
 
 Positionevaluator:
     (classe virtuelle)
@@ -41,8 +38,14 @@ MoveGeneratorbyMinMax(MoveGenerator):
     - takes an evaluator as parameter:
     - takes a branchComparator as as parameter
     
-Remarque :
+
+    
+IDÉES :
+
+KC chess:
 Quand on voudra optimiser, quand on calcule l'arbre des coups, je pense que ça vaut le coup de passer en "kc chess" (king capture allowed)
 
-Idée :
+Special actions:
 claim draw, resign, offer draw ne drevraient pas faire partie de Move, c'est une action séparée. Elle fera partie d'une classe "Game"!
+
+Try to fork stockfish? At least try to understand some of it

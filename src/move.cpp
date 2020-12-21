@@ -268,23 +268,21 @@ bool MovePGN::fromPGN(Move &res, const std::string &PGNstring, const Mover *move
         else if (Board::rankIndex(rank, c))
         {
             if (((PGNstring.size()>pos+2) && Square::fromName(squareIndexTarget, PGNstring.substr(pos+1, 2))) ||
-                    ((PGNstring.size()>pos+3) && (PGNstring[pos]=='x') && Square::fromName(squareIndexTarget, PGNstring.substr(pos+2, 2))))
+                    ((PGNstring.size()>pos+3) && (PGNstring[pos+1]=='x') && Square::fromName(squareIndexTarget, PGNstring.substr(pos+2, 2))))
             {
                 target = Square(squareIndexTarget);
                 rankIndexOrigin = rank;
                 if (mover->uniqueOriginOnRank(origin, target, rankIndexOrigin, piecetype)) {}
-                else {std::cout << "Ambiguous or incorrect move" << std::endl; return false;}
+                else {std::cout << "Ambiguous or incorrect move (uniqueOriginOnRank failed)" << std::endl; return false;}
             }
-            else {std::cout << "Ambiguous or incorrect move" << std::endl; return false;}
+            else {std::cout << "Ambiguous or incorrect move (wrong string continuation)" << std::endl; return false;}
         }
         else {std::cout << "Incorrect piece move" << std::endl; return false;}
     }
-    else if ((PGNstring.size()>pos+2) && ((PGNstring.substr(pos, pos+3)=="O-O") || (PGNstring.substr(pos, pos+3)=="0-0")))
+    else if ((PGNstring.size()>pos+2) && ((PGNstring.substr(pos, 3)=="O-O") || (PGNstring.substr(pos, 3)=="0-0")))
     {
         origin = (turn==Color::WHITE) ? Square(4, 0) : Square(4, 7) ;
-        pos += 3;
-        c = PGNstring[pos];
-        if ((PGNstring.size()>pos+1) && ((PGNstring.substr(pos, pos+3)=="-O") || (PGNstring.substr(pos, pos+3)=="-0")))
+        if ((PGNstring.size()>pos+4) && ((PGNstring.substr(pos, 5)=="O-O-O") || (PGNstring.substr(pos, 5)=="0-0-0")))
         {
             target = (turn==Color::WHITE) ? Square(2, 0) : Square(2, 7) ;
         }
@@ -313,7 +311,7 @@ bool MovePGN::fromMove(MovePGN &res, const Move &move, const Mover *mover)
 
     if (!mover->isInLegalMovesList(move))
     {
-        std::cout << std::endl << "Illegal move" << std::endl;
+        std::cout << std::endl << "Illegal move in MovePGN::fromMove" << std::endl;
         std::cout << "Move is " << move << std::endl;
         return false;
     }
@@ -344,4 +342,23 @@ bool MovePGN::fromMove(MovePGN &res, const Move &move, const Mover *mover)
     res.checkmate = mover->isCheckmate(move);
 
     return true;
+}
+
+bool MovePGN::operator==(const MovePGN &other) const
+{
+    bool res = true;
+    res &= other.origin==origin;
+    res &= other.target==target;
+    res &= other.promotion==promotion && ((!promotion) || (other.promotedPiece==promotedPiece));
+    res &= other.piecetype==piecetype;
+    res &= other.turn==turn;
+    res &= other.pieceOriginAmbiguous==pieceOriginAmbiguous;
+    res &= other.ambiguityLiftedByFile==ambiguityLiftedByFile;
+    res &= other.ambiguityLiftedByRank==ambiguityLiftedByRank;
+    res &= other.capture==capture;
+    res &= other.castleShort==castleShort;
+    res &= other.castleLong==castleLong;
+    res &= other.check==check;
+    res &= other.checkmate==checkmate;
+    return res;
 }

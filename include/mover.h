@@ -21,6 +21,7 @@ public:
     std::vector<Move> getlegalMoves() const {return legalMoves;}
     bool isCapture(const Move &move) const;
     bool isPawnMove(const Move &move) const;
+    bool isKingMove(const Move &move) const;
     bool isReversible(const Move &move) const;
     bool isInLegalMovesList(const Move &move) const;
     bool isCheck() const;
