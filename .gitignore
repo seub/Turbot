@@ -55,3 +55,7 @@ compile_commands.json
 # VScode
 .vscode/
 .vscode/*
+
+build
+CMakeFiles
+cmake_install.cmake

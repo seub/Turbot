@@ -1,7 +1,6 @@
 cmake_minimum_required(VERSION 3.5)
 
 project(Turbot LANGUAGES CXX)
-
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
@@ -18,6 +17,8 @@ set(SOURCES
     src/position.cpp
     src/square.cpp
     src/tools.cpp
+    src/evaluator.cpp
+    src/moveGenerator.cpp
     )
 
 add_executable(Turbot ${SOURCES})

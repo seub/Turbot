@@ -1,5 +1,26 @@
-# include "position.h"
-# include "mover.h"
+#include "position.h"
+#include "mover.h"
+#include "evaluator.h"
+#include "piece.h"
+#include "moveGenerator.h"
+#include <functional>
+
+#include <map>
+
+std::map<PieceType,float> pieceValue = 
+{
+    {PieceType::BISHOP, 3},
+    {PieceType::BISHOP, 3},
+    {PieceType::EMPTY,0},
+    {PieceType::KING, 1000},
+    {PieceType::KNIGHT, 3},
+    {PieceType::PAWN,1},
+    {PieceType::QUEEN, 10},
+    {PieceType::ROOK,5}
+};
+
+
+
 
 int main()
 {
@@ -19,6 +40,9 @@ int main()
                 std::vector<Move> legalMoves = M.getlegalMoves();
                 if (legalMoves.empty()) {break;}
                 Move m=legalMoves[(uint (clock())) % legalMoves.size()];
+                Basicevaluator evaluator = Basicevaluator(pieceValue);
+                MoveGenerator moveGenerator(&evaluator, &P);
+                m = moveGenerator.pickMove(legalMoves);
                 MovePGN movepgn(m, &M);
                 if (white) {std::cout << P.getMoveNumber() << ". " << movepgn;}
                 else{std::cout << " " << movepgn << " ";}
