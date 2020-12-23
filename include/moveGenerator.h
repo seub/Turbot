@@ -10,7 +10,7 @@ private:
     Basicevaluator *evaluator;
     Position *position;
     Mover *mover;
-    bool comparator(Move first, Move second);
+    bool comparator(Move first, Move second, int reverse);
 public:
     MoveGenerator(Basicevaluator *evaluator, Position * posititon);
     ~MoveGenerator();

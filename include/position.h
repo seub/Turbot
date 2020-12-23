@@ -20,6 +20,7 @@ public:
     static bool fromFENstring(Position &res, const std::string &FENstr);
     uint getMoveNumber() const {return moveNumber;}
     bool getPiece(Piece &res, const Square &square) const {return board.getPiece(res, square);}
+    Color getTurn(){return turn;}
 
 private:
     void clear();

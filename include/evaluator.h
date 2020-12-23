@@ -13,8 +13,8 @@ private:
     /* data */
 public:
     Evaluator(/* args */);
-    virtual ~Evaluator();
-    virtual float evaluatePosition(const Position &position) const;
+    ~Evaluator();
+    float evaluatePosition(const Position &position) const;
 };
 
 class Basicevaluator: public Evaluator

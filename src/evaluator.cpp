@@ -12,8 +12,10 @@ Evaluator::~Evaluator()
     
 }
 
-
-
+float Evaluator::evaluatePosition(const Position &position) const
+{
+    return 0;
+}
 
 
 Basicevaluator::Basicevaluator(std::map<PieceType,float> pieceValue): pieceValue(pieceValue)
