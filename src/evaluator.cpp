@@ -23,15 +23,13 @@ double BasicEvaluator::evaluatePosition(const Position &position) const
 {
     double score = 0;
     Piece piece;
-    Color color;
     double value;
     for(uint index=0; index!=64; ++index)
     {
         if(position.getPiece(piece,Square(index)))
         {
             value = pieceValues.at(piece.getType());
-            color = piece.getColor();
-            score += (piece.getColor() == Color::WHITE) ? value : -value;
+            score += (piece.getColor()==Color::WHITE) ? value : -value;
         }
     }
     return score;

@@ -5,6 +5,9 @@
 # include "move.h"
 # include "legalmover.h"
 
+class MovePicker;
+
+
 class Position
 {
     friend std::ostream & operator<<(std::ostream &out, const Position &p);
@@ -26,7 +29,8 @@ public:
     Board getBoard() const {return board;}
 
     bool applyMove(Position &res, const Move &m, bool checkLegal = false, bool checkKCLegal = false) const;
-    bool getRandomLegalMove(Move &res) const;
+    bool pickRandomLegalMove(Move &res) const;
+    bool pickBestMove(Move &res, const MovePicker *picker) const;
 
 private:
     void clear();

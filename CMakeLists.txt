@@ -13,7 +13,7 @@ set(SOURCES
     src/legalmover.cpp
     src/main.cpp
     src/move.cpp
-    src/moveGenerator.cpp
+    src/movepicker.cpp
     src/piece.cpp
     src/position.cpp
     src/square.cpp

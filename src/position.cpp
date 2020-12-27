@@ -1,4 +1,5 @@
 # include "position.h"
+# include "movepicker.h"
 
 Position::Position(bool gamestart) : board(gamestart)
 {
@@ -198,11 +199,17 @@ bool Position::applyMove(Position &res, const Move &m, bool checkLegal, bool che
     return mover.applyMove(res, m, checkLegal, checkKCLegal);
 }
 
-bool Position::getRandomLegalMove(Move &res) const
+bool Position::pickRandomLegalMove(Move &res) const
 {
     LegalMover mover(this, true);
     return mover.getRandomLegalMove(res);
 
+}
+
+bool Position::pickBestMove(Move &res, const MovePicker *picker) const
+{
+    LegalMover mover(this, true);
+    return picker->pickMove(res, *this, mover.getlegalMoves(), false, false);
 }
 
 

@@ -56,3 +56,5 @@ NOTES POUR CODE "PROPRE"
 - ne pas oublier les const
 - private before public?
 - mot clé override
+- no need to write destructor in general
+- passer les arguments par référence

@@ -159,7 +159,28 @@ bool Game::playRandomMove()
     {
         Position currentPosition = positions.back();
         Move move;
-        if (currentPosition.getRandomLegalMove(move))
+        if (currentPosition.pickRandomLegalMove(move))
+        {
+            success = playMove(move);
+        }
+        else
+        {
+            std::cout << "Error: failed to get random legal move" << std::endl;
+        }
+    }
+
+    return success;
+}
+
+bool Game::playBestMove(const MovePicker *picker)
+{
+    bool success = false;
+
+    if (!isFinished())
+    {
+        Position currentPosition = positions.back();
+        Move move;
+        if (currentPosition.pickBestMove(move, picker))
         {
             success = playMove(move);
         }

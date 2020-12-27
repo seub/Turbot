@@ -25,6 +25,7 @@ public:
 
     bool playMove(const Move &move, bool checkLegal=false, bool checkCKLegal=false);
     bool playRandomMove();
+    bool playBestMove(const MovePicker *picker);
 
 private:
     std::vector<Move> moves;
