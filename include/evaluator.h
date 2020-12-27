@@ -9,23 +9,23 @@
 
 class Evaluator
 {
-private:
-    /* data */
 public:
-    Evaluator(/* args */);
-    ~Evaluator();
-    float evaluatePosition(const Position &position) const;
+    Evaluator() {}
+    virtual double evaluatePosition(const Position &position) const =0 ; // Pure virtual function --> Evaluator is an abstract class
+
+private:
 };
 
-class Basicevaluator: public Evaluator
-{
-private:
-    std::map<PieceType,float> pieceValue;
-public:
-    Basicevaluator(std::map<PieceType,float> pieceValue);
-    ~Basicevaluator();
-float evaluatePosition(const Position &position) const;
 
+class BasicEvaluator: public Evaluator
+{
+public:
+    BasicEvaluator();
+
+double evaluatePosition(const Position &position) const override;
+
+private:
+    std::map<PieceType, double> pieceValues;
 };
 
 

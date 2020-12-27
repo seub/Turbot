@@ -3,53 +3,35 @@
 #include "square.h"
 #include "piece.h"
 
-Evaluator::Evaluator(/* args */)
-{
-}
 
-Evaluator::~Evaluator()
+BasicEvaluator::BasicEvaluator()
 {
-    
-}
-
-float Evaluator::evaluatePosition(const Position &position) const
-{
-    return 0;
-}
-
-
-Basicevaluator::Basicevaluator(std::map<PieceType,float> pieceValue): pieceValue(pieceValue)
-{
-
-}
-    
-Basicevaluator::~Basicevaluator()
-{
-
-}
-    
-float Basicevaluator::evaluatePosition(const Position &position) const
-{
-    float score = 0;
-    Piece piece;
-    bool ispiece;
-    Color color;
-    float value;
-    for(uint index=0; index<64; ++index)
+    // NB: We could try ALphaZero's piece values
+    pieceValues =
     {
-        ispiece = position.getPiece(piece,Square(index));
-        if(ispiece)
+        {PieceType::EMPTY,0},
+        {PieceType::KING, 0},
+        {PieceType::QUEEN, 9.5},
+        {PieceType::ROOK, 5},
+        {PieceType::BISHOP, 3},
+        {PieceType::KNIGHT, 3},
+        {PieceType::PAWN, 1}
+    };
+}
+    
+double BasicEvaluator::evaluatePosition(const Position &position) const
+{
+    double score = 0;
+    Piece piece;
+    Color color;
+    double value;
+    for(uint index=0; index!=64; ++index)
+    {
+        if(position.getPiece(piece,Square(index)))
         {
-            value = pieceValue.at(piece.getType());
+            value = pieceValues.at(piece.getType());
             color = piece.getColor();
-            if(color == Color::WHITE)
-            {
-                score +=value;
-            }
-            else
-            {
-                score -=value;
-            }
+            score += (piece.getColor() == Color::WHITE) ? value : -value;
         }
     }
     return score;

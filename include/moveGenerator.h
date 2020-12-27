@@ -7,12 +7,12 @@
 class MoveGenerator
 {
 private:
-    Basicevaluator *evaluator;
+    BasicEvaluator *evaluator;
     Position *position;
     LegalMover *mover;
     bool comparator(Move first, Move second, int reverse);
 public:
-    MoveGenerator(Basicevaluator *evaluator, Position * posititon);
+    MoveGenerator(BasicEvaluator *evaluator, Position * posititon);
     ~MoveGenerator();
     Move pickMove( std::vector<Move> legalMoves);
 };

@@ -1,6 +1,6 @@
 #include "moveGenerator.h"
 
-MoveGenerator::MoveGenerator(Basicevaluator * evaluator, Position *position): evaluator(evaluator), position(position)
+MoveGenerator::MoveGenerator(BasicEvaluator * evaluator, Position *position): evaluator(evaluator), position(position)
 {
     mover = new LegalMover(position);
 }

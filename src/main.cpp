@@ -9,17 +9,7 @@
 
 # include "game.h"
 
-std::map<PieceType,float> pieceValue = 
-{
-    {PieceType::BISHOP, 3},
-    {PieceType::BISHOP, 3},
-    {PieceType::EMPTY,0},
-    {PieceType::KING, 1000},
-    {PieceType::KNIGHT, 3},
-    {PieceType::PAWN,1},
-    {PieceType::QUEEN, 10},
-    {PieceType::ROOK,5}
-};
+
 
 
 

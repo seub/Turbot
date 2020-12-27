@@ -49,3 +49,10 @@ Special actions:
 claim draw, resign, offer draw ne drevraient pas faire partie de Move, c'est une action séparée. Elle fera partie d'une classe "Game"!
 
 Try to fork stockfish? At least try to understand some of it
+
+
+NOTES POUR CODE "PROPRE"
+- double au lieu de float
+- ne pas oublier les const
+- private before public?
+- mot clé override
