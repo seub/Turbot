@@ -25,7 +25,10 @@ public:
 
     bool playMove(const Move &move, bool checkLegal=false, bool checkCKLegal=false);
     bool playRandomMove();
+    bool findBestMove(Move &res, const MovePicker *picker) const;
     bool playBestMove(const MovePicker *picker);
+
+    void playWithHuman(const MovePicker *picker);
 
 private:
     std::vector<Move> moves;

@@ -261,7 +261,13 @@ bool MovePGN::fromPGN(Move &res, const std::string &PGNstring, const LegalMover 
             {
                 target = Square(squareIndexTarget);
                 if (mover->uniqueOrigin(origin, target, piecetype)) {}
-                else {std::cout << "Ambiguous or incorrect move" << std::endl; return false;}
+                else
+                {
+                    std::cout << "Ambiguous or incorrect move" << std::endl;
+                    std::cout << "String was " << PGNstring << std::endl;
+                    std::cout << "Position was " << mover->position << std::endl;
+                    return false;
+                }
             }
             else {std::cout << "Incorrect move name" << std::endl; return false;}
         }
@@ -313,6 +319,9 @@ bool MovePGN::fromMove(MovePGN &res, const Move &move, const LegalMover *mover)
     {
         std::cout << std::endl << "Illegal move in MovePGN::fromMove" << std::endl;
         std::cout << "Move is " << move << std::endl;
+        std::cout << "Position is " << *(mover->position) << std::endl;
+        /*std::cout << "Legal move list is " << mover->printLegalMoves() << std::endl;
+        std::cout << "KCLegal move list is " << mover->printKCLegalMoves() << std::endl;*/
         return false;
     }
 

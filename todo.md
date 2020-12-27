@@ -1,8 +1,6 @@
 TODO
 
 BUGS:
-Fixed
-
 
 Question :
     Sur la class position, il y a une fonction reset. Est ce qu'on ne veut pas plutot une class immutable?

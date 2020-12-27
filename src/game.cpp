@@ -172,6 +172,26 @@ bool Game::playRandomMove()
     return success;
 }
 
+bool Game::findBestMove(Move &res, const MovePicker *picker) const
+{
+    bool success = false;
+
+    if (!isFinished())
+    {
+        Position currentPosition = positions.back();
+        if (currentPosition.pickBestMove(res, picker))
+        {
+            success = true;
+        }
+        else
+        {
+            std::cout << "Error: failed to pick best move" << std::endl;
+        }
+    }
+
+    return success;
+}
+
 bool Game::playBestMove(const MovePicker *picker)
 {
     bool success = false;
@@ -186,12 +206,75 @@ bool Game::playBestMove(const MovePicker *picker)
         }
         else
         {
-            std::cout << "Error: failed to get random legal move" << std::endl;
+            std::cout << "Error: failed to pick best move" << std::endl;
         }
     }
 
     return success;
 }
+
+void Game::playWithHuman(const MovePicker *picker)
+{
+    std::cout << "Hello there, I'm Turbot. What is your name? ";
+    std::cin >> whitePlayer;
+    std::cout << "Okay " << whitePlayer << ", let's play! You play White." << std::endl << std::endl;
+
+    std::string moveString;
+    Position position;
+    MovePGN movePGN;
+    Move move;
+
+    while (!isFinished())
+    {
+        position = getPosition();
+        LegalMover mover1(&position, true);
+        std::cout << "What is your " << ((position.getMoveNumber()==1) ? "first" : "next") << " move? Enter it in PGN notation. " << position.getMoveNumber() << ". ";
+        std::cin >> moveString;
+        if (moveString=="exit") {break;}
+        if (MovePGN::fromPGN(movePGN, moveString, &mover1))
+        {
+            move = (Move) movePGN;
+            if (mover1.isInLegalMovesList(move)) {playMove((Move) move);}
+            else
+            {
+                std::cout << "Sorry, that's an illegal move. Try again: (Enter \"exit\" to exit)" << std::endl;
+                continue;
+            }
+        }
+        else
+        {
+            std::cout << "Sorry, that didn't work. Try again: (Enter \"exit\" to exit)" << std::endl;
+            continue;
+        }
+        std::cout << "Okay, you played " << movePGN << ".";
+        if (isFinished()) {break;}
+
+        position = getPosition();
+        LegalMover mover2(&position, true);
+        findBestMove(move, picker);
+        std::cout << " My move is " << position.getMoveNumber() << "... " << MovePGN(move, &mover2) << "." << std::endl << std::endl;
+        playMove(move);
+    }
+
+    std::cout << std::endl << std::endl;
+    switch(result)
+    {
+    case GameResult::NOT_FINISHED : std::cout << "Game is not finished!" << std::endl << std::endl; break;
+    case GameResult::WHITE_WINS : std::cout << "You win. Congratulations!" << std::endl << std::endl; break;
+    case GameResult::BLACK_WINS : std::cout << "I win! Hahahaha what a loser!" << std::endl << std::endl; break;
+    case GameResult::DRAW : std::cout << "Draw. Good game!" << std::endl << std::endl; break;
+    default: throw("Invalid game result"); break;
+    }
+
+    std::string print;
+    std::cout << "Would you like to see the PGN of the whole game (Y|N)? ";
+    std::cin >> print;
+    std::cout << std::endl;
+    if (print=="Y") {std::cout << printPGN();}
+    std::cout << std::endl << std::endl;
+}
+
+
 
 std::ostream & operator <<(std::ostream &out, const Game &game)
 {

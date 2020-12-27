@@ -173,7 +173,7 @@ void LegalMover::addkcLegalMovesKing(uint i)
         {
             if ((!boardHelper.occupiedSquares[5]) && (!boardHelper.occupiedSquares[6])) addkcLegalMove(4, 6, false);
         }
-        else if (position->castlingRights[1])
+        if (position->castlingRights[1])
         {
             if ((!boardHelper.occupiedSquares[1]) && (!boardHelper.occupiedSquares[2]) && (!boardHelper.occupiedSquares[3])) addkcLegalMove(4, 2, false);
         }
@@ -184,7 +184,7 @@ void LegalMover::addkcLegalMovesKing(uint i)
         {
             if ((!boardHelper.occupiedSquares[61]) && (!boardHelper.occupiedSquares[62])) addkcLegalMove(60, 62, false);
         }
-        else if (position->castlingRights[3])
+        if (position->castlingRights[3])
         {
             if ((!boardHelper.occupiedSquares[57]) && (!boardHelper.occupiedSquares[58]) && (!boardHelper.occupiedSquares[59])) addkcLegalMove(60, 58, false);
         }
@@ -678,11 +678,11 @@ bool LegalMover::isLegalConstruct(const Move &m, bool checkKClegal) //NB: Legal 
     {
         if (target==origin-2)
         {
-            if (newMover.opponentKsideCastleUnderAttack) return false;
+            if (newMover.opponentQsideCastleUnderAttack) return false;
         }
         else if (target==origin+2)
         {
-            if (newMover.opponentQsideCastleUnderAttack) return false;
+            if (newMover.opponentKsideCastleUnderAttack) return false;
         }
     }
 

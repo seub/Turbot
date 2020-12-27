@@ -11,7 +11,7 @@ int main()
         BasicEvaluator evaluator;
         MovePicker picker(&evaluator);
 
-        while (!game.isFinished())
+        /*while (!game.isFinished())
         {
             game.playBestMove(&picker);
         }
@@ -20,6 +20,11 @@ int main()
         std::cout << std::endl;
         std::cout << game.getPosition().toLichessURL() << std::endl;
 
+        std::string test;
+        std::cin >> test;
+        std::cout << test << std::endl;*/
+
+        game.playWithHuman(&picker);
     }
     catch (char const *errorMessage)
     {
