@@ -13,12 +13,12 @@ set(SOURCES
     src/legalmover.cpp
     src/main.cpp
     src/move.cpp
+    src/moveGenerator.cpp
     src/piece.cpp
     src/position.cpp
     src/square.cpp
     src/tools.cpp
     src/evaluator.cpp
-    src/moveGenerator.cpp
     )
 
 add_executable(Turbot ${SOURCES})

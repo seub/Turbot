@@ -10,6 +10,7 @@ class LegalMover
 {
     friend class MovePGN;
     friend class Position;
+    friend class MoveGenerator;
 
 public:
     explicit LegalMover(const Position * const position, bool generateLegalMoves = true);
