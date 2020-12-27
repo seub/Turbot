@@ -11,7 +11,7 @@ class Evaluator
 {
 public:
     Evaluator() {}
-    virtual double evaluatePosition(const Position &position) const =0 ; // Pure virtual function --> Evaluator is an abstract class
+    virtual double evaluatePosition(const Position &position) const = 0; // Pure virtual function --> Evaluator is an abstract class
 
 private:
 };

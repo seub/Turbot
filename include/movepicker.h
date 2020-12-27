@@ -12,7 +12,7 @@ public:
     bool compareMoves(const Position &position, const Move &first, const Move &second, bool checkLegal = false, bool checkKCLegal = false) const;
 
 private:
-    BasicEvaluator *evaluator;
+    Evaluator *evaluator;
 };
 
 
