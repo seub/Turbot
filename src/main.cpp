@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 #include "position.h"
 #include "mover.h"
 #include "evaluator.h"
@@ -21,11 +22,16 @@ std::map<PieceType,float> pieceValue =
 
 
 
+=======
+# include "game.h"
+>>>>>>> game-branch
 
 int main()
 {
+
     try
     {
+<<<<<<< HEAD
         uint j=0, k=0;
         uint kmax=1; //kmax=10000;
         bool test = true, test1, test2, test3;
@@ -64,17 +70,18 @@ int main()
                     std::cout << "The comparison between the first PGN conversion and the conversion back from PGN was a success? " << ((test2) ? "Yes" : "No") << std::endl;
                     throw("test failed");
                 }
+=======
+        Game game;
+>>>>>>> game-branch
 
-                P = M.applyKCMove(m);
-                ++j;
-                white = !white;
-            }
-            std::cout << std::endl;
-            std::cout << P.toFENstring() << std::endl;
-            std::cout << "Check position on Lichess: " << P.toLichessURL() << std::endl;
-            ++k;
+        while (!game.isFinished())
+        {
+            game.playRandomMove();
         }
-        std::cout << "success? " << ((k==kmax) ? "Yes" : "No") << std::endl;
+
+        std::cout << game << std::endl;
+        std::cout << std::endl;
+        std::cout << game.getPosition().toLichessURL() << std::endl;
 
     }
     catch (char const *errorMessage)

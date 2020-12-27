@@ -1,6 +1,6 @@
 #include "move.h"
 #include "boardhelper.h"
-#include "mover.h"
+#include "position.h"
 
 Move::Move(const Square & origin, const Square & target, bool promotion, PieceType promotedPiece) :
     origin(origin), target(target), promotion(promotion), promotedPiece(promotedPiece)
@@ -71,7 +71,7 @@ std::ostream & operator <<(std::ostream &out, const Move &M)
 
 
 
-MovePGN::MovePGN(const Move &move, const Mover *mover) : Move(move)
+MovePGN::MovePGN(const Move &move, const LegalMover *mover) : Move(move)
 {
     if (fromMove(*this, move, mover)) {}
     else throw("MovePGN constructor failed");
@@ -111,14 +111,14 @@ std::string MovePGN::toPGN() const
     return out;
 }
 
-bool MovePGN::fromPGN(MovePGN &res, const std::string &PGNstring, const Mover *mover)
+bool MovePGN::fromPGN(MovePGN &res, const std::string &PGNstring, const LegalMover *mover)
 {
     Move move(Square(0),Square(0));
     if (fromPGN(move, PGNstring, mover)) {return fromMove(res, move, mover);}
     else return false;
 }
 
-bool MovePGN::fromPGN(Move &res, const std::string &PGNstring, const Mover *mover)
+bool MovePGN::fromPGN(Move &res, const std::string &PGNstring, const LegalMover *mover)
 {
 
     if (PGNstring.empty()) {std::cout << "Empty string" << std::endl; return false;}
@@ -302,7 +302,7 @@ std::ostream & operator <<(std::ostream &out, const MovePGN &M)
     return out;
 }
 
-bool MovePGN::fromMove(MovePGN &res, const Move &move, const Mover *mover)
+bool MovePGN::fromMove(MovePGN &res, const Move &move, const LegalMover *mover)
 {
     res.origin = move.getOrigin();
     res.target = move.getTarget();

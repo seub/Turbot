@@ -10,9 +10,9 @@ set(SOURCES
     src/board.cpp
     src/boardhelper.cpp
     src/game.cpp
+    src/legalmover.cpp
     src/main.cpp
     src/move.cpp
-    src/mover.cpp
     src/piece.cpp
     src/position.cpp
     src/square.cpp

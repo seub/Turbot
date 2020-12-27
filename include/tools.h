@@ -8,7 +8,9 @@
 #include <sstream>
 #include <cassert>
 #include <algorithm>
-
+#include <memory>
+#include <ctime>
+#include <random>
 
 #include "types.h"
 
@@ -19,6 +21,7 @@ namespace Tools
 int intRound(double x);
 double randDouble(double min, double max);
 int stoi(const std::string& str, int* p_value, std::size_t* pos = 0, int base = 10);
+void currentDate(uint &year, uint &month, uint &day);
 
 template <typename T> T exponentiation(T base, int power)
 {
@@ -86,6 +89,26 @@ template <typename T> bool containsDuplicates(const std::vector<T> & V)
     return false;
 }
 
+template <typename T> bool containsTriplicates(const std::vector<T> & V)
+{
+    uint i, j, count, N=V.size();
+
+    for (i=0; i!=N; ++i)
+    {
+        count = 1;
+        for (j=0; j!=i; ++j)
+        {
+            if (V[j] == V[i])
+            {
+                ++count;
+                if (count==3) {return true;}
+            }
+        }
+    }
+    return false;
+}
+
+
 template <typename T> bool haveCommonElements(const std::vector<T> & V1, const std::vector<T> & V2)
 {
     uint i, j, N1 = V1.size(), N2 = V2.size();
@@ -124,8 +147,9 @@ template<typename T> std::ostream & operator<<(std::ostream &out, const std::vec
     }
     if (!V.empty())
     {
-        out << V.back() <<  "]";
+        out << V.back();
     }
+    out << "]";
     return out;
 }
 
