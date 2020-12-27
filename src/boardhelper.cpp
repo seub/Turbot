@@ -14,6 +14,7 @@ void BoardHelper::updateBitboards()
     {
         type = board->pieces[i].getType();
         color = board->pieces[i].getColor();
+        fullboard += (color==Color::BLACK) ? 1 << (i*8+7) : 0 ;
         switch (type)
         {
         case PieceType::EMPTY :
@@ -40,6 +41,7 @@ void BoardHelper::updateBitboards()
             whitePieces[i] = ((color==Color::WHITE) ? true : false);
             blackPieces[i] = ((color==Color::BLACK) ? true : false);
             occupiedSquares[i] = true;
+            fullboard += 1 << (i*8 + 5);
             break;
         }
         case PieceType::QUEEN :
@@ -53,6 +55,7 @@ void BoardHelper::updateBitboards()
             whitePieces[i] = ((color==Color::WHITE) ? true : false);
             blackPieces[i] = ((color==Color::BLACK) ? true : false);
             occupiedSquares[i] = true;
+            fullboard += 1 << (i*8 + 4);
             break;
         }
         case PieceType::ROOK :
@@ -66,6 +69,7 @@ void BoardHelper::updateBitboards()
             whitePieces[i] = ((color==Color::WHITE) ? true : false);
             blackPieces[i] = ((color==Color::BLACK) ? true : false);
             occupiedSquares[i] = true;
+            fullboard += 1 << (i*8 + 3);
             break;
         }
         case PieceType::BISHOP :
@@ -79,6 +83,7 @@ void BoardHelper::updateBitboards()
             whitePieces[i] = ((color==Color::WHITE) ? true : false);
             blackPieces[i] = ((color==Color::BLACK) ? true : false);
             occupiedSquares[i] = true;
+            fullboard += 1 << (i*8 + 2);
             break;
         }
         case PieceType::KNIGHT :
@@ -92,6 +97,7 @@ void BoardHelper::updateBitboards()
             whitePieces[i] = ((color==Color::WHITE) ? true : false);
             blackPieces[i] = ((color==Color::BLACK) ? true : false);
             occupiedSquares[i] = true;
+            fullboard += 1 << (i*8 + 1);
             break;
         }
         case PieceType::PAWN :
@@ -105,6 +111,7 @@ void BoardHelper::updateBitboards()
             whitePieces[i] = ((color==Color::WHITE) ? true : false);
             blackPieces[i] = ((color==Color::BLACK) ? true : false);
             occupiedSquares[i] = true;
+            fullboard += 1 << (i*8 + 0);
             break;
         }
         default: throw("Error in updateBitboards");

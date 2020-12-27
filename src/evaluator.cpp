@@ -12,7 +12,7 @@ Evaluator::~Evaluator()
     
 }
 
-float Evaluator::evaluatePosition(const Position &position) const
+float Evaluator::evaluatePosition(const Position &position)
 {
     return 0;
 }
@@ -28,8 +28,11 @@ Basicevaluator::~Basicevaluator()
 
 }
     
-float Basicevaluator::evaluatePosition(const Position &position) const
+float Basicevaluator::evaluatePosition(const Position &position)
 {
+    auto position_hash = position.getHash();
+    auto value_pointer = evaluated_res.find(position_hash);
+    if( value_pointer != evaluated_res.end()) return value_pointer->second;
     float score = 0;
     Piece piece;
     bool ispiece;
@@ -52,5 +55,6 @@ float Basicevaluator::evaluatePosition(const Position &position) const
             }
         }
     }
+    evaluated_res[position_hash] = score;
     return score;
 }

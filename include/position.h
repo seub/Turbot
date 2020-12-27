@@ -4,6 +4,8 @@
 # include "board.h"
 # include "move.h"
 
+#include <boost/multiprecision/cpp_int.hpp>
+
 class Position
 {
     friend std::ostream & operator<<(std::ostream &out, const Position &p);
@@ -21,7 +23,7 @@ public:
     uint getMoveNumber() const {return moveNumber;}
     bool getPiece(Piece &res, const Square &square) const {return board.getPiece(res, square);}
     Color getTurn(){return turn;}
-
+    boost::multiprecision::uint512_t getHash() const;
 private:
     void clear();
     void reset();

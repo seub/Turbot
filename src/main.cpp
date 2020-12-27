@@ -26,9 +26,12 @@ int main()
 {
     try
     {
+        uint depth=2;
         uint j=0, k=0;
         uint kmax=1; //kmax=10000;
         bool test = true, test1, test2, test3;
+        Basicevaluator evaluator = Basicevaluator(pieceValue);
+        MinMaxMoveGenerator moveGenerator(&evaluator,depth);
         while(k<kmax && test)
         {
             Position P(true);
@@ -36,16 +39,11 @@ int main()
             bool white=true;
             while (j<200)
             {
+                Move m = moveGenerator.pickMove(&P,depth).nextmove;
                 Mover M(&P);
-                std::vector<Move> legalMoves = M.getlegalMoves();
-                if (legalMoves.empty()) {break;}
-                Move m=legalMoves[(uint (clock())) % legalMoves.size()];
-                Basicevaluator evaluator = Basicevaluator(pieceValue);
-                MoveGenerator moveGenerator(&evaluator, &P);
-                m = moveGenerator.pickMove(legalMoves);
                 MovePGN movepgn(m, &M);
                 if (white) {std::cout << P.getMoveNumber() << ". " << movepgn;}
-                else{std::cout << " " << movepgn << " ";}
+                else{std::cout << " " << movepgn << " " << std::flush;}
 
                 MovePGN movepgn2;
                 test1 = MovePGN::fromPGN(movepgn2, movepgn.toPGN(), &M);

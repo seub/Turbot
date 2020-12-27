@@ -1,4 +1,5 @@
 # include "position.h"
+#include "boardhelper.h"
 
 Position::Position(bool gamestart) : board(gamestart)
 {
@@ -197,3 +198,14 @@ std::ostream & operator <<(std::ostream &out, const Position &P)
     return out;
 }
 
+
+boost::multiprecision::uint512_t Position::getHash() const
+{
+    BoardHelper bh(&board);
+    boost::multiprecision::uint512_t res =  bh.getFullboard();
+    if(turn == Color::WHITE)
+    {
+        res += 1 << 6;
+    }
+    return res;
+} 
