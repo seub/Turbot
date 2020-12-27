@@ -8,7 +8,7 @@ class Board;
 
 class BoardHelper
 {
-    friend class Mover;
+    friend class LegalMover;
     friend class MovePGN;
 
 public:

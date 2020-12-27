@@ -12,6 +12,7 @@ Position::Position(bool gamestart) : board(gamestart)
     }
 }
 
+
 bool Position::operator==(const Position &other) const
 {
     bool res = true;
@@ -190,10 +191,25 @@ bool Position::fromFENstring(Position &res, const std::string &FENstr)
 }
 
 
+bool Position::applyMove(Position &res, const Move &m, bool checkLegal, bool checkKCLegal) const
+{
+    LegalMover mover(this, true);
+
+    return mover.applyMove(res, m, checkLegal, checkKCLegal);
+}
+
+bool Position::getRandomLegalMove(Move &res) const
+{
+    LegalMover mover(this, true);
+    return mover.getRandomLegalMove(res);
+
+}
+
 
 std::ostream & operator <<(std::ostream &out, const Position &P)
 {
     out << P.printString();
     return out;
 }
+
 

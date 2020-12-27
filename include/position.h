@@ -3,11 +3,12 @@
 
 # include "board.h"
 # include "move.h"
+# include "legalmover.h"
 
 class Position
 {
     friend std::ostream & operator<<(std::ostream &out, const Position &p);
-    friend class Mover;
+    friend class LegalMover;
 
 public:
     Position(bool gamestart=false);
@@ -20,6 +21,12 @@ public:
     static bool fromFENstring(Position &res, const std::string &FENstr);
     uint getMoveNumber() const {return moveNumber;}
     bool getPiece(Piece &res, const Square &square) const {return board.getPiece(res, square);}
+    uint getNbReversibleHalfMoves() const {return nbReversibleHalfMoves;}
+    Board getBoard() const {return board;}
+
+    bool applyMove(Position &res, const Move &m, bool checkLegal = false, bool checkKCLegal = false) const;
+    bool getRandomLegalMove(Move &res) const;
+
 
 private:
     void clear();

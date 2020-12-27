@@ -48,3 +48,12 @@ int Tools::stoi(const std::string& str, int* p_value, std::size_t* pos, int base
         return -3;
     }
 }
+
+void Tools::currentDate(uint &year, uint &month, uint &day)
+{
+    std::time_t t = std::time(0);
+    std::tm* now = std::localtime(&t);
+    year = now->tm_year + 1900;
+    month = now->tm_mon + 1;
+    day = now->tm_mday;
+}
