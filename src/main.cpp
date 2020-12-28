@@ -10,10 +10,10 @@ int main()
         
         BasicEvaluator evaluator;
         MinMaxMovePicker picker(&evaluator,2);
-        //ComputerPlayer whitePlayer(&picker, "Turbot 1");
-        HumanPlayer firstPlayer(Color::WHITE);
-        //ComputerPlayer blackPlayer(&picker,"Turbot 2");
-        HumanPlayer secondPlayer(Color::BLACK);
+        ComputerPlayer firstPlayer(Color::WHITE, &picker, "Turbot 1");
+        //HumanPlayer firstPlayer(Color::WHITE);
+        ComputerPlayer secondPlayer(Color::BLACK, &picker,"Turbot 2");
+        //HumanPlayer secondPlayer(Color::BLACK);
         Game game( (Player *) &firstPlayer,  (Player *) &secondPlayer);
 
         game.playGame();

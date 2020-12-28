@@ -15,6 +15,7 @@ set(SOURCES
     src/move.cpp
     src/movepicker.cpp
     src/piece.cpp
+    src/player.cpp
     src/position.cpp
     src/square.cpp
     src/tools.cpp
