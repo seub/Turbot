@@ -8,6 +8,8 @@
 class MovePicker;
 
 
+#include <boost/multiprecision/cpp_int.hpp>
+
 class Position
 {
     friend std::ostream & operator<<(std::ostream &out, const Position &p);
@@ -30,8 +32,10 @@ public:
 
     bool applyMove(Position &res, const Move &m, bool checkLegal = false, bool checkKCLegal = false) const;
     bool pickRandomLegalMove(Move &res) const;
-    bool pickBestMove(Move &res, const MovePicker *picker) const;
-
+    bool pickBestMove(Move &res, MovePicker *picker) const;
+    std::size_t getHash() const;
+    bool getLegalMoves(std::vector<Move> &res) const;
+    bool getKCLegalMoves(std::vector<Move> &res) const;
 private:
     void clear();
     void reset();
@@ -46,6 +50,15 @@ private:
     uint nbReversibleHalfMoves; //For 50 and 75 move rules for draw
 };
 
-
+namespace std
+{
+    template<> struct hash<Position>
+    {
+        std::size_t operator()(Position const& position) const noexcept
+        {
+            return position.getHash();
+        }
+    };
+}
 
 #endif // POSITION_H

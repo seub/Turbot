@@ -13,11 +13,15 @@ bool MovePicker::compareMoves(const Position &position, const Move &first, const
     return (position.getTurn()==Color::WHITE) ? (firstEval>secondEval) : (secondEval>firstEval);
 }
 
-bool MovePicker::pickMove(Move &res, const Position &position, const std::vector<Move> &moves, bool checkLegal, bool checkKCLegal) const
+bool MovePicker::pickMove(Move &res, const Position &position, const std::vector<Move> &moves, bool checkLegal, bool checkKCLegal)
 {
-    if (moves.empty()) {return false;}
+    if (moves.empty()) 
+    {
+        std::cout << "No move" << std::endl;
+        return false;
+    }
 
-    std::vector sortedMoves = moves;
+    std::vector<Move> sortedMoves = moves;
     std::sort(std::begin(sortedMoves),std::end(sortedMoves), [this, position, checkLegal, checkKCLegal](const Move &first, const Move &second)
     { return compareMoves(position, first, second, checkLegal, checkKCLegal); });
 

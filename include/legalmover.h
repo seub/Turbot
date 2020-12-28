@@ -21,6 +21,7 @@ public:
     std::string printLegalMoves() const;
     std::string printKCLegalMoves() const;
     std::vector<Move> getlegalMoves() const {return legalMoves;}
+    std::vector<Move> getKCLegalMoves() const {return kCLegalMoves;}
     bool getRandomLegalMove(Move &res) const;
     bool isCapture(const Move &move) const;
     bool isPawnMove(const Move &move) const;

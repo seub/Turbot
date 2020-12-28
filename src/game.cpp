@@ -9,8 +9,12 @@ Game::Game()
     moveNumber = 1;
     result = GameResult::NOT_FINISHED;
     Tools::currentDate(year, month, day);
-    whitePlayer = "Turbot";
-    blackPlayer = "Turbot";
+}
+
+Game::Game(Player *whitePlayer, Player *BlackPlayer): Game()
+{
+    this->whitePlayer =whitePlayer; 
+    this->blackPlayer = blackPlayer;
 }
 
 Position Game::getPosition() const
@@ -79,12 +83,12 @@ std::string Game::printTagRoster() const
     out += "\n";
 
     out += "[White \"";
-    out += whitePlayer;
+    out += whitePlayer->getName();
     out += "\"]";
     out += "\n";
 
     out += "[Black \"";
-    out += blackPlayer;
+    out += blackPlayer->getName();
     out += "\"]";
     out += "\n";
 
@@ -171,69 +175,44 @@ bool Game::playRandomMove()
     return success;
 }
 
-bool Game::findBestMove(Move &res, const MovePicker *picker) const
+bool ComputerPlayer::findBestMove(Move &res, Position &position) const
 {
     bool success = false;
 
-    if (!isFinished())
+    if (position.pickBestMove(res, picker))
     {
-        Position currentPosition = positions.back();
-        if (currentPosition.pickBestMove(res, picker))
-        {
-            success = true;
-        }
-        else
-        {
-            std::cout << "Error: failed to pick best move" << std::endl;
-        }
+        success = true;
     }
+    else
+    {
+        std::cout << "Error: failed to pick best move" << std::endl;
+    }
+    
 
     return success;
 }
-
-bool Game::playBestMove(const MovePicker *picker)
-{
-    bool success = false;
-
-    if (!isFinished())
-    {
-        Position currentPosition = positions.back();
-        Move move;
-        if (currentPosition.pickBestMove(move, picker))
-        {
-            success = playMove(move);
-        }
-        else
-        {
-            std::cout << "Error: failed to pick best move" << std::endl;
-        }
-    }
-
-    return success;
-}
-
-void Game::playWithHuman(const MovePicker *picker)
+HumanPlayer::HumanPlayer(): Player()
 {
     std::cout << "Hello there, I'm Turbot. What is your name? ";
-    std::cin >> whitePlayer;
-    std::cout << "Okay " << whitePlayer << ", let's play! You play White." << std::endl << std::endl;
-
+    std::cin >> name;
+    std::cout << "Okay " << name << ", let's play! You play White." << std::endl << std::endl;
+}
+bool HumanPlayer::play(Move &move, Position &position, MovePGN &movePGN) const
+{
+    LegalMover mover1(&position, true);
     std::string moveString;
-    Position position;
-    MovePGN movePGN;
-    Move move;
-
-    while (!isFinished())
+    while(true)
     {
-        position = getPosition();
-        LegalMover mover1(&position, true);
         std::cout << "What is your " << ((position.getMoveNumber()==1) ? "first" : "next") << " move? Enter it in PGN notation. " << position.getMoveNumber() << ". ";
         std::cin >> moveString;
-        if (moveString=="exit") {break;}
+        if (moveString=="exit") 
+        {
+            return false;
+        }
         if (MovePGN::fromPGN(movePGN, moveString, &mover1))
         {
             move = (Move) movePGN;
-            if (mover1.isInLegalMovesList(move)) {playMove((Move) move);}
+            if (mover1.isInLegalMovesList(move)) {return true;}
             else
             {
                 std::cout << "Sorry, that's an illegal move. Try again: (Enter \"exit\" to exit)" << std::endl;
@@ -245,14 +224,23 @@ void Game::playWithHuman(const MovePicker *picker)
             std::cout << "Sorry, that didn't work. Try again: (Enter \"exit\" to exit)" << std::endl;
             continue;
         }
-        std::cout << "Okay, you played " << movePGN << ".";
-        if (isFinished()) {break;}
+    }
+}
 
+void Game::playGame()
+{
+    Position position;
+    MovePGN movePGN;
+    Move move;
+    Player * nexplayer;
+    while (!isFinished() && moves.size() < 20)
+    {
+        nexplayer = moves.size()%2 == 0? whitePlayer:blackPlayer;
         position = getPosition();
-        LegalMover mover2(&position, true);
-        findBestMove(move, picker);
-        std::cout << " My move is " << position.getMoveNumber() << "... " << MovePGN(move, &mover2) << "." << std::endl << std::endl;
+        if(!nexplayer->play(move, position, movePGN)) break;
         playMove(move);
+        LegalMover mover(&position, true);
+        std::cout << nexplayer->getName() << " played " << MovePGN(move, &mover) << "." << std::endl;
     }
 
     std::cout << std::endl << std::endl;

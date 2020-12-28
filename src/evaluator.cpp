@@ -10,7 +10,7 @@ BasicEvaluator::BasicEvaluator()
     pieceValues =
     {
         {PieceType::EMPTY,0},
-        {PieceType::KING, 0},
+        {PieceType::KING, 1000},
         {PieceType::QUEEN, 9.5},
         {PieceType::ROOK, 5},
         {PieceType::BISHOP, 3},
@@ -21,6 +21,7 @@ BasicEvaluator::BasicEvaluator()
     
 double BasicEvaluator::evaluatePosition(const Position &position) const
 {
+
     double score = 0;
     Piece piece;
     double value;
@@ -32,5 +33,6 @@ double BasicEvaluator::evaluatePosition(const Position &position) const
             score += (piece.getColor()==Color::WHITE) ? value : -value;
         }
     }
+    //evaluated_res[position] = score;
     return score;
 }

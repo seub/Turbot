@@ -19,6 +19,7 @@ set(SOURCES
     src/square.cpp
     src/tools.cpp
     src/evaluator.cpp
+    src/minmaxmovepicker.cpp
     )
 
 add_executable(Turbot ${SOURCES})
