@@ -23,7 +23,7 @@ bool MinMaxMovePicker::pickMove(std::vector<Value> &res, const Position &positio
 
     if(value_pointer != evaluated_res.end() &&  (*(value_pointer->second))[0].depth >= depth)
     {
-        std::cout << std::endl << position.getHash() << std::endl;
+        //std::cout << std::endl << position.getHash() << std::endl;
         res = std::vector<Value>(*value_pointer->second);
         return true;
     }

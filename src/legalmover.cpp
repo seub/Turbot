@@ -590,8 +590,8 @@ Position LegalMover::applyMove(const Move &m) const
     // En passant move
     if (p.isPawn() && position->enPassantPossible && (target==position->enPassantTargetSquare))
     {
-        uint opPawn = (position->turn==Color::WHITE) ? target+8 : target-8;
-        res.board.pieces[opPawn] = Piece();
+        uint opponentPawn = (position->turn==Color::WHITE) ? target-8 : target+8;
+        res.board.pieces[opponentPawn] = Piece();
     }
 
     // Pawn move allowing en passant or not
