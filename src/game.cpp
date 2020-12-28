@@ -1,6 +1,6 @@
 #include "game.h"
 
-Game::Game()
+Game::Game(Player *whitePlayer, Player *blackPlayer) : whitePlayer(whitePlayer), blackPlayer(blackPlayer)
 {
     moves.clear();
     movePGNs.clear();
@@ -9,12 +9,6 @@ Game::Game()
     moveNumber = 1;
     result = GameResult::NOT_FINISHED;
     Tools::currentDate(year, month, day);
-}
-
-Game::Game(Player *whitePlayer, Player *BlackPlayer): Game()
-{
-    this->whitePlayer =whitePlayer; 
-    this->blackPlayer = blackPlayer;
 }
 
 Position Game::getPosition() const
@@ -175,7 +169,7 @@ bool Game::playRandomMove()
     return success;
 }
 
-bool ComputerPlayer::findBestMove(Move &res, Position &position) const
+bool ComputerPlayer::findBestMove(Move &res, const Position &position) const
 {
     bool success = false;
 
@@ -191,28 +185,30 @@ bool ComputerPlayer::findBestMove(Move &res, Position &position) const
 
     return success;
 }
-HumanPlayer::HumanPlayer(): Player()
+
+HumanPlayer::HumanPlayer()
 {
-    std::cout << "Hello there, I'm Turbot. What is your name? ";
+    std::cout << "Hi there! What is your name? ";
     std::cin >> name;
-    std::cout << "Okay " << name << ", let's play! You play White." << std::endl << std::endl;
+    std::cout << "Okay " << name << ", let's play!" << std::endl << std::endl;
 }
-bool HumanPlayer::play(Move &move, Position &position, MovePGN &movePGN) const
+
+bool HumanPlayer::nextMove(Move &res, const Position &position) const
 {
     LegalMover mover1(&position, true);
     std::string moveString;
     while(true)
     {
-        std::cout << "What is your " << ((position.getMoveNumber()==1) ? "first" : "next") << " move? Enter it in PGN notation. " << position.getMoveNumber() << ". ";
+        std::cout << "What is your " << ((position.getMoveNumber()==1) ? "first" : "next") << " move? "
+                  << ((position.getMoveNumber()==1) ? "Enter it in PGN notation. " : "") << position.getMoveNumber() << ". ";
         std::cin >> moveString;
-        if (moveString=="exit") 
+        if (moveString=="exit")
         {
             return false;
         }
-        if (MovePGN::fromPGN(movePGN, moveString, &mover1))
+        if (MovePGN::fromPGN(res, moveString, &mover1))
         {
-            move = (Move) movePGN;
-            if (mover1.isInLegalMovesList(move)) {return true;}
+            if (mover1.isInLegalMovesList(res)) {return true;}
             else
             {
                 std::cout << "Sorry, that's an illegal move. Try again: (Enter \"exit\" to exit)" << std::endl;
@@ -232,24 +228,28 @@ void Game::playGame()
     Position position;
     MovePGN movePGN;
     Move move;
-    Player * nexplayer;
-    while (!isFinished() && moves.size() < 20)
+    Player *nextPlayer;
+    while (!isFinished())
     {
-        nexplayer = moves.size()%2 == 0? whitePlayer:blackPlayer;
         position = getPosition();
-        if(!nexplayer->play(move, position, movePGN)) break;
+        nextPlayer = (turn==Color::WHITE) ? whitePlayer : blackPlayer;
+        if(!nextPlayer->nextMove(move, position))
+        {
+            std::cout << "Failed to play next move!" << std::endl;
+            break;
+        }
         playMove(move);
         LegalMover mover(&position, true);
-        std::cout << nexplayer->getName() << " played " << MovePGN(move, &mover) << "." << std::endl;
+        std::cout << nextPlayer->getName() << " played " << MovePGN(move, &mover).toPGN(moveNumber) << "." << std::endl;
     }
 
     std::cout << std::endl << std::endl;
     switch(result)
     {
     case GameResult::NOT_FINISHED : std::cout << "Game is not finished!" << std::endl << std::endl; break;
-    case GameResult::WHITE_WINS : std::cout << "You win. Congratulations!" << std::endl << std::endl; break;
-    case GameResult::BLACK_WINS : std::cout << "I win! Hahahaha what a loser!" << std::endl << std::endl; break;
-    case GameResult::DRAW : std::cout << "Draw. Good game!" << std::endl << std::endl; break;
+    case GameResult::WHITE_WINS : std::cout << whitePlayer->getName() << "wins!" << std::endl << std::endl; break;
+    case GameResult::BLACK_WINS : std::cout << blackPlayer->getName() << "wins!" << std::endl << std::endl; break;
+    case GameResult::DRAW : std::cout << "Draw!" << std::endl << std::endl; break;
     default: throw("Invalid game result"); break;
     }
 

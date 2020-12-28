@@ -53,6 +53,7 @@ public:
     Color getTurn() const {return turn;}
 
     std::string toPGN() const;
+    std::string toPGN(uint moveNum) const;
 
 private:
     PieceType piecetype;

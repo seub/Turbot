@@ -10,9 +10,10 @@ enum class GameResult {NOT_FINISHED, WHITE_WINS, BLACK_WINS, DRAW};
 class Player
 {
 public:
-    Player(){name="Turbot";}
-    virtual bool play(Move &move, Position &position, MovePGN &movePGN) const = 0;
-    std::string getName(){return name;}
+    Player(std::string name = {}) : name(name) {}
+    virtual bool nextMove(Move &move, const Position &position) const = 0;
+    std::string getName() const {return name;}
+
 protected:
     std::string name;
 };
@@ -21,18 +22,19 @@ class HumanPlayer: Player
 {
 public:
     HumanPlayer();
-    bool play(Move &move, Position &position, MovePGN &movePGN) const override;
+    HumanPlayer(std::string name) : Player(name) {};
+    bool nextMove(Move &res, const Position &position) const override;
 };
 
 class ComputerPlayer: Player
 {
 public:
-    ComputerPlayer() {}
-    ComputerPlayer(MovePicker *picker, std::string name="Turbot"): Player(), picker(picker) {this->name = name;}
-    bool play(Move &res, Position &position, MovePGN &movePGN) const override { return findBestMove(res,position); }
+    ComputerPlayer(MovePicker *picker = nullptr, std::string name="Turbot"): Player(name), picker(picker) {}
+    bool nextMove(Move &res, const Position &position) const override {return findBestMove(res,position);}
+
 private:
     MovePicker *picker;
-    bool findBestMove(Move &res, Position &position) const;
+    bool findBestMove(Move &res, const Position &position) const;
 };
 
 
@@ -41,8 +43,7 @@ class Game
     friend std::ostream & operator<<(std::ostream &out, const Game &game);
 
 public:
-    Game();
-    Game(Player *whitePlayer, Player *BlackPlayer);
+    Game(Player *whitePlayer, Player *blackPlayer);
 
     Position getPosition() const;
     bool ThreeFoldRepetition() const;

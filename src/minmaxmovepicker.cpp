@@ -9,7 +9,10 @@ bool MinMaxMovePicker::pickMove(Move &res, const Position &position, const std::
     
     std::vector<Value> out;
     std::sample(bestValues.begin(), bestValues.end(), std::back_inserter(out), 1, std::mt19937{std::random_device{}()});
-    res = out.back().nextmove;}
+    res = out.back().nextmove;
+
+    return true;
+}
 
 
 bool MinMaxMovePicker::pickMove(std::vector<Value> &res, const Position &position, const std::vector<Move> &moves, bool checkLegal, bool checkKCLegal, uint depth)
@@ -32,7 +35,6 @@ bool MinMaxMovePicker::pickMove(std::vector<Value> &res, const Position &positio
     std::vector<Value> nextvalues;
     double eval;
     std::vector<Move> nextLegalmoves;
-    bool returnbool;
     for(auto it = std::begin(moves); it != std::end(moves); ++it)
     {
         if(!position.applyMove(nextPos, *it)) continue;

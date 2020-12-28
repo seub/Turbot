@@ -111,6 +111,15 @@ std::string MovePGN::toPGN() const
     return out;
 }
 
+std::string MovePGN::toPGN(uint moveNum) const
+{
+    std::string out = Tools::convertToString(moveNum);
+    out += (turn==Color::WHITE) ? ". " : "... ";
+    out += toPGN();
+    return out;
+}
+
+
 bool MovePGN::fromPGN(MovePGN &res, const std::string &PGNstring, const LegalMover *mover)
 {
     Move move(Square(0),Square(0));
