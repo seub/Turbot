@@ -29,7 +29,7 @@ public:
 class ComputerPlayer: Player
 {
 public:
-    ComputerPlayer(Color color, MovePicker *picker, std::string name="Turbot"): Player(color, name), picker(picker) {}
+    ComputerPlayer(Color color, MovePicker *picker, std::string name="Turbot");
     bool isHuman() const override {return false;}
     bool nextMove(Move &res, const Position &position) const override {return findBestMove(res,position);}
 

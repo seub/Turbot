@@ -1,5 +1,9 @@
 #include "player.h"
 
+ComputerPlayer::ComputerPlayer(Color color, MovePicker *picker, std::string name) : Player(color, name), picker(picker)
+{
+    std::cout << ((color==Color::WHITE) ? "White" : "Black") << " player was set as the computer \"" << name << "\"." << std::endl;
+}
 
 
 bool ComputerPlayer::findBestMove(Move &res, const Position &position) const

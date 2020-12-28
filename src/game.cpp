@@ -1,4 +1,5 @@
 #include "game.h"
+#include <fstream>
 
 Game::Game(const Player * const whitePlayer, const Player * const blackPlayer) : whitePlayer(whitePlayer), blackPlayer(blackPlayer)
 {
@@ -151,6 +152,17 @@ std::string Game::printPGN(bool printTagRoster) const
     return out;
 }
 
+bool Game::exportPGN(std::string fileName, bool printTagRoster) const
+{
+    std::ofstream file(fileName);
+    if (file.is_open())
+    {
+        file << printPGN(printTagRoster);
+        return true;
+    }
+    else {return false;}
+}
+
 bool Game::playRandomMove()
 {
     bool success = false;
@@ -178,6 +190,8 @@ void Game::playGame()
     MovePGN movePGN;
     Move move;
 
+    std::cout << std::endl;
+
     while (!isFinished())
     {
         position = getPosition();
@@ -203,17 +217,28 @@ void Game::playGame()
     switch(result)
     {
     case GameResult::NOT_FINISHED : std::cout << "Game is not finished!" << std::endl << std::endl; break;
-    case GameResult::WHITE_WINS : std::cout << whitePlayer->getName() << "wins!" << std::endl << std::endl; break;
-    case GameResult::BLACK_WINS : std::cout << blackPlayer->getName() << "wins!" << std::endl << std::endl; break;
+    case GameResult::WHITE_WINS : std::cout << whitePlayer->getName() << " wins!" << std::endl << std::endl; break;
+    case GameResult::BLACK_WINS : std::cout << blackPlayer->getName() << " wins!" << std::endl << std::endl; break;
     case GameResult::DRAW : std::cout << "Draw!" << std::endl << std::endl; break;
     default: throw("Invalid game result"); break;
     }
 
     std::string print;
-    std::cout << "Would you like to see the PGN of the whole game (Y|N)? ";
+    std::cout << "Would you like to see the PGN of the whole game here (Y|N)? ";
     std::cin >> print;
     std::cout << std::endl;
-    if (print=="Y") {std::cout << printPGN();}
+    if (print=="Y")
+    {
+        std::cout << printPGN();
+        std::cout << std::endl << std::endl;
+        exportPGN();
+        std::cout << "The game was also exported as a PGN file." << std::endl;
+    }
+    else
+    {
+        exportPGN();
+        std::cout << "Ok. The game was exported as a PGN file." << std::endl;
+    }
     std::cout << std::endl << std::endl;
 }
 

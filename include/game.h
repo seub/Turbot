@@ -18,6 +18,7 @@ public:
     bool ThreeFoldRepetition() const;
 
     std::string printPGN(bool printTagRoster = true) const;
+    bool exportPGN(std::string fileName = "turbot.pgn", bool printTagRoster = true) const;
     std::string printTagRoster() const;
     std::string printDate() const;
     std::string printResult() const;
