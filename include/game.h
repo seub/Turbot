@@ -12,6 +12,7 @@ class Player
 public:
     Player(std::string name = {}) : name(name) {}
     virtual bool nextMove(Move &move, const Position &position) const = 0;
+    virtual bool isHuman() const = 0;
     std::string getName() const {return name;}
 
 protected:
@@ -23,6 +24,7 @@ class HumanPlayer: Player
 public:
     HumanPlayer();
     HumanPlayer(std::string name) : Player(name) {};
+    bool isHuman() const override {return true;}
     bool nextMove(Move &res, const Position &position) const override;
 };
 
@@ -30,6 +32,7 @@ class ComputerPlayer: Player
 {
 public:
     ComputerPlayer(MovePicker *picker = nullptr, std::string name="Turbot"): Player(name), picker(picker) {}
+    bool isHuman() const override {return false;}
     bool nextMove(Move &res, const Position &position) const override {return findBestMove(res,position);}
 
 private:

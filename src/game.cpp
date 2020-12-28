@@ -240,7 +240,14 @@ void Game::playGame()
         }
         playMove(move);
         LegalMover mover(&position, true);
-        std::cout << nextPlayer->getName() << " played " << MovePGN(move, &mover).toPGN(moveNumber) << "." << std::endl;
+        if (nextPlayer->isHuman())
+        {
+            std::cout << "Okay, " << nextPlayer->getName() << " played " << MovePGN(move, &mover).toPGN(moveNumber) << "." << std::endl << std::endl;
+        }
+        else
+        {
+            std::cout << "The computer \"" << nextPlayer->getName() << "\" played " << MovePGN(move, &mover).toPGN(moveNumber) << "." << std::endl << std::endl;
+        }
     }
 
     std::cout << std::endl << std::endl;
