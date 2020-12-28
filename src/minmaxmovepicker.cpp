@@ -28,7 +28,7 @@ bool MinMaxMovePicker::pickMove(std::vector<Value> &res, const Position &positio
         return true;
     }
 
-    int reverse = position.getTurn() == Color::BLACK ? 1: -1;
+    int reverse = (position.getTurn() == Color::WHITE) ? 1: -1;
     double bestevaluation = -1000000;
     std::vector<Value> * bestvalues = new std::vector<Value>();
     Position nextPos;

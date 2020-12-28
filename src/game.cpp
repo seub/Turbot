@@ -1,7 +1,10 @@
 #include "game.h"
 
-Game::Game(Player *whitePlayer, Player *blackPlayer) : whitePlayer(whitePlayer), blackPlayer(blackPlayer)
+Game::Game(const Player * const whitePlayer, const Player * const blackPlayer) : whitePlayer(whitePlayer), blackPlayer(blackPlayer)
 {
+    assert(whitePlayer->getColor()==Color::WHITE);
+    assert(blackPlayer->getColor()==Color::BLACK);
+
     moves.clear();
     movePGNs.clear();
     turn = Color::WHITE;
@@ -186,21 +189,24 @@ bool ComputerPlayer::findBestMove(Move &res, const Position &position) const
     return success;
 }
 
-HumanPlayer::HumanPlayer()
+HumanPlayer::HumanPlayer(Color color) : Player(color)
 {
-    std::cout << "Hi there! What is your name? ";
+    std::cout << "Hi there! You play " << ((color==Color::WHITE)? "White" : "Black") << ". What is your name? ";
     std::cin >> name;
-    std::cout << "Okay " << name << ", let's play!" << std::endl << std::endl;
+    std::cout << "Okay " << name << ", let's go!" << std::endl << std::endl;
 }
 
 bool HumanPlayer::nextMove(Move &res, const Position &position) const
 {
     LegalMover mover1(&position, true);
     std::string moveString;
+    bool first = (position.getMoveNumber()==1);
     while(true)
     {
-        std::cout << "What is your " << ((position.getMoveNumber()==1) ? "first" : "next") << " move? "
-                  << ((position.getMoveNumber()==1) ? "Enter it in PGN notation. " : "") << position.getMoveNumber() << ". ";
+        std::cout << std::endl;
+        std::cout << name << ", what is your " << (first ? "first" : "next") << " move? "
+                  << (first ? "Enter it in PGN notation. " : "")
+                  << position.getMoveNumber() << ((color==Color::WHITE) ? ". " : "... ");
         std::cin >> moveString;
         if (moveString=="exit")
         {
@@ -228,11 +234,11 @@ void Game::playGame()
     Position position;
     MovePGN movePGN;
     Move move;
-    Player *nextPlayer;
+
     while (!isFinished())
     {
         position = getPosition();
-        nextPlayer = (turn==Color::WHITE) ? whitePlayer : blackPlayer;
+        const Player *nextPlayer = (turn==Color::WHITE) ? whitePlayer : blackPlayer;
         if(!nextPlayer->nextMove(move, position))
         {
             std::cout << "Failed to play next move!" << std::endl;
@@ -242,11 +248,11 @@ void Game::playGame()
         LegalMover mover(&position, true);
         if (nextPlayer->isHuman())
         {
-            std::cout << "Okay, " << nextPlayer->getName() << " played " << MovePGN(move, &mover).toPGN(moveNumber) << "." << std::endl << std::endl;
+            std::cout << "Okay, " << nextPlayer->getName() << " played " << MovePGN(move, &mover).toPGN(position.getMoveNumber()) << "." << std::endl;
         }
         else
         {
-            std::cout << "The computer \"" << nextPlayer->getName() << "\" played " << MovePGN(move, &mover).toPGN(moveNumber) << "." << std::endl << std::endl;
+            std::cout << "The computer \"" << nextPlayer->getName() << "\" played " << MovePGN(move, &mover).toPGN(position.getMoveNumber()) << "." << std::endl;
         }
     }
 
