@@ -1,5 +1,6 @@
 # include "position.h"
-#include "boardhelper.h"
+# include "boardhelper.h"
+# include "movepicker.h"
 
 Position::Position(bool gamestart) : board(gamestart)
 {
@@ -12,6 +13,7 @@ Position::Position(bool gamestart) : board(gamestart)
         clear();
     }
 }
+
 
 bool Position::operator==(const Position &other) const
 {
@@ -191,6 +193,42 @@ bool Position::fromFENstring(Position &res, const std::string &FENstr)
 }
 
 
+bool Position::applyMove(Position &res, const Move &m, bool checkLegal, bool checkKCLegal) const
+{
+    LegalMover mover(this, true);
+
+    return mover.applyMove(res, m, checkLegal, checkKCLegal);
+}
+
+bool Position::pickRandomLegalMove(Move &res) const
+{
+    LegalMover mover(this, true);
+    return mover.getRandomLegalMove(res);
+
+}
+
+bool Position::getLegalMoves(std::vector<Move> &res) const
+{
+    LegalMover mover(this, true);
+    res = mover.getlegalMoves();
+    if(res.size() ==0) return false;
+    return true;
+}
+
+bool Position::getKCLegalMoves(std::vector<Move> &res) const
+{
+    LegalMover mover(this, true);
+    res = mover.getKCLegalMoves();
+    if(res.size() ==0) return false;
+    return true;
+}
+
+bool Position::pickBestMove(Move &res, MovePicker *picker) const
+{
+    LegalMover mover(this, true);
+    return picker->pickMove(res, *this, mover.getlegalMoves(), false, false);
+}
+
 
 std::ostream & operator <<(std::ostream &out, const Position &P)
 {
@@ -199,13 +237,21 @@ std::ostream & operator <<(std::ostream &out, const Position &P)
 }
 
 
-boost::multiprecision::uint512_t Position::getHash() const
+std::size_t Position::getHash() const
 {
     BoardHelper bh(&board);
     boost::multiprecision::uint512_t res =  bh.getFullboard();
+    res <<=1;
     if(turn == Color::WHITE)
     {
-        res += 1 << 6;
+        res += 1;
     }
-    return res;
+    std::size_t re = 0;
+    while(res)
+    {
+        re += (size_t) (res %  (((boost::multiprecision::uint512_t) 1) << 64));
+        res >>=64;
+    }
+    return re;
 } 
+

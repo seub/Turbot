@@ -10,16 +10,16 @@ set(SOURCES
     src/board.cpp
     src/boardhelper.cpp
     src/game.cpp
+    src/legalmover.cpp
     src/main.cpp
     src/move.cpp
-    src/mover.cpp
+    src/movepicker.cpp
     src/piece.cpp
     src/position.cpp
     src/square.cpp
     src/tools.cpp
     src/evaluator.cpp
-    src/moveGenerator.cpp
-    src/minmaxmovegenerator.cpp
+    src/minmaxmovepicker.cpp
     )
 
 add_executable(Turbot ${SOURCES})

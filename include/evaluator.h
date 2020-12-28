@@ -2,7 +2,7 @@
 #define EVALUATOR_H
 
 
-#include <map>
+#include <unordered_map>
 
 #include "piece.h"
 #include "position.h"
@@ -11,25 +11,23 @@
 
 class Evaluator
 {
-private:
-    /* data */
 public:
-    Evaluator(/* args */);
-    std::map<boost::multiprecision::uint512_t,float> evaluated_res;
-    ~Evaluator();
-    float evaluatePosition(const Position &position);
+    Evaluator() {}
+    virtual double evaluatePosition(const Position &position) const = 0; // Pure virtual function --> Evaluator is an abstract class
+protected:
+    std::unordered_map<Position,double> evaluated_res;
 };
 
-class Basicevaluator: public Evaluator
+
+class BasicEvaluator: public Evaluator
 {
-private:
-    std::map<PieceType,float> pieceValue;
-
 public:
-    Basicevaluator(std::map<PieceType,float> pieceValue);
-    ~Basicevaluator();
-    float evaluatePosition(const Position &position);
+    BasicEvaluator();
 
+double evaluatePosition(const Position &position) const override;
+
+private:
+    std::unordered_map<PieceType, double> pieceValues;
 };
 
 

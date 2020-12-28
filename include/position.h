@@ -3,13 +3,17 @@
 
 # include "board.h"
 # include "move.h"
+# include "legalmover.h"
+
+class MovePicker;
+
 
 #include <boost/multiprecision/cpp_int.hpp>
 
 class Position
 {
     friend std::ostream & operator<<(std::ostream &out, const Position &p);
-    friend class Mover;
+    friend class LegalMover;
 
 public:
     Position(bool gamestart=false);
@@ -22,8 +26,16 @@ public:
     static bool fromFENstring(Position &res, const std::string &FENstr);
     uint getMoveNumber() const {return moveNumber;}
     bool getPiece(Piece &res, const Square &square) const {return board.getPiece(res, square);}
-    Color getTurn(){return turn;}
-    boost::multiprecision::uint512_t getHash() const;
+    Color getTurn() const {return turn;}
+    uint getNbReversibleHalfMoves() const {return nbReversibleHalfMoves;}
+    Board getBoard() const {return board;}
+
+    bool applyMove(Position &res, const Move &m, bool checkLegal = false, bool checkKCLegal = false) const;
+    bool pickRandomLegalMove(Move &res) const;
+    bool pickBestMove(Move &res, MovePicker *picker) const;
+    std::size_t getHash() const;
+    bool getLegalMoves(std::vector<Move> &res) const;
+    bool getKCLegalMoves(std::vector<Move> &res) const;
 private:
     void clear();
     void reset();
@@ -38,6 +50,15 @@ private:
     uint nbReversibleHalfMoves; //For 50 and 75 move rules for draw
 };
 
-
+namespace std
+{
+    template<> struct hash<Position>
+    {
+        std::size_t operator()(Position const& position) const noexcept
+        {
+            return position.getHash();
+        }
+    };
+}
 
 #endif // POSITION_H

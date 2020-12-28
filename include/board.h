@@ -11,7 +11,7 @@ class Board
 {
     friend class Position;
     friend class BoardHelper;
-    friend class Mover;
+    friend class LegalMover;
     friend std::ostream & operator<<(std::ostream &out, const Board &B);
 
 public:

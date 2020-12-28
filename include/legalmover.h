@@ -1,33 +1,39 @@
-#ifndef MOVER_H
-#define MOVER_H
-
-#include "square.h"
-#include "position.h"
-#include "move.h"
+#ifndef LEGALMOVER_H
+#define LEGALMOVER_H
 
 
+# include "move.h"
 
-class Mover
+class Position;
+
+class LegalMover
 {
     friend class MovePGN;
+    friend class Position;
+    friend class MoveGenerator;
 
 public:
-    explicit Mover(const Position * const position, bool generateLegalMoves = true);
-    Mover() = delete;
-    Mover(const Mover &) = delete;
-    Mover & operator=(Mover) = delete;
+    explicit LegalMover(const Position * const position, bool generateLegalMoves = true);
+    LegalMover() = delete;
+    LegalMover(const LegalMover &) = delete;
+    LegalMover & operator=(LegalMover) = delete;
 
     std::string printLegalMoves() const;
+    std::string printKCLegalMoves() const;
     std::vector<Move> getlegalMoves() const {return legalMoves;}
+    std::vector<Move> getKCLegalMoves() const {return kCLegalMoves;}
+    bool getRandomLegalMove(Move &res) const;
     bool isCapture(const Move &move) const;
     bool isPawnMove(const Move &move) const;
     bool isKingMove(const Move &move) const;
     bool isReversible(const Move &move) const;
     bool isInLegalMovesList(const Move &move) const;
+    bool isInKCLegalMovesList(const Move &move) const;
     bool isCheck() const;
     bool isCheck(const Move &move) const;
     bool isCheckmate() const;
     bool isCheckmate(const Move &move) const;
+    bool isStalemate() const;
     bool isCastleShort(const Move &move) const;
     bool isCastleLong(const Move &move) const;
     Color turn() const;
@@ -36,8 +42,7 @@ public:
     bool uniqueOriginOnFile(Square &resOrigin, const Square &target, uint fileIndex, PieceType type) const;
     bool uniqueOriginOnRank(Square &resOrigin, const Square &target, uint rankIndex, PieceType type) const;
 
-
-    Position applyKCMove(const Move &m) const;
+    bool applyMove(Position &res, const Move &m, bool checkLegal = false, bool checkKCLegal = false) const;
 
 private:
     bool initialize();
@@ -55,6 +60,8 @@ private:
     void addkcLegalMovesPawn(uint i);
     void addkcLegalMovesRow(uint i, const std::vector<uint> row);
 
+    Position applyMove(const Move &m) const;
+
     std::vector<Move> kCLegalMoves, legalMoves; // We call "KC Chess" the variation of chess where king capture is allowed.
     bool kCLegalMovesGenerated, legalMovesGenerated;
     bitboard squaresAttacked;
@@ -65,4 +72,4 @@ private:
     const BoardHelper boardHelper;
 };
 
-#endif // MOVER_H
+#endif // LEGALMOVER_H

@@ -1,8 +1,6 @@
 TODO
 
 BUGS:
-Fixed
-
 
 Question :
     Sur la class position, il y a une fonction reset. Est ce qu'on ne veut pas plutot une class immutable?
@@ -49,3 +47,12 @@ Special actions:
 claim draw, resign, offer draw ne drevraient pas faire partie de Move, c'est une action séparée. Elle fera partie d'une classe "Game"!
 
 Try to fork stockfish? At least try to understand some of it
+
+
+NOTES POUR CODE "PROPRE"
+- double au lieu de float
+- ne pas oublier les const
+- private before public?
+- mot clé override
+- no need to write destructor in general
+- passer les arguments par référence

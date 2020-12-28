@@ -3,12 +3,13 @@
 
 #include "square.h"
 #include "piece.h"
-#include "game.h"
 #include "board.h"
+
+
 
 class Move
 {
-    friend class Mover;
+    friend class LegalMover;
     friend std::ostream & operator<<(std::ostream &out, const Move &M);
 
 public:
@@ -32,7 +33,7 @@ protected:
 };
 
 
-class Mover;
+class LegalMover;
 
 class MovePGN : public Move
 {
@@ -42,12 +43,14 @@ class MovePGN : public Move
 
 public:
     MovePGN() {}
-    MovePGN(const Move &move, const Mover *mover);
+    MovePGN(const Move &move, const LegalMover *mover);
     bool operator==(const MovePGN &other) const;
 
-    static bool fromPGN(MovePGN &res, const std::string &PGNstring, const Mover *mover);
-    static bool fromPGN(Move &res, const std::string &PGNstring, const Mover *mover);
-    static bool fromMove(MovePGN &res, const Move &m, const Mover *mover);
+    static bool fromPGN(MovePGN &res, const std::string &PGNstring, const LegalMover *mover);
+    static bool fromPGN(Move &res, const std::string &PGNstring, const LegalMover *mover);
+    static bool fromMove(MovePGN &res, const Move &m, const LegalMover *mover);
+
+    Color getTurn() const {return turn;}
 
     std::string toPGN() const;
 

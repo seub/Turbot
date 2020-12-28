@@ -1,13 +1,14 @@
-#include "mover.h"
+#include "legalmover.h"
+#include "position.h"
 
-Mover::Mover(const Position * const position, bool generateLegalMoves) : position(position), boardHelper(&(position->board))
+LegalMover::LegalMover(const Position * const position, bool generateLegalMoves) : position(position), boardHelper(&(position->board))
 {
     initialize();
     if (generateLegalMoves) updateLegalMoves();
     legalMovesGenerated = generateLegalMoves;
 }
 
-bool Mover::initialize()
+bool LegalMover::initialize()
 {
 
     squaresAttacked.fill(false);
@@ -39,7 +40,7 @@ bool Mover::initialize()
 }
 
 
-bool Mover::updateKCLegalMoves()
+bool LegalMover::updateKCLegalMoves()
 {
     kCLegalMoves.clear();
 
@@ -66,13 +67,13 @@ bool Mover::updateKCLegalMoves()
     return true;
 }
 
-void Mover::addkcLegalMove(uint origin, uint target, bool attack)
+void LegalMover::addkcLegalMove(uint origin, uint target, bool attack)
 {
     kCLegalMoves.push_back(Move(origin, target));
     if (attack) squaresAttacked[target] = true;
 }
 
-void Mover::addkcLegalMovePromotions(uint origin, uint target, bool attack)
+void LegalMover::addkcLegalMovePromotions(uint origin, uint target, bool attack)
 {
     kCLegalMoves.push_back(Move(origin, target, true, PieceType::QUEEN));
     kCLegalMoves.push_back(Move(origin, target, true, PieceType::ROOK));
@@ -81,7 +82,7 @@ void Mover::addkcLegalMovePromotions(uint origin, uint target, bool attack)
     if (attack) squaresAttacked[target] = true;
 }
 
-void Mover::addkcLegalMovesKing(uint i)
+void LegalMover::addkcLegalMovesKing(uint i)
 {
 
     uint file = i % 8;
@@ -118,7 +119,7 @@ void Mover::addkcLegalMovesKing(uint i)
         {
             if (!myPieces->at(48)) addkcLegalMove(i, 48);
             if (!myPieces->at(49)) addkcLegalMove(i, 49);
-            if (!myPieces->at(56)) addkcLegalMove(i, 56);
+            if (!myPieces->at(57)) addkcLegalMove(i, 57);
         }
         else if (file==7)
         {
@@ -172,7 +173,7 @@ void Mover::addkcLegalMovesKing(uint i)
         {
             if ((!boardHelper.occupiedSquares[5]) && (!boardHelper.occupiedSquares[6])) addkcLegalMove(4, 6, false);
         }
-        else if (position->castlingRights[1])
+        if (position->castlingRights[1])
         {
             if ((!boardHelper.occupiedSquares[1]) && (!boardHelper.occupiedSquares[2]) && (!boardHelper.occupiedSquares[3])) addkcLegalMove(4, 2, false);
         }
@@ -183,20 +184,20 @@ void Mover::addkcLegalMovesKing(uint i)
         {
             if ((!boardHelper.occupiedSquares[61]) && (!boardHelper.occupiedSquares[62])) addkcLegalMove(60, 62, false);
         }
-        else if (position->castlingRights[3])
+        if (position->castlingRights[3])
         {
             if ((!boardHelper.occupiedSquares[57]) && (!boardHelper.occupiedSquares[58]) && (!boardHelper.occupiedSquares[59])) addkcLegalMove(60, 58, false);
         }
     }
 }
 
-void Mover::addkcLegalMovesQueen(uint i)
+void LegalMover::addkcLegalMovesQueen(uint i)
 {
     addkcLegalMovesRook(i);
     addkcLegalMovesBishop(i);
 }
 
-void Mover::addkcLegalMovesRook(uint i)
+void LegalMover::addkcLegalMovesRook(uint i)
 {
     std::vector<uint> row = {};
     uint filei = i % 8;
@@ -246,7 +247,7 @@ void Mover::addkcLegalMovesRook(uint i)
     addkcLegalMovesRow(i, row);
 }
 
-void Mover::addkcLegalMovesBishop(uint i)
+void LegalMover::addkcLegalMovesBishop(uint i)
 {
     std::vector<uint> diag = {};
     uint filei = i % 8;
@@ -305,7 +306,7 @@ void Mover::addkcLegalMovesBishop(uint i)
     addkcLegalMovesRow(i, diag);
 }
 
-void Mover::addkcLegalMovesRow(uint i, const std::vector<uint> row)
+void LegalMover::addkcLegalMovesRow(uint i, const std::vector<uint> row)
 {
     const bitboard *myPieces = (position->turn==Color::WHITE) ? &(boardHelper.whitePieces) : &(boardHelper.blackPieces);
 
@@ -319,7 +320,7 @@ void Mover::addkcLegalMovesRow(uint i, const std::vector<uint> row)
     }
 }
 
-void Mover::addkcLegalMovesKnight(uint i)
+void LegalMover::addkcLegalMovesKnight(uint i)
 {
     uint file = i % 8;
     uint rank = i / 8;
@@ -361,7 +362,7 @@ void Mover::addkcLegalMovesKnight(uint i)
 }
 
 
-void Mover::addkcLegalMovesPawn(uint i)
+void LegalMover::addkcLegalMovesPawn(uint i)
 {
     uint file = i % 8;
     uint rank = i / 8;
@@ -463,16 +464,16 @@ void Mover::addkcLegalMovesPawn(uint i)
     }
 }
 
-void Mover::updateLegalMoves()
+void LegalMover::updateLegalMoves()
 {
     legalMoves.clear();
     for (const auto & move : kCLegalMoves)
     {
-        if (isLegalConstruct(move, false)) legalMoves.push_back(move);
+        if (isLegalConstruct(move, false)) {legalMoves.push_back(move);}
     }
 }
 
-std::string Mover::printLegalMoves() const
+std::string LegalMover::printLegalMoves() const
 {
     std::string res = {};
     for (auto move : legalMoves)
@@ -484,7 +485,33 @@ std::string Mover::printLegalMoves() const
     return res;
 }
 
-bool Mover::isCapture(const Move &move) const
+std::string LegalMover::printKCLegalMoves() const
+{
+    std::string res = {};
+    for (auto move : kCLegalMoves)
+    {
+        res += move.toLAN();
+        res += ", ";
+    }
+    if (!kCLegalMoves.empty()) res.erase (res.end()-2, res.end());
+    return res;
+}
+
+bool LegalMover::getRandomLegalMove(Move &res) const
+{
+    if (!legalMovesGenerated) {throw("Legal moves not generated!");}
+
+    if (legalMoves.empty()) {return false;}
+    else
+    {
+        std::vector<Move> out;
+        std::sample(legalMoves.begin(), legalMoves.end(), std::back_inserter(out), 1, std::mt19937{std::random_device{}()});
+        res = out.back();
+        return true;
+    }
+}
+
+bool LegalMover::isCapture(const Move &move) const
 {
     uint target = move.target.getIndex();
     bool enPassant = (isPawnMove(move) && (position->enPassantPossible==true) && (position->enPassantTargetSquare==target));
@@ -492,50 +519,56 @@ bool Mover::isCapture(const Move &move) const
     return (enPassant || boardHelper.occupiedSquares[target]);
 }
 
-bool Mover::isPawnMove(const Move &move) const
+bool LegalMover::isPawnMove(const Move &move) const
 {
     return boardHelper.pawns[move.origin.getIndex()];
 }
 
-bool Mover::isKingMove(const Move &move) const
+bool LegalMover::isKingMove(const Move &move) const
 {
     return boardHelper.kings[move.origin.getIndex()];
 }
 
-bool Mover::isReversible(const Move &move) const
+bool LegalMover::isReversible(const Move &move) const
 {
     return (!(isCapture(move)) && !(isPawnMove(move)));
 }
 
-bool Mover::isCheck() const
+bool LegalMover::isCheck() const
 {
     Position switchTurn(*position);
     switchTurn.turn = (position->turn==Color::WHITE) ? Color::BLACK : Color::WHITE;
-    Mover newMover(&switchTurn, false);
+    LegalMover newMover(&switchTurn, false);
     return newMover.opponentKingUnderAttack;
 }
 
-bool Mover::isCheck(const Move &move) const
+bool LegalMover::isCheck(const Move &move) const
 {
-    Position newPos = applyKCMove(move);
-    Mover newMover(&newPos, false);
+    Position newPos = applyMove(move);
+    LegalMover newMover(&newPos, false);
     return newMover.isCheck();
 }
 
-bool Mover::isCheckmate() const
+bool LegalMover::isCheckmate() const
 {
     if (!legalMovesGenerated) throw("Legal moves not generated!");
     return (isCheck() && (legalMoves.empty()));
 }
 
-bool Mover::isCheckmate(const Move &move) const
+bool LegalMover::isStalemate() const
 {
-    Position newPos = applyKCMove(move);
-    Mover newMover(&newPos, true);
+    if (!legalMovesGenerated) throw("Legal moves not generated!");
+    return ((!isCheck()) && (legalMoves.empty()));
+}
+
+bool LegalMover::isCheckmate(const Move &move) const
+{
+    Position newPos = applyMove(move);
+    LegalMover newMover(&newPos, true);
     return newMover.isCheckmate();
 }
 
-Position Mover::applyKCMove(const Move &m) const
+Position LegalMover::applyMove(const Move &m) const
 {
     Position res(*position);
 
@@ -616,21 +649,25 @@ Position Mover::applyKCMove(const Move &m) const
     return res;
 }
 
-bool Mover::isInLegalMovesList(const Move &m) const
+bool LegalMover::isInLegalMovesList(const Move &m) const
 {
     return (std::find(legalMoves.begin(), legalMoves.end(), m) != legalMoves.end());
 }
 
-bool Mover::isLegalConstruct(const Move &m, bool checkKClegal) //NB: Legal move = KC legal + king cannot be captured next move (+ including while castling)
+bool LegalMover::isInKCLegalMovesList(const Move &m) const
+{
+    return (std::find(kCLegalMoves.begin(), kCLegalMoves.end(), m) != kCLegalMoves.end());
+}
+
+bool LegalMover::isLegalConstruct(const Move &m, bool checkKClegal) //NB: Legal move = KC legal + king cannot be captured next move (+ including while castling)
 {
     if (checkKClegal)
     {
         if  (!(std::find(kCLegalMoves.begin(), kCLegalMoves.end(), m) != kCLegalMoves.end())) return false;
     }
 
-
-    Position newPos = applyKCMove(m);
-    Mover newMover(&newPos, false);
+    Position newPos = applyMove(m);
+    LegalMover newMover(&newPos, false);
 
     if (newMover.opponentKingUnderAttack) return false;
 
@@ -641,23 +678,23 @@ bool Mover::isLegalConstruct(const Move &m, bool checkKClegal) //NB: Legal move 
     {
         if (target==origin-2)
         {
-            if (newMover.opponentKsideCastleUnderAttack) return false;
+            if (newMover.opponentQsideCastleUnderAttack) return false;
         }
         else if (target==origin+2)
         {
-            if (newMover.opponentQsideCastleUnderAttack) return false;
+            if (newMover.opponentKsideCastleUnderAttack) return false;
         }
     }
 
     return true;
 }
 
-Color Mover::turn() const
+Color LegalMover::turn() const
 {
     return position->turn;
 }
 
-bool Mover::uniqueOrigin(Square &resOrigin, const Square &target, PieceType type) const
+bool LegalMover::uniqueOrigin(Square &resOrigin, const Square &target, PieceType type) const
 {
     if (legalMovesGenerated)
     {
@@ -682,7 +719,7 @@ bool Mover::uniqueOrigin(Square &resOrigin, const Square &target, PieceType type
 }
 
 
-bool Mover::uniqueOriginOnFile(Square &resOrigin, const Square &target, uint fileIndex, PieceType type) const
+bool LegalMover::uniqueOriginOnFile(Square &resOrigin, const Square &target, uint fileIndex, PieceType type) const
 {
     if (legalMovesGenerated)
     {
@@ -708,7 +745,7 @@ bool Mover::uniqueOriginOnFile(Square &resOrigin, const Square &target, uint fil
 
 
 
-bool Mover::uniqueOriginOnRank(Square &resOrigin, const Square &target, uint rankIndex, PieceType type) const
+bool LegalMover::uniqueOriginOnRank(Square &resOrigin, const Square &target, uint rankIndex, PieceType type) const
 {
     if (legalMovesGenerated)
     {
@@ -733,12 +770,26 @@ bool Mover::uniqueOriginOnRank(Square &resOrigin, const Square &target, uint ran
     else {throw("Legal moves have not been generated!");}
 }
 
-bool Mover::isCastleShort(const Move &move) const
+bool LegalMover::isCastleShort(const Move &move) const
 {
     return isKingMove(move) && (((position->turn==Color::WHITE) && (move==Move(4, 6))) || ((position->turn==Color::BLACK) && (move==Move(60, 62))));
 }
 
-bool Mover::isCastleLong(const Move &move) const
+bool LegalMover::isCastleLong(const Move &move) const
 {
     return isKingMove(move) && (((position->turn==Color::WHITE) && (move==Move(4, 2))) || ((position->turn==Color::BLACK) && (move==Move(60, 58))));
+}
+
+bool LegalMover::applyMove(Position &res, const Move &m, bool checkLegal, bool checkKCLegal) const
+{
+    if (legalMovesGenerated)
+    {
+        if (checkLegal) {if (!isInLegalMovesList(m)) {return false;}}
+        if (checkKCLegal) {if (!isInKCLegalMovesList(m)) {return false;}}
+
+        res = applyMove(m);
+
+        return true;
+    }
+    else {throw("Legal moves have not been generated!");}
 }
