@@ -35,7 +35,6 @@ bool Game::isFinished() const
     return (result!=GameResult::NOT_FINISHED);
 }
 
-
 bool Game::playMove(const Move &move, bool checkLegal, bool checkCKLegal)
 {
     bool success=false;
