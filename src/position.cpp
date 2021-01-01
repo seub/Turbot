@@ -217,7 +217,7 @@ bool Position::getLegalMoves(std::vector<Move> &res) const
 
 bool Position::getKCLegalMoves(std::vector<Move> &res) const
 {
-    LegalMover mover(this, true);
+    LegalMover mover(this, false);
     res = mover.getKCLegalMoves();
     if(res.size() ==0) return false;
     return true;
@@ -237,7 +237,7 @@ std::ostream & operator <<(std::ostream &out, const Position &P)
 }
 
 
-std::size_t Position::getHash() const
+/*std::size_t Position::getHash() const
 {
     BoardHelper bh(&board);
     boost::multiprecision::uint512_t res =  bh.getFullboard();
@@ -253,5 +253,5 @@ std::size_t Position::getHash() const
         res >>=64;
     }
     return re;
-} 
+}*/
 

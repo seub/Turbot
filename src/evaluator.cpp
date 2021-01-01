@@ -6,7 +6,7 @@
 
 BasicEvaluator::BasicEvaluator()
 {
-    // NB: We could try ALphaZero's piece values
+    // NB: We could try AlphaZero's piece values
     pieceValues =
     {
         {PieceType::EMPTY,0},

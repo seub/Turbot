@@ -30,8 +30,9 @@ HumanPlayer::HumanPlayer(Color color) : Player(color)
     std::cout << "Okay " << name << ", let's go!" << std::endl << std::endl;
 }
 
-bool HumanPlayer::nextMove(Move &res, const Position &position) const
+bool HumanPlayer::nextMove(Move &res, std::chrono::duration<double> &time, const Position &position) const
 {
+    auto start = std::chrono::steady_clock::now();
     LegalMover mover1(&position, true);
     std::string moveString;
     bool first = (position.getMoveNumber()==1);
@@ -48,7 +49,12 @@ bool HumanPlayer::nextMove(Move &res, const Position &position) const
         }
         if (MovePGN::fromPGN(res, moveString, &mover1))
         {
-            if (mover1.isInLegalMovesList(res)) {return true;}
+            if (mover1.isInLegalMovesList(res))
+            {
+                auto end = std::chrono::steady_clock::now();
+                time = end-start;
+                return true;
+            }
             else
             {
                 std::cout << "Sorry, that's an illegal move. Try again: (Enter \"exit\" to exit)" << std::endl;
@@ -61,4 +67,13 @@ bool HumanPlayer::nextMove(Move &res, const Position &position) const
             continue;
         }
     }
+}
+
+bool ComputerPlayer::nextMove(Move &res, std::chrono::duration<double> &time, const Position &position) const
+{
+    auto start = std::chrono::steady_clock::now();
+    bool success = findBestMove(res, position);
+    auto end = std::chrono::steady_clock::now();
+    time = end-start;
+    return success;
 }

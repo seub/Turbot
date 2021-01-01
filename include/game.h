@@ -23,15 +23,16 @@ public:
     std::string printDate() const;
     std::string printResult() const;
     bool isFinished() const;
+    void averageMoveTime(std::chrono::duration<double> &white, std::chrono::duration<double> &black) const;
 
-    bool playMove(const Move &move, bool checkLegal=false, bool checkCKLegal=false);
-    bool playRandomMove();
+    bool playMove(const Move &move, std::chrono::duration<double> moveTime, bool checkLegal=false, bool checkCKLegal=false);
     void playGame();
     
 
 private:
     std::vector<Move> moves;
     std::vector<MovePGN> movePGNs;
+    std::vector< std::chrono::duration<double> > moveTimes;
     std::vector<Position> positions;
     Color turn;
     uint moveNumber;

@@ -8,7 +8,7 @@
 class MovePicker;
 
 
-#include <boost/multiprecision/cpp_int.hpp>
+//#include <boost/multiprecision/cpp_int.hpp>
 
 class Position
 {
@@ -33,7 +33,7 @@ public:
     bool applyMove(Position &res, const Move &m, bool checkLegal = false, bool checkKCLegal = false) const;
     bool pickRandomLegalMove(Move &res) const;
     bool pickBestMove(Move &res, MovePicker *picker) const;
-    std::size_t getHash() const;
+    //std::size_t getHash() const;
     bool getLegalMoves(std::vector<Move> &res) const;
     bool getKCLegalMoves(std::vector<Move> &res) const;
 private:
@@ -50,7 +50,7 @@ private:
     uint nbReversibleHalfMoves; //For 50 and 75 move rules for draw
 };
 
-namespace std
+/*namespace std
 {
     template<> struct hash<Position>
     {
@@ -59,6 +59,19 @@ namespace std
             return position.getHash();
         }
     };
-}
+}*/
+
+class KCPosition : public Position
+{
+    friend class LegalMover;
+
+public:
+    KCPosition(bool gamestart=false);
+
+    bool operator==(KCPosition const& other) const;
+
+private:
+    bool enPassantShortCastle, enPassantLongCastle;
+};
 
 #endif // POSITION_H

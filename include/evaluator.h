@@ -2,12 +2,12 @@
 #define EVALUATOR_H
 
 
-#include <unordered_map>
+//#include <unordered_map>
 
 #include "piece.h"
 #include "position.h"
 
-#include <boost/multiprecision/cpp_int.hpp>
+//#include <boost/multiprecision/cpp_int.hpp>
 
 class Evaluator
 {
@@ -15,7 +15,7 @@ public:
     Evaluator() {}
     virtual double evaluatePosition(const Position &position) const = 0; // Pure virtual function --> Evaluator is an abstract class
 protected:
-    std::unordered_map<Position,double> evaluated_res;
+    //std::unordered_map<Position,double> evaluated_res;
 };
 
 

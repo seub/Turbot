@@ -8,7 +8,8 @@ include_directories(include)
 
 set(SOURCES
     src/board.cpp
-    src/boardhelper.cpp
+    src/boardhelper.cpp    
+    src/evaluator.cpp
     src/game.cpp
     src/legalmover.cpp
     src/main.cpp
@@ -19,8 +20,6 @@ set(SOURCES
     src/position.cpp
     src/square.cpp
     src/tools.cpp
-    src/evaluator.cpp
-    src/minmaxmovepicker.cpp
     )
 
 add_executable(Turbot ${SOURCES})

@@ -8,6 +8,7 @@ Game::Game(const Player * const whitePlayer, const Player * const blackPlayer) :
 
     moves.clear();
     movePGNs.clear();
+    moveTimes.clear();
     turn = Color::WHITE;
     positions = {Position(true)};
     moveNumber = 1;
@@ -33,7 +34,7 @@ bool Game::isFinished() const
     return (result!=GameResult::NOT_FINISHED);
 }
 
-bool Game::playMove(const Move &move, bool checkLegal, bool checkCKLegal)
+bool Game::playMove(const Move &move, std::chrono::duration<double> moveTime, bool checkLegal, bool checkCKLegal)
 {
     bool success=false;
 
@@ -46,6 +47,7 @@ bool Game::playMove(const Move &move, bool checkLegal, bool checkCKLegal)
     if (currentMover.applyMove(newPosition, move, checkLegal, checkCKLegal))
     {
         moves.push_back(move);
+        moveTimes.push_back(moveTime);
         movePGNs.push_back(MovePGN(move, &currentMover));
         positions.push_back(newPosition);
         turn = (turn==Color::WHITE) ? Color::BLACK : Color::WHITE;
@@ -163,32 +165,12 @@ bool Game::exportPGN(std::string fileName, bool printTagRoster) const
     else {return false;}
 }
 
-bool Game::playRandomMove()
-{
-    bool success = false;
-
-    if (!isFinished())
-    {
-        Position currentPosition = positions.back();
-        Move move;
-        if (currentPosition.pickRandomLegalMove(move))
-        {
-            success = playMove(move);
-        }
-        else
-        {
-            std::cout << "Error: failed to get random legal move" << std::endl;
-        }
-    }
-
-    return success;
-}
-
 void Game::playGame()
 {
     Position position;
     MovePGN movePGN;
     Move move;
+    std::chrono::duration<double> moveTime, averageWhite, averageBlack;
 
     std::cout << std::endl;
 
@@ -196,32 +178,38 @@ void Game::playGame()
     {
         position = getPosition();
         const Player *nextPlayer = (turn==Color::WHITE) ? whitePlayer : blackPlayer;
-        if(!nextPlayer->nextMove(move, position))
+        if(!nextPlayer->nextMove(move, moveTime, position))
         {
             std::cout << "Failed to play next move!" << std::endl;
             break;
         }
-        playMove(move);
+        playMove(move, moveTime);
         LegalMover mover(&position, true);
         if (nextPlayer->isHuman())
         {
-            std::cout << "Okay, " << nextPlayer->getName() << " played " << MovePGN(move, &mover).toPGN(position.getMoveNumber()) << "." << std::endl;
+            std::cout << "Okay, " << nextPlayer->getName();
         }
         else
         {
-            std::cout << "The computer \"" << nextPlayer->getName() << "\" played " << MovePGN(move, &mover).toPGN(position.getMoveNumber()) << "." << std::endl;
+            std::cout << "The computer \"" << nextPlayer->getName() << "\"";
         }
+        std::cout << " played " << MovePGN(move, &mover).toPGN(position.getMoveNumber()) << ". (move time: " << moveTime.count() << "s)" << std::endl;
     }
 
     std::cout << std::endl << std::endl;
     switch(result)
     {
-    case GameResult::NOT_FINISHED : std::cout << "Game is not finished!" << std::endl << std::endl; break;
+    case GameResult::NOT_FINISHED : std::cout << "Game was terminated prematurely." << std::endl << std::endl; break;
     case GameResult::WHITE_WINS : std::cout << whitePlayer->getName() << " wins!" << std::endl << std::endl; break;
     case GameResult::BLACK_WINS : std::cout << blackPlayer->getName() << " wins!" << std::endl << std::endl; break;
     case GameResult::DRAW : std::cout << "Draw!" << std::endl << std::endl; break;
     default: throw("Invalid game result"); break;
     }
+
+    averageMoveTime(averageWhite, averageBlack);
+    std::cout << "Average time per move spent by White: " <<  averageWhite.count() << "s" << std::endl;
+    std::cout << "Average time per move spent by Black: " <<  averageBlack.count() << "s" << std::endl;
+    std::cout << std::endl;
 
     std::string print;
     std::cout << "Would you like to see the PGN of the whole game here (Y|N)? ";
@@ -240,6 +228,28 @@ void Game::playGame()
         std::cout << "Ok. The game was exported as a PGN file." << std::endl;
     }
     std::cout << std::endl << std::endl;
+}
+
+void Game::averageMoveTime(std::chrono::duration<double> &white, std::chrono::duration<double> &black) const
+{
+    uint nbWhite =0 , nbBlack = 0;
+    white = std::chrono::duration<double>::zero();
+    black = std::chrono::duration<double>::zero();
+    for (uint i=0; i!=moves.size(); ++i)
+    {
+        if ((i%2)==0)
+        {
+            white += moveTimes[i];
+            ++nbWhite;
+        }
+        else
+        {
+            black += moveTimes[i];
+            ++nbBlack;
+        }
+    }
+    white = white/nbWhite;
+    black = black/nbWhite;
 }
 
 
