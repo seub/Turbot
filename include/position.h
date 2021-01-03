@@ -32,7 +32,7 @@ public:
     Board getBoard() const {return board;}
 
     bool applyMove(Position &res, const Move &m, bool checkLegal = false, bool checkKCLegal = false) const;
-    bool pickBestMove(Move &res, MovePicker *picker) const;
+    bool pickBestMove(Move &res, bool &bestMoveIsForceDraw, MovePicker *picker) const;
     //std::size_t getHash() const;
     bool getLegalMoves(std::vector<Move> &res) const;
     bool getKCLegalMoves(std::vector<Move> &res) const;
@@ -40,10 +40,13 @@ public:
     bool printPGN(std::string &res, const Move &move, bool printMoveNumber) const;
     bool printPGN(std::string &res, const std::vector<Move> &line) const;
 
+    bool threeFoldRepetition() const; // Says whether a 3-fold repetition has occurred at any points in the past
+    bool drawCanBeClaimed() const;
 
 private:
     void clear();
     void reset();
+    void commonReset();
     void resetPieces();
 
     Board board;
@@ -53,7 +56,11 @@ private:
     uint enPassantTargetSquare;
     uint moveNumber;
     uint nbReversibleHalfMoves; // For 50 and 75 move rules for draw
+
+    // The information below is usually not included in a "position", but we need it for our implementation
     bool enPassantKingCapturePossibleK, enPassantKingCapturePossibleQ; // In "KC chess", we're allowing "en passant king capture" when the opponent king castled illegally.
+    std::vector<Board> pastBoards; // Necessary for threefold repetition rule
+    bool drawOffered; // Records whether a draw offer is on the table
 };
 
 /*namespace std

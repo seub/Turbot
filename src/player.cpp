@@ -6,11 +6,11 @@ ComputerPlayer::ComputerPlayer(Color color, MovePicker *picker, std::string name
 }
 
 
-bool ComputerPlayer::findBestMove(Move &res, const Position &position) const
+bool ComputerPlayer::findBestMove(Move &res, bool &bestMoveIsForceDraw, const Position &position) const
 {
     bool success = false;
 
-    if (position.pickBestMove(res, picker))
+    if (position.pickBestMove(res, bestMoveIsForceDraw, picker))
     {
         success = true;
     }
@@ -30,7 +30,7 @@ HumanPlayer::HumanPlayer(Color color) : Player(color)
     std::cout << "Okay " << name << ", let's go!" << std::endl << std::endl;
 }
 
-bool HumanPlayer::nextMove(Move &res, std::chrono::duration<double> &time, const Position &position) const
+bool HumanPlayer::nextMove(Move &res, bool &forceDraw, std::chrono::duration<double> &time, const Position &position) const
 {
     auto start = std::chrono::steady_clock::now();
     LegalMover mover1(&position, true);
@@ -47,32 +47,48 @@ bool HumanPlayer::nextMove(Move &res, std::chrono::duration<double> &time, const
         {
             return false;
         }
-        if (MovePGN::fromPGN(res, moveString, &mover1))
+        else if (moveString=="draw")
         {
-            if (mover1.isInLegalMovesList(res))
+            if (position.drawCanBeClaimed())
             {
+                forceDraw = true;
                 auto end = std::chrono::steady_clock::now();
                 time = end-start;
                 return true;
             }
             else
             {
-                std::cout << "Sorry, that's an illegal move. Try again: (Enter \"exit\" to exit)" << std::endl;
+                std::cout << "Sorry, you cannot claim a draw in this position. Try again: (Enter \"exit\" to exit, \"draw\" to claim draw)" << std::endl;
+                continue;
+            }
+        }
+        if (MovePGN::fromPGN(res, moveString, &mover1))
+        {
+            if (mover1.isInLegalMovesList(res))
+            {
+                forceDraw = false;
+                auto end = std::chrono::steady_clock::now();
+                time = end-start;
+                return true;
+            }
+            else
+            {
+                std::cout << "Sorry, that's an illegal move. Try again: (Enter \"exit\" to exit, \"draw\" to claim draw)" << std::endl;
                 continue;
             }
         }
         else
         {
-            std::cout << "Sorry, that didn't work. Try again: (Enter \"exit\" to exit)" << std::endl;
+            std::cout << "Sorry, that didn't work. Try again: (Enter \"exit\" to exit, \"draw\" to claim draw)" << std::endl;
             continue;
         }
     }
 }
 
-bool ComputerPlayer::nextMove(Move &res, std::chrono::duration<double> &time, const Position &position) const
+bool ComputerPlayer::nextMove(Move &res, bool &forceDraw, std::chrono::duration<double> &time, const Position &position) const
 {
     auto start = std::chrono::steady_clock::now();
-    bool success = findBestMove(res, position);
+    bool success = findBestMove(res, forceDraw, position);
     auto end = std::chrono::steady_clock::now();
     time = end-start;
     return success;

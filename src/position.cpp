@@ -31,10 +31,7 @@ void Position::reset()
     board.reset();
     turn = Color::WHITE;
     castlingRights.fill(true);
-    enPassantPossible = false;
-    enPassantTargetSquare = 0;
-    moveNumber = 1;
-    nbReversibleHalfMoves = 0;
+    commonReset();
 }
 
 void Position::clear()
@@ -42,10 +39,20 @@ void Position::clear()
     board.clear();
     turn = Color::WHITE;
     castlingRights.fill(false);
+    commonReset();
+}
+
+void Position::commonReset()
+{
     enPassantPossible = false;
     enPassantTargetSquare = 0;
-    moveNumber = 0;
+    moveNumber = 1;
     nbReversibleHalfMoves = 0;
+
+    enPassantKingCapturePossibleK = false;
+    enPassantKingCapturePossibleQ = false;
+    pastBoards = {board};
+    drawOffered = false;
 }
 
 std::string Position::printString() const
@@ -212,9 +219,9 @@ bool Position::getKCLegalMoves(std::vector<Move> &res) const
     return true;
 }
 
-bool Position::pickBestMove(Move &res, MovePicker *picker) const
+bool Position::pickBestMove(Move &res, bool &bestMoveIsForceDraw, MovePicker *picker) const
 {
-    return picker->pickMove(res, *this);
+    return picker->pickMove(res, bestMoveIsForceDraw, *this);
 }
 
 
@@ -279,6 +286,15 @@ bool Position::printPGN(std::string &res, const std::vector<Move> &line) const
     return true;
 }
 
+bool Position::threeFoldRepetition() const
+{
+    return Tools::containsTriplicates(pastBoards);
+}
+
+bool Position::drawCanBeClaimed() const
+{
+    return (drawOffered || threeFoldRepetition() || (nbReversibleHalfMoves > 49));
+}
 
 /*std::size_t Position::getHash() const
 {

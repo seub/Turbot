@@ -2,8 +2,10 @@
 
 
 
-bool MinMaxMovePicker::pickMove(Move &res, const Position &position)
+bool MinMaxMovePicker::pickMove(Move &res, bool &bestMoveIsForceDraw, const Position &position)
 {
+    bestMoveIsForceDraw = false;
+
     std::vector<Move> moves;
     if (!position.getLegalMoves(moves)) {return false;}
 
@@ -76,6 +78,8 @@ PositionEval::PositionEval()
 
 bool PositionEval::operator==(const PositionEval &other) const
 {
+    if (forceDraw!=other.forceDraw) {return false;}
+
     if (forcedMate)
     {
         return (other.forcedMate) && (other.forcedGettingMated==forcedGettingMated) && (forcedMateDepth==other.forcedMateDepth);
@@ -92,7 +96,21 @@ bool PositionEval::operator==(const PositionEval &other) const
 
 bool PositionEval::isLessThan(const PositionEval &other, Color side, bool switchSide) const
 {
-    if (forcedGettingMated)
+    if (forceDraw)
+    {
+        if (other.forceDraw) {return false;}
+        else if (other.forcedGettingMated) {return switchSide;}
+        else if (other.forcedMate) {return !switchSide;}
+        else {return ((side==Color::WHITE) ? (other.eval>0.0) : (other.eval<0.0));}
+    }
+    else if (other.forceDraw)
+    {
+        if (forceDraw) {return false;}
+        else if (forcedGettingMated) {return !switchSide;}
+        else if (forcedMate) {return switchSide;}
+        else {return ((side==Color::WHITE) ? (eval<0.0) : (eval>0.0));}
+    }
+    else if (forcedGettingMated)
     {
         if (switchSide) {return (other.forcedGettingMated && other.forcedGettingMatedDepth<forcedGettingMatedDepth);}
         else {return !(other.forcedGettingMated && (other.forcedGettingMatedDepth<=forcedGettingMatedDepth));}
@@ -115,6 +133,7 @@ void PositionEval::constructFromDepthZeroEval(const double &eval)
 {
     forcedMate = false;
     forcedGettingMated = false;
+    forceDraw = false;
     this->eval = eval;
 }
 
@@ -124,12 +143,20 @@ void PositionEval::constructWhenOpponentKingCanBeCaptured()
     forcedMate = true;
     forcedGettingMated = false;
     forcedMateDepth = 0;
+    forceDraw = false;
 }
 
-void PositionEval::constructFromEvalAfterBestMove(const PositionEval &evalAfterBestMovePlayed)
-{
+void PositionEval::constructFromEvalAfterBestMovePlayed(const PositionEval &evalAfterBestMovePlayed)
+{    
+    forceDraw = false;
 
-    if (evalAfterBestMovePlayed.forcedMate)
+    if (evalAfterBestMovePlayed.forceDraw)
+    {
+        forcedGettingMated = false;
+        forcedMate = false;
+        eval = 0.0;
+    }
+    else if (evalAfterBestMovePlayed.forcedMate)
     {
         forcedMate = false;
         forcedGettingMated = true;
@@ -149,9 +176,20 @@ void PositionEval::constructFromEvalAfterBestMove(const PositionEval &evalAfterB
     }
 }
 
+void PositionEval::constructFromForceDraw()
+{
+    forcedMate = false;
+    forcedGettingMated = false;
+    forceDraw = true;
+}
+
 std::ostream & operator <<(std::ostream &out, const PositionEval &PE)
 {
-    if (PE.forcedMate)
+    if (PE.forceDraw)
+    {
+        out << "1/2-1/2";
+    }
+    else if (PE.forcedMate)
     {
         out << "#" << PE.forcedMateDepth;
     }
@@ -167,24 +205,38 @@ std::ostream & operator <<(std::ostream &out, const PositionEval &PE)
 }
 
 
-bool NaiveMovePicker::pickMove(Move &res, const Position &position)
+bool NaiveMovePicker::pickMove(Move &res, bool &bestMoveIsForceDraw, const Position &position)
 {
     std::vector<Move> bestLine;
     PositionEval eval;
-    if (findBestLine(bestLine, eval, position, depth))
+    if (findBestLine(bestLine, eval, bestMoveIsForceDraw, position, depth))
     {
-        res = bestLine.front();
+        if (bestMoveIsForceDraw) {std::cout << "Best move found was to force draw!" << std::endl;}
+        if (!bestMoveIsForceDraw) {res = bestLine.front();}
         std::string bestLineString;
         position.printPGN(bestLineString, bestLine);
         std::cout << "Best line found: " << bestLineString << " (eval = " << eval << ")" << std::endl;
         return true;
     }
-    else {return false;}
+
+    else
+    {
+        std::cout << "NaiveMovePicker::pickMove failed" << std::endl;
+        return false;
+    }
 }
 
-bool NaiveMovePicker::findBestLine(std::vector<Move> &resLine, PositionEval &resEval, const Position &position, uint depth) const
+bool NaiveMovePicker::findBestLine(std::vector<Move> &resLine, PositionEval &resEval, bool &bestMoveIsForceDraw,
+                                   const Position &position, uint depth) const
 {
     resLine.clear();
+
+    if (position.getNbReversibleHalfMoves()>74)
+    {
+        bestMoveIsForceDraw = true;
+        resEval.constructFromForceDraw();
+        return true;
+    }
 
     if (depth==0)
     {
@@ -195,32 +247,54 @@ bool NaiveMovePicker::findBestLine(std::vector<Move> &resLine, PositionEval &res
     {
         LegalMover mover(&position, false);
         std::vector<Move> moves = mover.getKCLegalMoves();
-        if (moves.empty()) {return false;}
+        if (moves.empty())
+        {
+            std::cout << "WARNING in NaiveMovePicker::findBestLine: no moves!" << std::endl;
+            return false;
+        }
         else if (mover.isOpponentKingCapturable())
         {
+            // HERE WE NEED TO DEAL WITH STALEMATE!
+            bestMoveIsForceDraw = false;
             resEval.constructWhenOpponentKingCanBeCaptured();
             return true;
         }
         else
         {
+
             Position newPos;
             Move bestMove;
             Color turn = position.getTurn();
             PositionEval eval, bestEval;
             std::vector<Move> line, bestLine;
-            bool first = true;
+            bool first;
+
+            if (position.drawCanBeClaimed())
+            {
+                bestMoveIsForceDraw = true;
+                bestEval.constructFromForceDraw();
+                bestLine = line;
+                first = false;
+            }
+            else
+            {
+                bestMoveIsForceDraw = false;
+                first = true;
+            }
+
             for (const auto &move : moves)
             {
                 newPos = mover.applyMove(move);
                 if (depth==1) {eval.constructFromDepthZeroEval(evaluator->evaluatePosition(newPos));}
                 else
                 {
-                    findBestLine(line, eval, newPos, depth-1);
+                    bool bestOpponentMoveIsForceDraw;
+                    findBestLine(line, eval, bestOpponentMoveIsForceDraw, newPos, depth-1);
                 }
-
 
                 if (first)
                 {
+                    bestMoveIsForceDraw = false;
                     bestMove = move;
                     bestEval = eval;
                     bestLine = line;
@@ -228,20 +302,31 @@ bool NaiveMovePicker::findBestLine(std::vector<Move> &resLine, PositionEval &res
                 }
                 else if (bestEval.isLessThan(eval, turn, true))
                 {
+                    bestMoveIsForceDraw = false;
                     bestMove = move;
                     bestEval = eval;
                     bestLine = line;
                 }
             }
 
-            if (depth==1) {resLine = {bestMove};}
+            if (bestMoveIsForceDraw)
+            {
+                resLine.clear();
+                resEval.constructFromForceDraw();
+            }
             else
             {
-                resLine = bestLine;
-                resLine.insert(resLine.begin(), bestMove);
+                if (depth==1) {resLine = {bestMove};}
+                else
+                {
+                    resLine = bestLine;
+                    resLine.insert(resLine.begin(), bestMove);
+                }
+                resEval.constructFromEvalAfterBestMovePlayed(bestEval);
             }
-            resEval.constructFromEvalAfterBestMove(bestEval);
+
             return true;
+
         }
     }
 }

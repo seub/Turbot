@@ -48,6 +48,7 @@ template <typename T> T exponentiation(T base, int power)
 }
 
 std::string convertToString(int i);
+std::string convertDoubleToString(const double &x);
 
 template <typename T> std::vector<uint> findInList(const T &x, const std::vector<T> &V)
 {

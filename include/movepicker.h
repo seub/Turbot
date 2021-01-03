@@ -34,15 +34,16 @@ public:
 
     bool isLessThan(const PositionEval &other, Color side, bool switchSide) const; // "switchSide" is set to true when the two evals were computed from the point of view of the opponent.
 
-
 private:
     void constructFromDepthZeroEval(const double &eval);
     void constructWhenOpponentKingCanBeCaptured();
-    void constructFromEvalAfterBestMove(const PositionEval &evalAfterBestMovePlayed);
+    void constructFromEvalAfterBestMovePlayed(const PositionEval &evalAfterBestMovePlayed);
+    void constructFromForceDraw();
 
     bool forcedMate, forcedGettingMated;
     uint forcedMateDepth, forcedGettingMatedDepth;
     double eval;
+    bool forceDraw;
 };
 
 
@@ -51,7 +52,7 @@ class MovePicker
 public:
     MovePicker() {}
     MovePicker(Evaluator *evaluator) : evaluator(evaluator) {}
-    virtual bool pickMove(Move &res, const Position &position) = 0;
+    virtual bool pickMove(Move &res, bool &bestMoveIsForceDraw, const Position &position) = 0;
 
 protected:
     Evaluator *evaluator;
@@ -62,7 +63,7 @@ class MinMaxMovePicker: public MovePicker
 {
 public:
     MinMaxMovePicker(Evaluator *evaluator, uint depth): MovePicker(evaluator), depth(depth) {}
-    bool pickMove(Move &res, const Position &position) override;
+    bool pickMove(Move &res, bool &bestMoveIsForceDraw, const Position &position) override;
     bool pickMove(std::vector<Value> &res, const Position &position, const std::vector<Move> &moves, uint depth);
 
 private:
@@ -75,8 +76,9 @@ class NaiveMovePicker: public MovePicker
 {
 public:
     NaiveMovePicker(Evaluator *evaluator, uint depth): MovePicker(evaluator), depth(depth) {}
-    bool pickMove(Move &res, const Position &position) override;
-    bool findBestLine(std::vector<Move> &res, PositionEval &eval, const Position &position, uint depth) const;
+    bool pickMove(Move &res, bool &bestMoveIsForceDraw, const Position &position) override;
+    bool findBestLine(std::vector<Move> &res, PositionEval &eval, bool &bestMoveIsForceDraw,
+                      const Position &position, uint depth) const;
 
 private:
     uint depth;

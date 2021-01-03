@@ -23,6 +23,15 @@ std::string Tools::convertToString(int i)
     return s;
 }
 
+std::string Tools::convertDoubleToString(const double &x)
+{
+    std::string s;
+    std::stringstream out;
+    out << x;
+    s = out.str();
+    return s;
+}
+
 int Tools::stoi(const std::string& str, int* p_value, std::size_t* pos, int base)
 {
     // wrapping std::stoi because it may throw an exception

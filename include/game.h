@@ -4,8 +4,6 @@
 #include "player.h"
 
 
-enum class GameResult {NOT_FINISHED, WHITE_WINS, BLACK_WINS, DRAW};
-
 
 class Game
 {
@@ -15,7 +13,6 @@ public:
     Game(const Player * const whitePlayer, const Player * const blackPlayer);
 
     Position getPosition() const;
-    bool ThreeFoldRepetition() const;
 
     std::string printPGN(bool printTagRoster = true) const;
     bool exportPGN(std::string fileName = "turbot.pgn", bool printTagRoster = true) const;
@@ -25,7 +22,7 @@ public:
     bool isFinished() const;
     void averageMoveTime(std::chrono::duration<double> &white, std::chrono::duration<double> &black) const;
 
-    bool playMove(const Move &move, std::chrono::duration<double> moveTime, bool checkLegal=false, bool checkCKLegal=false);
+    bool playMove(const Move &move, const bool &forceDraw, std::chrono::duration<double> moveTime, bool checkLegal=false, bool checkCKLegal=false);
     void playGame();
     
 
@@ -33,7 +30,7 @@ private:
     std::vector<Move> moves;
     std::vector<MovePGN> movePGNs;
     std::vector< std::chrono::duration<double> > moveTimes;
-    std::vector<Position> positions;
+    Position currentPosition;
     Color turn;
     uint moveNumber;
     GameResult result;

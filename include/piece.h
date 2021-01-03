@@ -3,8 +3,7 @@
 
 # include "tools.h"
 
-enum class PieceType {EMPTY, KING, QUEEN, ROOK, BISHOP, KNIGHT, PAWN};
-enum class Color {WHITE, BLACK};
+
 
 class Piece
 {

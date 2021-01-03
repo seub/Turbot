@@ -10,7 +10,7 @@ Game::Game(const Player * const whitePlayer, const Player * const blackPlayer) :
     movePGNs.clear();
     moveTimes.clear();
     turn = Color::WHITE;
-    positions = {Position(true)};
+    currentPosition = Position(true);
     moveNumber = 1;
     result = GameResult::NOT_FINISHED;
     Tools::currentDate(year, month, day);
@@ -18,15 +18,7 @@ Game::Game(const Player * const whitePlayer, const Player * const blackPlayer) :
 
 Position Game::getPosition() const
 {
-    return positions.back();
-}
-
-bool Game::ThreeFoldRepetition() const
-{
-    std::vector<Board> boards;
-    boards.reserve(positions.size());
-    for (const auto & position : positions) {boards.push_back(position.getBoard());}
-    return Tools::containsTriplicates(boards);
+    return currentPosition;
 }
 
 bool Game::isFinished() const
@@ -34,31 +26,40 @@ bool Game::isFinished() const
     return (result!=GameResult::NOT_FINISHED);
 }
 
-bool Game::playMove(const Move &move, std::chrono::duration<double> moveTime, bool checkLegal, bool checkCKLegal)
+bool Game::playMove(const Move &move, const bool &forceDraw, std::chrono::duration<double> moveTime, bool checkLegal, bool checkCKLegal)
 {
     bool success=false;
 
     if (isFinished()) {throw("Game is finished!");}
 
-    Position currentPosition = positions.back(), newPosition;
-    LegalMover currentMover(&currentPosition, true);
-
-
-    if (currentMover.applyMove(newPosition, move, checkLegal, checkCKLegal))
+    if (forceDraw)
     {
-        moves.push_back(move);
-        moveTimes.push_back(moveTime);
-        movePGNs.push_back(MovePGN(move, &currentMover));
-        positions.push_back(newPosition);
-        turn = (turn==Color::WHITE) ? Color::BLACK : Color::WHITE;
-        if (turn==Color::WHITE) {++moveNumber;}
+        result = GameResult::DRAW;
+        success = true;
+    }
+    else
+    {
+        Position newPosition;
+        LegalMover currentMover(&currentPosition, true);
 
-        LegalMover newMover(&newPosition, true);
-        if (newMover.isCheckmate()) {result = (turn==Color::WHITE) ? GameResult::BLACK_WINS : GameResult::WHITE_WINS;}
-        else if (newMover.isStalemate()) {result = GameResult::DRAW;}
-        else if (currentPosition.getNbReversibleHalfMoves()>74) {result = GameResult::DRAW;}
 
-        success =  true;
+        if (currentMover.applyMove(newPosition, move, checkLegal, checkCKLegal))
+        {
+            moves.push_back(move);
+            moveTimes.push_back(moveTime);
+            movePGNs.push_back(MovePGN(move, &currentMover));
+            turn = (turn==Color::WHITE) ? Color::BLACK : Color::WHITE;
+            if (turn==Color::WHITE) {++moveNumber;}
+
+            LegalMover newMover(&newPosition, true);
+            if (newMover.isCheckmate()) {result = (turn==Color::WHITE) ? GameResult::BLACK_WINS : GameResult::WHITE_WINS;}
+            else if (newMover.isStalemate()) {result = GameResult::DRAW;}
+            else if (newPosition.getNbReversibleHalfMoves()>74) {result = GameResult::DRAW;}
+
+            currentPosition = newPosition;
+
+            success =  true;
+        }
     }
 
     return success;
@@ -137,7 +138,7 @@ std::string Game::printPGN(bool printTagRoster) const
         out += "\n";
     }
 
-    uint moveNum = positions.front().getMoveNumber()-1;
+    uint moveNum = 0;
     for (const auto &move : movePGNs)
     {
         if (move.getTurn()==Color::WHITE)
@@ -178,22 +179,27 @@ void Game::playGame()
     {
         position = getPosition();
         const Player *nextPlayer = (turn==Color::WHITE) ? whitePlayer : blackPlayer;
-        if(!nextPlayer->nextMove(move, moveTime, position))
+        bool forceDraw;
+        if(!nextPlayer->nextMove(move, forceDraw, moveTime, position))
         {
             std::cout << "Failed to play next move!" << std::endl;
             break;
         }
-        playMove(move, moveTime);
-        LegalMover mover(&position, true);
-        if (nextPlayer->isHuman())
-        {
-            std::cout << "Okay, " << nextPlayer->getName();
-        }
+        playMove(move, forceDraw, moveTime);
+        std::string message = {};
+        message += nextPlayer->getName();
+        if (forceDraw) {message += " claimed a draw!";}
         else
         {
-            std::cout << "The computer \"" << nextPlayer->getName() << "\"";
+            LegalMover mover(&position, true);
+            message += " played ";
+            message += MovePGN(move, &mover).toPGN(position.getMoveNumber());
+            message += ".";
         }
-        std::cout << " played " << MovePGN(move, &mover).toPGN(position.getMoveNumber()) << ". (move time: " << moveTime.count() << "s)" << std::endl;
+        message += " Move time: ";
+        message += Tools::convertDoubleToString(moveTime.count());
+        message += "s";
+        std::cout << message << std::endl;
     }
 
     std::cout << std::endl << std::endl;
@@ -207,15 +213,15 @@ void Game::playGame()
     }
 
     averageMoveTime(averageWhite, averageBlack);
-    std::cout << "Average time per move spent by White: " <<  averageWhite.count() << "s" << std::endl;
-    std::cout << "Average time per move spent by Black: " <<  averageBlack.count() << "s" << std::endl;
+    std::cout << "Average time per move spent by " << whitePlayer->getName() << ": " << averageWhite.count() << "s" << std::endl;
+    std::cout << "Average time per move spent by " << blackPlayer->getName() << ": " << averageBlack.count() << "s" << std::endl;
     std::cout << std::endl;
 
     std::string print;
     std::cout << "Would you like to see the PGN of the whole game here (Y|N)? ";
     std::cin >> print;
     std::cout << std::endl;
-    if (print=="Y")
+    if ((print=="Y") || (print=="y"))
     {
         std::cout << printPGN();
         std::cout << std::endl << std::endl;

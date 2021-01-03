@@ -660,6 +660,9 @@ Position LegalMover::applyMove(const Move &m) const
         }
     }
 
+    res.pastBoards = position->pastBoards;
+    res.pastBoards.push_back(res.board);
+
     return res;
 }
 
