@@ -17,17 +17,13 @@ Position::Position(bool gamestart) : board(gamestart)
 
 bool Position::operator==(const Position &other) const
 {
-    bool res = true;
+    return isEqual(other);
+}
 
-    res &= (board==other.board);
-    res &= (turn == other.turn);
-    res &= (castlingRights == other.castlingRights);
-    res &= (enPassantPossible == other.enPassantPossible);
-    res &= (enPassantTargetSquare == other. enPassantTargetSquare);
-    res &= (moveNumber == other.moveNumber);
-    res &= (nbReversibleHalfMoves == other.nbReversibleHalfMoves);
-
-    return res;
+bool Position::isEqual(const Position &other) const
+{
+    return (board==other.board) && (turn == other.turn) && (castlingRights == other.castlingRights) && (enPassantPossible == other.enPassantPossible)
+            && (enPassantTargetSquare == other. enPassantTargetSquare) && (moveNumber == other.moveNumber) && (nbReversibleHalfMoves == other.nbReversibleHalfMoves);
 }
 
 void Position::reset()
@@ -200,18 +196,11 @@ bool Position::applyMove(Position &res, const Move &m, bool checkLegal, bool che
     return mover.applyMove(res, m, checkLegal, checkKCLegal);
 }
 
-bool Position::pickRandomLegalMove(Move &res) const
-{
-    LegalMover mover(this, true);
-    return mover.getRandomLegalMove(res);
-
-}
-
 bool Position::getLegalMoves(std::vector<Move> &res) const
 {
     LegalMover mover(this, true);
     res = mover.getlegalMoves();
-    if(res.size() ==0) return false;
+    if(res.size()==0) return false;
     return true;
 }
 
@@ -225,8 +214,7 @@ bool Position::getKCLegalMoves(std::vector<Move> &res) const
 
 bool Position::pickBestMove(Move &res, MovePicker *picker) const
 {
-    LegalMover mover(this, true);
-    return picker->pickMove(res, *this, mover.getlegalMoves(), false, false);
+    return picker->pickMove(res, *this);
 }
 
 
@@ -234,6 +222,61 @@ std::ostream & operator <<(std::ostream &out, const Position &P)
 {
     out << P.printString();
     return out;
+}
+
+bool Position::printPGN(std::string &res, const Move &move, bool printMoveNumber) const
+{
+    LegalMover mover(this, true);
+    MovePGN movePGN;
+    bool success = MovePGN::fromMove(movePGN, move, &mover);
+    if (success)
+    {
+        if (printMoveNumber) {res = movePGN.toPGN(moveNumber);}
+        else {res = movePGN.toPGN();}
+    }
+    return success;
+}
+
+bool Position::printPGN(std::string &res, const std::vector<Move> &line) const
+{
+    res.clear();
+    Position pos(*this), nextPos;
+    uint N = line.size();
+    if (N==0) {return true;}
+
+    Move move;
+    std::string moveStr;
+
+    move = line.front();
+    if (!pos.printPGN(moveStr, move, true)) {return false;}
+    else {res += moveStr;}
+    if (N==1) {return true;}
+
+    if (pos.applyMove(nextPos, move)) {pos = nextPos;}
+    else {return false;}
+
+    for (uint i=1; i<N-1; ++i)
+    {
+        move = line[i];
+        if (!pos.printPGN(moveStr, move, pos.getTurn()==Color::WHITE)) {return false;}
+        else
+        {
+            res += " ";
+            res += moveStr;
+        }
+        if (pos.applyMove(nextPos, move)) {pos = nextPos;}
+        else {return false;}
+    }
+
+    move = line.back();
+    if (!pos.printPGN(moveStr, move, pos.getTurn()==Color::WHITE)) {return false;}
+    else
+    {
+        res += " ";
+        res += moveStr;
+    }
+
+    return true;
 }
 
 
@@ -254,4 +297,3 @@ std::ostream & operator <<(std::ostream &out, const Position &P)
     }
     return re;
 }*/
-

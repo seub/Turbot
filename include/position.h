@@ -19,6 +19,7 @@ public:
     Position(bool gamestart=false);
 
     bool operator==(Position const& other) const;
+    bool isEqual(Position const &other) const;
 
     std::string printString() const;
     std::string toFENstring() const;
@@ -31,11 +32,15 @@ public:
     Board getBoard() const {return board;}
 
     bool applyMove(Position &res, const Move &m, bool checkLegal = false, bool checkKCLegal = false) const;
-    bool pickRandomLegalMove(Move &res) const;
     bool pickBestMove(Move &res, MovePicker *picker) const;
     //std::size_t getHash() const;
     bool getLegalMoves(std::vector<Move> &res) const;
     bool getKCLegalMoves(std::vector<Move> &res) const;
+
+    bool printPGN(std::string &res, const Move &move, bool printMoveNumber) const;
+    bool printPGN(std::string &res, const std::vector<Move> &line) const;
+
+
 private:
     void clear();
     void reset();
@@ -47,7 +52,8 @@ private:
     bool enPassantPossible;
     uint enPassantTargetSquare;
     uint moveNumber;
-    uint nbReversibleHalfMoves; //For 50 and 75 move rules for draw
+    uint nbReversibleHalfMoves; // For 50 and 75 move rules for draw
+    bool enPassantKingCapturePossibleK, enPassantKingCapturePossibleQ; // In "KC chess", we're allowing "en passant king capture" when the opponent king castled illegally.
 };
 
 /*namespace std
@@ -60,18 +66,5 @@ private:
         }
     };
 }*/
-
-class KCPosition : public Position
-{
-    friend class LegalMover;
-
-public:
-    KCPosition(bool gamestart=false);
-
-    bool operator==(KCPosition const& other) const;
-
-private:
-    bool enPassantShortCastle, enPassantLongCastle;
-};
 
 #endif // POSITION_H

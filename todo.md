@@ -1,21 +1,8 @@
 TODO
 
-MISTAKES?
-For the queen in boardhelper.cpp: fullboard += 1 << 5;
-
-QUESTIONS
-Why is there an unordered map and shit in class Evaluator?
 
 
 PROPOSITIONS DE CLASSES
-
-
-BranchComparator:
-    Tells the MinMax move generator which branch is more interesting
-    operator < (Position*, Position*) -> bool
-    *Can have a bunch of additional parameters:
-        - Evaluation
-        - depth of position in the three
 
     
 IDÉES :

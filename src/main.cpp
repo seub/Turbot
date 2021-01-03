@@ -9,14 +9,16 @@ int main()
     {
         
         BasicEvaluator evaluator;
-        MinMaxMovePicker picker(&evaluator, 2);
-        //ComputerPlayer firstPlayer(Color::WHITE, &picker, "Turbot 1");
+        MinMaxMovePicker minMaxPicker(&evaluator, 3);
+        NaiveMovePicker naivePicker(&evaluator, 5);
+        //ComputerPlayer firstPlayer(Color::WHITE, &minMaxPicker, "Turbot MinMax");
         HumanPlayer firstPlayer(Color::WHITE);
-        ComputerPlayer secondPlayer(Color::BLACK, &picker,"Turbot 2");
+        ComputerPlayer secondPlayer(Color::BLACK, &naivePicker,"Turbot Naive");
         //HumanPlayer secondPlayer(Color::BLACK);
         Game game( (Player *) &firstPlayer,  (Player *) &secondPlayer);
 
         game.playGame();
+
     }
     catch (char const *errorMessage)
     {
