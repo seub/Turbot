@@ -11,6 +11,7 @@ class LegalMover
     friend class MovePGN;
     friend class Position;
     friend class NaiveMovePicker;
+    friend class ForcefulMovePicker;
 
 public:
     explicit LegalMover(const Position * const position, bool generateLegalMoves = true);
@@ -34,6 +35,7 @@ public:
     bool isCheckmate() const;
     bool isCheckmate(const Move &move) const;
     bool isStalemate() const;
+    bool isForceful(const Move &move) const;
     bool isCastleShort(const Move &move) const;
     bool isCastleLong(const Move &move) const;
     Color turn() const;

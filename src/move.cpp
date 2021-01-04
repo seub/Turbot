@@ -326,7 +326,7 @@ bool MovePGN::fromMove(MovePGN &res, const Move &move, const LegalMover *mover)
 
     if (!mover->isInLegalMovesList(move))
     {
-        std::cout << std::endl << "WARNING: Illegal move in MovePGN::fromMove" << std::endl;
+        //std::cout << std::endl << "WARNING: Illegal move in MovePGN::fromMove" << std::endl;
         /*std::cout << "Move is " << move << std::endl;
         std::cout << "Position is " << *(mover->position) << std::endl;*/
         /*std::cout << "Legal move list is " << mover->printLegalMoves() << std::endl;

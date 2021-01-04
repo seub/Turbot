@@ -1,8 +1,10 @@
 #include "player.h"
+#include "movepicker.h"
 
-ComputerPlayer::ComputerPlayer(Color color, MovePicker *picker, std::string name) : Player(color, name), picker(picker)
+ComputerPlayer::ComputerPlayer(MovePicker *picker) : picker(picker)
 {
-    std::cout << ((color==Color::WHITE) ? "White" : "Black") << " player was set as the computer \"" << name << "\"." << std::endl;
+    name = picker->createName();
+    std::cout << "Computer player was set as \"" << name << "\"." << std::endl;
 }
 
 
@@ -23,11 +25,17 @@ bool ComputerPlayer::findBestMove(Move &res, bool &bestMoveIsForceDraw, const Po
     return success;
 }
 
-HumanPlayer::HumanPlayer(Color color) : Player(color)
+HumanPlayer::HumanPlayer()
 {
-    std::cout << "Hi there! You play " << ((color==Color::WHITE)? "White" : "Black") << ". What is your name? ";
+    std::cout << "Hi there! What is your name? ";
     std::cin >> name;
     std::cout << "Okay " << name << ", let's go!" << std::endl << std::endl;
+}
+
+HumanPlayer::HumanPlayer(const std::string &name)
+{
+    this->name = name;
+    std::cout << "Hello " << name << ", let's go!" << std::endl << std::endl;
 }
 
 bool HumanPlayer::nextMove(Move &res, bool &forceDraw, std::chrono::duration<double> &time, const Position &position) const
@@ -41,7 +49,7 @@ bool HumanPlayer::nextMove(Move &res, bool &forceDraw, std::chrono::duration<dou
         std::cout << std::endl;
         std::cout << name << ", what is your " << (first ? "first" : "next") << " move? "
                   << (first ? "Enter it in PGN notation. " : "")
-                  << position.getMoveNumber() << ((color==Color::WHITE) ? ". " : "... ");
+                  << position.getMoveNumber() << ((position.getTurn()==Color::WHITE) ? ". " : "... ");
         std::cin >> moveString;
         if (moveString=="exit")
         {

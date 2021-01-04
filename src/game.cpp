@@ -3,9 +3,6 @@
 
 Game::Game(const Player * const whitePlayer, const Player * const blackPlayer) : whitePlayer(whitePlayer), blackPlayer(blackPlayer)
 {
-    assert(whitePlayer->getColor()==Color::WHITE);
-    assert(blackPlayer->getColor()==Color::BLACK);
-
     moves.clear();
     movePGNs.clear();
     moveTimes.clear();
@@ -13,7 +10,9 @@ Game::Game(const Player * const whitePlayer, const Player * const blackPlayer) :
     currentPosition = Position(true);
     moveNumber = 1;
     result = GameResult::NOT_FINISHED;
-    Tools::currentDate(year, month, day);
+
+    date = Tools::currentDate();
+    time = Tools::currentTime();
 }
 
 Position Game::getPosition() const
@@ -76,7 +75,7 @@ std::string Game::printTagRoster() const
     out += "\n";
 
     out += "[Date \"";
-    out += printDate();
+    out += date;
     out += "\"]";
     out += "\n";
 
@@ -96,19 +95,6 @@ std::string Game::printTagRoster() const
     out += "[Result \"";
     out += printResult();
     out += "\"]";
-
-    return out;
-}
-
-std::string Game::printDate() const
-{
-    std::string out = {};
-
-    out += Tools::convertToString(year);
-    out += ".";
-    out += Tools::convertToString(month);
-    out += ".";
-    out += Tools::convertToString(day);
 
     return out;
 }
@@ -155,9 +141,9 @@ std::string Game::printPGN(bool printTagRoster) const
     return out;
 }
 
-bool Game::exportPGN(std::string fileName, bool printTagRoster) const
+bool Game::exportPGN(bool printTagRoster) const
 {
-    std::ofstream file(fileName);
+    std::ofstream file(createFilename());
     if (file.is_open())
     {
         file << printPGN(printTagRoster);
@@ -168,12 +154,29 @@ bool Game::exportPGN(std::string fileName, bool printTagRoster) const
 
 void Game::playGame()
 {
+    startGame();
+    play();
+    finishGame();
+}
+
+void Game::startGame()
+{
+    date = Tools::currentDate();
+    time = Tools::currentTime();
+
+    std::cout << std::endl;
+    std::cout << "Let's start the game!" << std::endl;
+    std::cout << whitePlayer->getName() << " plays White." << std::endl;
+    std::cout << blackPlayer->getName() << " plays Black." << std::endl;
+    std::cout << std::endl;
+}
+
+void Game::play()
+{
     Position position;
     MovePGN movePGN;
     Move move;
-    std::chrono::duration<double> moveTime, averageWhite, averageBlack;
-
-    std::cout << std::endl;
+    std::chrono::duration<double> moveTime;
 
     while (!isFinished())
     {
@@ -196,11 +199,16 @@ void Game::playGame()
             message += MovePGN(move, &mover).toPGN(position.getMoveNumber());
             message += ".";
         }
-        message += " Move time: ";
+        message += " [Move time: ";
         message += Tools::convertDoubleToString(moveTime.count());
-        message += "s";
+        message += "s]";
         std::cout << message << std::endl;
     }
+}
+
+void Game::finishGame()
+{
+    std::chrono::duration<double> averageWhite, averageBlack;
 
     std::cout << std::endl << std::endl;
     switch(result)
@@ -226,15 +234,28 @@ void Game::playGame()
         std::cout << printPGN();
         std::cout << std::endl << std::endl;
         exportPGN();
-        std::cout << "The game was also exported as a PGN file." << std::endl;
+        std::cout << "The game was also exported as the PGN file \"" << createFilename() << "\"" << std::endl;
     }
     else
     {
         exportPGN();
-        std::cout << "Ok. The game was exported as a PGN file." << std::endl;
+        std::cout << "Ok. The game was exported as the PGN file \"" << createFilename() << "\"" << std::endl;
     }
     std::cout << std::endl << std::endl;
 }
+
+std::string Game::createFilename() const
+{
+    std::string res = {};
+    res += "Turbot_";
+    res += date;
+    res += "_";
+    res += time;
+    res += ".pgn";
+
+    return res;
+}
+
 
 void Game::averageMoveTime(std::chrono::duration<double> &white, std::chrono::duration<double> &black) const
 {

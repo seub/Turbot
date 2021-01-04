@@ -27,6 +27,7 @@ class PositionEval
 {
     friend std::ostream & operator<<(std::ostream &out, const PositionEval &PE);
     friend class NaiveMovePicker;
+    friend class ForcefulMovePicker;
 
 public:
     PositionEval();
@@ -50,21 +51,23 @@ private:
 class MovePicker
 {
 public:
-    MovePicker() {}
-    MovePicker(Evaluator *evaluator) : evaluator(evaluator) {}
-    virtual bool pickMove(Move &res, bool &bestMoveIsForceDraw, const Position &position) = 0;
+    MovePicker() : evaluator(nullptr) {}
+    MovePicker(const Evaluator *evaluator) : evaluator(evaluator) {}
+    virtual bool pickMove(Move &res, bool &claimDraw, const Position &position) = 0;
+    virtual std::string createName() const = 0;
 
 protected:
-    Evaluator *evaluator;
+    const Evaluator * const evaluator;
 };
 
 
 class MinMaxMovePicker: public MovePicker
 {
 public:
-    MinMaxMovePicker(Evaluator *evaluator, uint depth): MovePicker(evaluator), depth(depth) {}
-    bool pickMove(Move &res, bool &bestMoveIsForceDraw, const Position &position) override;
+    MinMaxMovePicker(const Evaluator *evaluator, uint depth): MovePicker(evaluator), depth(depth) {}
+    bool pickMove(Move &res, bool &claimDraw, const Position &position) override;
     bool pickMove(std::vector<Value> &res, const Position &position, const std::vector<Move> &moves, uint depth);
+    std::string createName() const override;
 
 private:
     //std::unordered_map< Position, std::vector<Value> * > evaluated_res;
@@ -75,13 +78,29 @@ private:
 class NaiveMovePicker: public MovePicker
 {
 public:
-    NaiveMovePicker(Evaluator *evaluator, uint depth): MovePicker(evaluator), depth(depth) {}
-    bool pickMove(Move &res, bool &bestMoveIsForceDraw, const Position &position) override;
-    bool findBestLine(std::vector<Move> &res, PositionEval &eval, bool &bestMoveIsForceDraw,
-                      const Position &position, uint depth) const;
+    NaiveMovePicker(const Evaluator *evaluator, uint depth): MovePicker(evaluator), depth(depth) {}
+    bool pickMove(Move &res, bool &claimDraw, const Position &position) override;
+    bool findBestLine(std::vector<Move> &res, PositionEval &eval, bool &claimDraw, const Position &position,
+                      const Position &previousPos, bool previousPosAvailable, uint depth) const; //NB: Previous position is only needed to deal with stalemate :(
+    std::string createName() const override;
 
 private:
     uint depth;
+};
+
+
+class ForcefulMovePicker: public MovePicker
+{
+public:
+    ForcefulMovePicker(const Evaluator *evaluator, uint depth, uint fdepth, uint gdepth): MovePicker(evaluator), depth(depth), fdepth(fdepth), gdepth(gdepth) {}
+    bool pickMove(Move &res, bool &claimDraw, const Position &position) override;
+    bool findBestLine(std::vector<Move> &res, PositionEval &eval, bool &claimDraw, const Position &position,
+                      const Position &previousPos, bool previousPosAvailable, uint depth, uint fdepth, uint gdepth) const;
+    std::string createName() const override;
+
+
+private:
+    uint depth, fdepth, gdepth;
 };
 
 

@@ -554,6 +554,11 @@ bool LegalMover::isCheckmate(const Move &move) const
     return newMover.isCheckmate();
 }
 
+bool LegalMover::isForceful(const Move &move) const
+{
+    return (isCapture(move) || isCheck(move));
+}
+
 Position LegalMover::applyMove(const Move &m) const
 {
     Position res(*position);
@@ -706,7 +711,7 @@ bool LegalMover::uniqueOrigin(Square &resOrigin, const Square &target, PieceType
     if (legalMovesGenerated)
     {
         uint nbOccurrences = 0;
-        Square res;
+        Square res(0);
         for (const auto &move : legalMoves)
         {
             if ((move.target==target) && (position->board.pieces[move.origin.getIndex()].getType()==type))
@@ -715,7 +720,12 @@ bool LegalMover::uniqueOrigin(Square &resOrigin, const Square &target, PieceType
                 if (nbOccurrences==1) {res=move.origin;}
             }
         }
-        if (nbOccurrences==1)
+        if (nbOccurrences==0)
+        {
+            std::cout << "Piece not found!" << std::endl;
+            return true;
+        }
+        else if (nbOccurrences==1)
         {
             resOrigin = res;
             return true;
@@ -731,7 +741,7 @@ bool LegalMover::uniqueOriginOnFile(Square &resOrigin, const Square &target, uin
     if (legalMovesGenerated)
     {
         uint nbOccurrences = 0;
-        Square res;
+        Square res(0);
         for (const auto &move : legalMoves)
         {
             if ((move.target==target) && (position->board.pieces[move.origin.getIndex()].getType()==type) && (move.origin.fileIndex()==fileIndex))
@@ -757,7 +767,7 @@ bool LegalMover::uniqueOriginOnRank(Square &resOrigin, const Square &target, uin
     if (legalMovesGenerated)
     {
         uint nbOccurrences = 0;
-        Square res;
+        Square res(0);
         for (const auto &move : legalMoves)
         {
             if ((move.target==target) && (position->board.pieces[move.origin.getIndex()].getType()==type) && (move.origin.rankIndex()==rankIndex))

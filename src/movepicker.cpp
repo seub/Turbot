@@ -2,9 +2,9 @@
 
 
 
-bool MinMaxMovePicker::pickMove(Move &res, bool &bestMoveIsForceDraw, const Position &position)
+bool MinMaxMovePicker::pickMove(Move &res, bool &claimDraw, const Position &position)
 {
-    bestMoveIsForceDraw = false;
+    claimDraw = false;
 
     std::vector<Move> moves;
     if (!position.getLegalMoves(moves)) {return false;}
@@ -69,6 +69,14 @@ bool MinMaxMovePicker::pickMove(std::vector<Value> &res, const Position &positio
     //evaluated_res[position] = bestvalues;
     res = std::vector<Value>(*bestvalues);
     return res.size()>0;
+}
+
+std::string MinMaxMovePicker::createName() const
+{
+    std::string res = "TurbotMinMax(";
+    res += Tools::convertToString(depth);
+    res += ")";
+    return res;
 }
 
 
@@ -204,21 +212,28 @@ std::ostream & operator <<(std::ostream &out, const PositionEval &PE)
     return out;
 }
 
+std::string NaiveMovePicker::createName() const
+{
+    std::string res = "TurbotNaive(";
+    res += Tools::convertToString(depth);
+    res += ")";
+    return res;
+}
 
-bool NaiveMovePicker::pickMove(Move &res, bool &bestMoveIsForceDraw, const Position &position)
+
+bool NaiveMovePicker::pickMove(Move &res, bool &claimDraw, const Position &position)
 {
     std::vector<Move> bestLine;
     PositionEval eval;
-    if (findBestLine(bestLine, eval, bestMoveIsForceDraw, position, depth))
+    if (findBestLine(bestLine, eval, claimDraw, position, position, false, depth))
     {
-        if (bestMoveIsForceDraw) {std::cout << "Best move found was to force draw!" << std::endl;}
-        if (!bestMoveIsForceDraw) {res = bestLine.front();}
+        if (!claimDraw) {res = bestLine.front();}
         std::string bestLineString;
         position.printPGN(bestLineString, bestLine);
-        std::cout << "Best line found: " << bestLineString << " (eval = " << eval << ")" << std::endl;
+        if (claimDraw) {std::cout << "[Best line: 'Claim Draw'  |  eval = " << eval << "]" << std::endl;}
+        else {std::cout << "[Best line: " << bestLineString << "  |  eval = " << eval << "]" << std::endl;}
         return true;
     }
-
     else
     {
         std::cout << "NaiveMovePicker::pickMove failed" << std::endl;
@@ -226,14 +241,15 @@ bool NaiveMovePicker::pickMove(Move &res, bool &bestMoveIsForceDraw, const Posit
     }
 }
 
-bool NaiveMovePicker::findBestLine(std::vector<Move> &resLine, PositionEval &resEval, bool &bestMoveIsForceDraw,
-                                   const Position &position, uint depth) const
+
+bool NaiveMovePicker::findBestLine(std::vector<Move> &resLine, PositionEval &resEval, bool &claimDraw,
+                                   const Position &position, const Position &previousPos, bool previousPosAvailable, uint depth) const
 {
     resLine.clear();
 
     if (position.getNbReversibleHalfMoves()>74)
     {
-        bestMoveIsForceDraw = true;
+        claimDraw = true;
         resEval.constructFromForceDraw();
         return true;
     }
@@ -249,15 +265,36 @@ bool NaiveMovePicker::findBestLine(std::vector<Move> &resLine, PositionEval &res
         std::vector<Move> moves = mover.getKCLegalMoves();
         if (moves.empty())
         {
-            std::cout << "WARNING in NaiveMovePicker::findBestLine: no moves!" << std::endl;
-            return false;
+            std::cout << "WARNING in NaiveMovePicker::findBestLine: no KC moves!?" << std::endl;
+            claimDraw = false;
+            resEval.constructWhenOpponentKingCanBeCaptured();
+            return true;
         }
         else if (mover.isOpponentKingCapturable())
         {
-            // HERE WE NEED TO DEAL WITH STALEMATE!
-            bestMoveIsForceDraw = false;
-            resEval.constructWhenOpponentKingCanBeCaptured();
-            return true;
+            if (!previousPosAvailable)
+            {
+                std::cout << "WARNING: unable to determine stalemate" << std::endl;
+                claimDraw = false;
+                resEval.constructWhenOpponentKingCanBeCaptured();
+                return true;
+            }
+            else
+            {
+                LegalMover stale(&previousPos, true);
+                if (stale.isStalemate())
+                {
+                    claimDraw = true;
+                    resEval.constructFromForceDraw();
+                    return true;
+                }
+                else
+                {
+                    claimDraw = false;
+                    resEval.constructWhenOpponentKingCanBeCaptured();
+                    return true;
+                }
+            }
         }
         else
         {
@@ -271,14 +308,14 @@ bool NaiveMovePicker::findBestLine(std::vector<Move> &resLine, PositionEval &res
 
             if (position.drawCanBeClaimed())
             {
-                bestMoveIsForceDraw = true;
+                claimDraw = true;
                 bestEval.constructFromForceDraw();
                 bestLine = line;
                 first = false;
             }
             else
             {
-                bestMoveIsForceDraw = false;
+                claimDraw = false;
                 first = true;
             }
 
@@ -288,13 +325,13 @@ bool NaiveMovePicker::findBestLine(std::vector<Move> &resLine, PositionEval &res
                 if (depth==1) {eval.constructFromDepthZeroEval(evaluator->evaluatePosition(newPos));}
                 else
                 {
-                    bool bestOpponentMoveIsForceDraw;
-                    findBestLine(line, eval, bestOpponentMoveIsForceDraw, newPos, depth-1);
+                    bool opponentClaimDraw;
+                    findBestLine(line, eval, opponentClaimDraw, newPos, position, true, depth-1);
                 }
 
                 if (first)
                 {
-                    bestMoveIsForceDraw = false;
+                    claimDraw = false;
                     bestMove = move;
                     bestEval = eval;
                     bestLine = line;
@@ -302,14 +339,174 @@ bool NaiveMovePicker::findBestLine(std::vector<Move> &resLine, PositionEval &res
                 }
                 else if (bestEval.isLessThan(eval, turn, true))
                 {
-                    bestMoveIsForceDraw = false;
+                    claimDraw = false;
                     bestMove = move;
                     bestEval = eval;
                     bestLine = line;
                 }
             }
 
-            if (bestMoveIsForceDraw)
+            if (claimDraw)
+            {
+                resLine.clear();
+                resEval.constructFromForceDraw();
+            }
+            else
+            {
+                if (depth==1) {resLine = {bestMove};}
+                else
+                {
+                    resLine = bestLine;
+                    resLine.insert(resLine.begin(), bestMove);
+                }
+                resEval.constructFromEvalAfterBestMovePlayed(bestEval);
+            }
+
+            return true;
+
+        }
+    }
+}
+
+std::string ForcefulMovePicker::createName() const
+{
+    std::string res = "TurbotForceful(";
+    res += Tools::convertToString(depth);
+    res += ", ";
+    res += Tools::convertToString(fdepth);
+    res += ", ";
+    res += Tools::convertToString(gdepth);
+    res += ")";
+    return res;
+}
+
+
+bool ForcefulMovePicker::pickMove(Move &res, bool &claimDraw, const Position &position)
+{
+    std::vector<Move> bestLine;
+    PositionEval eval;
+    if (findBestLine(bestLine, eval, claimDraw, position, position, false, depth, fdepth, gdepth))
+    {
+        if (!claimDraw) {res = bestLine.front();}
+        std::string bestLineString;
+        position.printPGN(bestLineString, bestLine);
+        if (claimDraw) {std::cout << "[Best line: 'Claim Draw'  |  eval = " << eval << "]" << std::endl;}
+        else {std::cout << "[Best line: " << bestLineString << "  |  eval = " << eval << "]" << std::endl;}
+        return true;
+    }
+
+    else
+    {
+        std::cout << "NaiveMovePicker::pickMove failed" << std::endl;
+        return false;
+    }
+}
+
+bool ForcefulMovePicker::findBestLine(std::vector<Move> &resLine, PositionEval &resEval, bool &claimDraw, const Position &position,
+                                      const Position &previousPos, bool previousPosAvailable, uint depth, uint fdepth, uint gdepth) const
+{
+    resLine.clear();
+
+    if (position.getNbReversibleHalfMoves()>74)
+    {
+        claimDraw = true;
+        resEval.constructFromForceDraw();
+        return true;
+    }
+
+    if (depth==0)
+    {
+        std::cout << "WARNING: ForcefulMovePicker::findBestLine is not supposed to be called for depth 0!" << std::endl;
+        return false;
+    }
+    else
+    {
+        LegalMover mover(&position, false);
+        std::vector<Move> moves = mover.getKCLegalMoves();
+        if (moves.empty())
+        {
+            std::cout << "WARNING in ForcefulMovePicker::findBestLine: no moves!" << std::endl;
+            return false;
+        }
+        else if (mover.isOpponentKingCapturable())
+        {
+            if (!previousPosAvailable)
+            {
+                std::cout << "WARNING: unable to determine stalemate" << std::endl;
+                claimDraw = false;
+                resEval.constructWhenOpponentKingCanBeCaptured();
+                return true;
+            }
+            else
+            {
+                LegalMover stale(&previousPos, true);
+                if (stale.isStalemate())
+                {
+                    claimDraw = true;
+                    resEval.constructFromForceDraw();
+                    return true;
+                }
+                else
+                {
+                    claimDraw = false;
+                    resEval.constructWhenOpponentKingCanBeCaptured();
+                    return true;
+                }
+            }
+        }
+        else
+        {
+
+            Position newPos;
+            Move bestMove;
+            Color turn = position.getTurn();
+            PositionEval eval, bestEval;
+            std::vector<Move> line, bestLine;
+            bool first;
+
+            if (position.drawCanBeClaimed())
+            {
+                claimDraw = true;
+                bestEval.constructFromForceDraw();
+                bestLine = line;
+                first = false;
+            }
+            else
+            {
+                claimDraw = false;
+                first = true;
+            }
+
+            for (const auto &move : moves)
+            {
+                newPos = mover.applyMove(move);
+                bool opponentClaimDraw;
+                if (mover.isCapture(move) && ((depth!=1 && fdepth!=0) || (depth==1 && gdepth!=0)))
+                {
+                    if (depth==1) {findBestLine(line, eval, opponentClaimDraw, newPos, position, true, depth, fdepth, gdepth-1);}
+                    else {findBestLine(line, eval, opponentClaimDraw, newPos, position, true, depth, fdepth-1, gdepth);}
+                }
+                else if (depth==1) {eval.constructFromDepthZeroEval(evaluator->evaluatePosition(newPos));}
+                else {findBestLine(line, eval, opponentClaimDraw, newPos, position, true, depth-1, fdepth, this->gdepth);}
+
+                if (first)
+                {
+                    claimDraw = false;
+                    bestMove = move;
+                    bestEval = eval;
+                    bestLine = line;
+                    first = false;
+                }
+                else if (bestEval.isLessThan(eval, turn, true))
+                {
+                    claimDraw = false;
+                    bestMove = move;
+                    bestEval = eval;
+                    bestLine = line;
+                }
+            }
+
+            if (claimDraw)
             {
                 resLine.clear();
                 resEval.constructFromForceDraw();

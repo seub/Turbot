@@ -15,18 +15,22 @@ public:
     Position getPosition() const;
 
     std::string printPGN(bool printTagRoster = true) const;
-    bool exportPGN(std::string fileName = "turbot.pgn", bool printTagRoster = true) const;
+    bool exportPGN(bool printTagRoster = true) const;
     std::string printTagRoster() const;
-    std::string printDate() const;
     std::string printResult() const;
     bool isFinished() const;
     void averageMoveTime(std::chrono::duration<double> &white, std::chrono::duration<double> &black) const;
+    std::string createFilename() const;
 
     bool playMove(const Move &move, const bool &forceDraw, std::chrono::duration<double> moveTime, bool checkLegal=false, bool checkCKLegal=false);
     void playGame();
     
-
 private:
+    void startGame();
+    void play();
+    void finishGame();
+
+
     std::vector<Move> moves;
     std::vector<MovePGN> movePGNs;
     std::vector< std::chrono::duration<double> > moveTimes;
@@ -36,7 +40,7 @@ private:
     GameResult result;
 
     const Player * const whitePlayer, * const blackPlayer;
-    uint year, month, day;
+    std::string date, time;
 };
 
 #endif // GAME_H

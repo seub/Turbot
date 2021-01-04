@@ -9,26 +9,21 @@ int main()
     {
         
         BasicEvaluator evaluator;
-        MinMaxMovePicker minMaxPicker3(&evaluator, 3);
-        NaiveMovePicker naivePicker3(&evaluator, 3), naivePicker4(&evaluator, 4), naivePicker5(&evaluator, 5);
+        NaiveMovePicker naive(&evaluator, 3);
+        ForcefulMovePicker forceful(&evaluator, 3, 0, 1);
 
-        //ComputerPlayer firstPlayer(Color::WHITE, &minMaxPicker3, "Turbot MinMax 3");
-        ComputerPlayer firstPlayer(Color::WHITE, &naivePicker4, "Turbot Naive 4");
-        //HumanPlayer firstPlayer(Color::WHITE);
-        ComputerPlayer secondPlayer(Color::BLACK, &naivePicker5,"Turbot Naive 5");
-        //HumanPlayer secondPlayer(Color::BLACK);
-        Game game( (Player *) &firstPlayer,  (Player *) &secondPlayer);
+        ComputerPlayer computer1(&naive);
+        ComputerPlayer computer2(&forceful);
+        HumanPlayer human;
+        Game game( (Player *) &human,  (Player *) &computer1);
 
         game.playGame();
-
-
     }
     catch (char const *errorMessage)
     {
         std::cout << "CAUGHT EXCEPTION: " << std::endl;
         std::cout << errorMessage << std::endl;
     }
-
 
     return 0;
 }

@@ -6,22 +6,20 @@
 class Player
 {
 public:
-    Player(Color color, std::string name = {}) : name(name), color(color) {}
+    Player() {}
     virtual bool nextMove(Move &move, bool &forceDraw, std::chrono::duration<double> &time, const Position &position) const = 0;
     virtual bool isHuman() const = 0;
     std::string getName() const {return name;}
-    Color getColor() const {return color;}
 
 protected:
     std::string name;
-    Color color;
 };
 
 class HumanPlayer: Player
 {
 public:
-    HumanPlayer(Color color);
-    HumanPlayer(Color color, std::string name) : Player(color, name) {};
+    HumanPlayer();
+    HumanPlayer(const std::string &name);
     bool isHuman() const override {return true;}
     bool nextMove(Move &res,  bool &forceDraw, std::chrono::duration<double> &time, const Position &position) const override;
 };
@@ -29,7 +27,7 @@ public:
 class ComputerPlayer: Player
 {
 public:
-    ComputerPlayer(Color color, MovePicker *picker, std::string name="Turbot");
+    ComputerPlayer(MovePicker *picker);
     bool isHuman() const override {return false;}
     bool nextMove(Move &res,  bool &forceDraw, std::chrono::duration<double> &time, const Position &position) const override;
 

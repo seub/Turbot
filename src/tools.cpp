@@ -58,11 +58,22 @@ int Tools::stoi(const std::string& str, int* p_value, std::size_t* pos, int base
     }
 }
 
-void Tools::currentDate(uint &year, uint &month, uint &day)
+std::string Tools::currentDate()
 {
-    std::time_t t = std::time(0);
-    std::tm* now = std::localtime(&t);
-    year = now->tm_year + 1900;
-    month = now->tm_mon + 1;
-    day = now->tm_mday;
+        auto t = std::time(nullptr);
+        auto tm = *std::localtime(&t);
+
+        std::ostringstream oss;
+        oss << std::put_time(&tm, "%Y.%m.%d");
+        return oss.str();
+}
+
+std::string Tools::currentTime()
+{
+        auto t = std::time(nullptr);
+        auto tm = *std::localtime(&t);
+
+        std::ostringstream oss;
+        oss << std::put_time(&tm, "%H:%M:%S");
+        return oss.str();
 }

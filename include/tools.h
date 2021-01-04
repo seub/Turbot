@@ -2,16 +2,17 @@
 #define TOOLS_H
 
 
-#include <iostream>
-#include <vector>
-#include <string>
-#include <sstream>
-#include <cassert>
 #include <algorithm>
-#include <memory>
-#include <ctime>
-#include <random>
+#include <cassert>
 #include <chrono>
+#include <ctime>
+#include <iomanip>
+#include <iostream>
+#include <memory>
+#include <random>
+#include <sstream>
+#include <string>
+#include <vector>
 
 #include "types.h"
 
@@ -22,7 +23,8 @@ namespace Tools
 int intRound(double x);
 double randDouble(double min, double max);
 int stoi(const std::string& str, int* p_value, std::size_t* pos = 0, int base = 10);
-void currentDate(uint &year, uint &month, uint &day);
+std::string currentDate(); //Format: YYYY.MM.DD
+std::string currentTime(); //Format: hh:mm:ss
 
 template <typename T> T exponentiation(T base, int power)
 {
