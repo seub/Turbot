@@ -3,49 +3,6 @@
 
 #include "evaluator.h"
 #include "legalmover.h"
-//#include <boost/multiprecision/cpp_int.hpp>
-//#include <unordered_map>
-
-
-class Value
-{
-    friend class MinMaxMovePicker;
-
-public:
-    Value() {}
-    Value(double eval): eval(eval){}
-    Value(double eval, const Move &nextMove, uint depth): eval(eval), nextMove(nextMove), depth(depth) {}
-
-private:
-    double eval;
-    Move nextMove;
-    uint depth;
-};
-
-
-class PositionEval
-{
-    friend std::ostream & operator<<(std::ostream &out, const PositionEval &PE);
-    friend class NaiveMovePicker;
-    friend class ForcefulMovePicker;
-
-public:
-    PositionEval();
-    bool operator==(const PositionEval &other) const;
-
-    bool isLessThan(const PositionEval &other, Color side, bool switchSide) const; // "switchSide" is set to true when the two evals were computed from the point of view of the opponent.
-
-private:
-    void constructFromDepthZeroEval(const double &eval);
-    void constructWhenOpponentKingCanBeCaptured();
-    void constructFromEvalAfterBestMovePlayed(const PositionEval &evalAfterBestMovePlayed);
-    void constructFromForceDraw();
-
-    bool forcedMate, forcedGettingMated;
-    uint forcedMateDepth, forcedGettingMatedDepth;
-    double eval;
-    bool forceDraw;
-};
 
 
 class MovePicker
@@ -64,21 +21,21 @@ protected:
 class MinMaxMovePicker: public MovePicker
 {
 public:
-    MinMaxMovePicker(const Evaluator *evaluator, uint depth): MovePicker(evaluator), depth(depth) {}
+    MinMaxMovePicker(const Evaluator *evaluator, uint depth);
     bool pickMove(Move &res, bool &claimDraw, const Position &position) override;
     bool pickMove(std::vector<Value> &res, const Position &position, const std::vector<Move> &moves, uint depth);
     std::string createName() const override;
 
 private:
-    //std::unordered_map< Position, std::vector<Value> * > evaluated_res;
+    std::unordered_map< Position, std::vector<Value> * > evaluated_res;
     uint depth;
 };
 
 
-class NaiveMovePicker: public MovePicker
+class BasicMovePicker: public MovePicker
 {
 public:
-    NaiveMovePicker(const Evaluator *evaluator, uint depth): MovePicker(evaluator), depth(depth) {}
+    BasicMovePicker(const Evaluator *evaluator, uint depth): MovePicker(evaluator), depth(depth) {}
     bool pickMove(Move &res, bool &claimDraw, const Position &position) override;
     bool findBestLine(std::vector<Move> &res, PositionEval &eval, bool &claimDraw, const Position &position,
                       const Position &previousPos, bool previousPosAvailable, uint depth) const; //NB: Previous position is only needed to deal with stalemate :(
@@ -101,6 +58,21 @@ public:
 
 private:
     uint depth, fdepth, gdepth;
+};
+
+class BasicMovePickerHash: public MovePicker
+{
+public:
+    BasicMovePickerHash(const Evaluator *evaluator, uint depth);
+    bool pickMove(Move &res, bool &claimDraw, const Position &position) override;
+    bool findBestLine(std::vector<Move> &res, PositionEval &eval, bool &claimDraw, const Position &position,
+                      const Position &previousPos, bool previousPosAvailable, uint depth);
+    std::string createName() const override;
+
+private:
+    uint depth;
+    std::unordered_map< Position, PositionEvalRich > alreadyEvaluated;
+    uint nbPositions, nbRepetitions;
 };
 
 

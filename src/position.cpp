@@ -1,6 +1,7 @@
 # include "position.h"
 # include "boardhelper.h"
 # include "movepicker.h"
+# include "zobrist.h"
 
 Position::Position(bool gamestart) : board(gamestart)
 {
@@ -296,20 +297,59 @@ bool Position::drawCanBeClaimed() const
     return (drawOffered || threeFoldRepetition() || (nbReversibleHalfMoves > 49));
 }
 
-/*std::size_t Position::getHash() const
+std::size_t Position::getHash() const
 {
-    BoardHelper bh(&board);
-    boost::multiprecision::uint512_t res =  bh.getFullboard();
-    res <<=1;
-    if(turn == Color::WHITE)
+    return ZobristPosition(this, BoardHelper(&board)).getHash();
+}
+
+
+ZobristPosition::ZobristPosition(const Position *position, const BoardHelper &helper)
+{
+    for (uint k=0; k!=64; ++k)
     {
-        res += 1;
+        pieces[0][0][k] = helper.kings[k] && helper.whitePieces[k];
+        pieces[0][1][k] = helper.kings[k] && helper.blackPieces[k];
+        pieces[1][0][k] = helper.queens[k] && helper.whitePieces[k];
+        pieces[1][1][k] = helper.queens[k] && helper.blackPieces[k];
+        pieces[2][0][k] = helper.rooks[k] && helper.whitePieces[k];
+        pieces[2][1][k] = helper.rooks[k] && helper.blackPieces[k];
+        pieces[3][0][k] = helper.bishops[k] && helper.whitePieces[k];
+        pieces[3][1][k] = helper.bishops[k] && helper.blackPieces[k];
+        pieces[4][0][k] = helper.knights[k] && helper.whitePieces[k];
+        pieces[4][1][k] = helper.knights[k] && helper.blackPieces[k];
+        pieces[5][0][k] = helper.pawns[k] && helper.whitePieces[k];
+        pieces[5][1][k] = helper.pawns[k] && helper.blackPieces[k];
     }
-    std::size_t re = 0;
-    while(res)
+
+    castlingRights[0] = position->castlingRights[0];
+    castlingRights[1] = position->castlingRights[1];
+    castlingRights[2] = position->castlingRights[2];
+    castlingRights[3] = position->castlingRights[3];
+
+    for (uint i=0; i!=8; ++i) {enPassantFile[i] = false;}
+    if (position->enPassantPossible)
     {
-        re += (size_t) (res %  (((boost::multiprecision::uint512_t) 1) << 64));
-        res >>=64;
+        uint enPassantFileIndex = Square(position->enPassantTargetSquare).fileIndex();
+        enPassantFile[enPassantFileIndex] = true;
     }
-    return re;
-}*/
+
+    side = (position->turn==Color::WHITE);
+}
+
+std::size_t ZobristPosition::getHash() const
+{
+    std::size_t res = 0;
+
+    if (!Zobrist::ZOBRIST_NUMBERS_GENERATED) {throw("Zobrist numbers have not been generated");}
+
+    for (uint i=0; i!=6; ++i) {for (uint j=0; j!=2; ++j) {for (uint k=0; k!=64; ++k) {if (pieces[i][j][k]) {res ^= Zobrist::ZOBRIST_PIECES[i][j][k];}}}}
+    for (uint i=0; i!=4; ++i) {if (castlingRights[i]) {res ^= Zobrist::ZOBRIST_CASTLING_RIGHTS[i];}}
+    for (uint i=0; i!=8; ++i) {if (enPassantFile[i]) {res ^= Zobrist::ZOBRIST_EN_PASSANT_FILE[i];}}
+    if (side) {res ^= Zobrist::ZOBRIST_SIDE;}
+
+    return res;
+}
+
+
+
+

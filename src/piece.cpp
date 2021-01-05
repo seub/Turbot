@@ -51,7 +51,7 @@ char Piece::name() const
 
 char Piece::name(PieceType type)
 {
-    return piecenames[uint(type)];
+    return pieceNames[uint(type)];
 }
 
 bool Piece::fromName(PieceType &res, char c)
@@ -72,7 +72,7 @@ bool Piece::fromName(PieceType &res, char c)
 
 char Piece::toFENchar() const
 {
-    return FENpiecenames[uint(type) + 7*(color==Color::BLACK)];
+    return FENpieceNames[uint(type) + 7*(color==Color::BLACK)];
 }
 
 std::ostream & operator <<(std::ostream &out, const Piece &piece)

@@ -10,8 +10,9 @@ class LegalMover
 {
     friend class MovePGN;
     friend class Position;
-    friend class NaiveMovePicker;
+    friend class BasicMovePicker;
     friend class ForcefulMovePicker;
+    friend class BasicMovePickerHash;
 
 public:
     explicit LegalMover(const Position * const position, bool generateLegalMoves = true);

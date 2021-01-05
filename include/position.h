@@ -7,13 +7,11 @@
 
 class MovePicker;
 
-
-//#include <boost/multiprecision/cpp_int.hpp>
-
 class Position
 {
     friend std::ostream & operator<<(std::ostream &out, const Position &p);
     friend class LegalMover;
+    friend class ZobristPosition;
 
 public:
     Position(bool gamestart=false);
@@ -33,7 +31,6 @@ public:
 
     bool applyMove(Position &res, const Move &m, bool checkLegal = false, bool checkKCLegal = false) const;
     bool pickBestMove(Move &res, bool &bestMoveIsForceDraw, MovePicker *picker) const;
-    //std::size_t getHash() const;
     bool getLegalMoves(std::vector<Move> &res) const;
     bool getKCLegalMoves(std::vector<Move> &res) const;
 
@@ -43,6 +40,8 @@ public:
     bool threeFoldRepetition() const; // Says whether a 3-fold repetition has occurred at any points in the past
     bool drawCanBeClaimed() const;
 
+    std::size_t getHash() const;
+
 private:
     void clear();
     void reset();
@@ -51,7 +50,7 @@ private:
 
     Board board;
     Color turn;
-    std::array<bool, 4> castlingRights;// White Kside, White Qside, Black Kside, Black Qside
+    std::array<bool, 4> castlingRights; // White short, White long, Black short, Black long
     bool enPassantPossible;
     uint enPassantTargetSquare;
     uint moveNumber;
@@ -63,7 +62,24 @@ private:
     bool drawOffered; // Records whether a draw offer is on the table
 };
 
-/*namespace std
+
+class ZobristPosition
+{
+
+public:
+    ZobristPosition() {}
+    ZobristPosition(const Position *position, const BoardHelper &helper);
+
+    std::size_t getHash() const;
+
+private:
+    bool pieces[6][2][64]; // [piece type][side to move][square]
+    bool castlingRights[4]; // White short, White long, Black short, Black long
+    bool enPassantFile[8]; // En passant file where capture is possible
+    bool side; // 0=White, 1=Black
+};
+
+namespace std
 {
     template<> struct hash<Position>
     {
@@ -72,6 +88,6 @@ private:
             return position.getHash();
         }
     };
-}*/
+}
 
 #endif // POSITION_H

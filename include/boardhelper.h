@@ -11,17 +11,16 @@ class BoardHelper
 {
     friend class LegalMover;
     friend class MovePGN;
+    friend class ZobristPosition;
 
 public:
     explicit BoardHelper(const Board * const board);
     BoardHelper() = delete;
     BoardHelper(const BoardHelper &) = delete;
     BoardHelper & operator=(BoardHelper) = delete;
-    //boost::multiprecision::uint512_t getFullboard() { return fullboard;}
 
 private:
     void updateBitboards();
-    //boost::multiprecision::uint512_t fullboard;
     bitboard kings, queens, rooks, bishops, knights, pawns;
     bitboard whitePieces, blackPieces, occupiedSquares;
     const Board * const  board;

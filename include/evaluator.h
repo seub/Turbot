@@ -2,20 +2,76 @@
 #define EVALUATOR_H
 
 
-//#include <unordered_map>
-
 #include "piece.h"
 #include "position.h"
 
-//#include <boost/multiprecision/cpp_int.hpp>
+
+class Value
+{
+    friend class MinMaxMovePicker;
+
+public:
+    Value() {}
+    Value(double eval): eval(eval){}
+    Value(double eval, const Move &nextMove, uint depth): eval(eval), nextMove(nextMove), depth(depth) {}
+
+private:
+    double eval;
+    Move nextMove;
+    uint depth;
+};
+
+
+class PositionEval
+{
+    friend std::ostream & operator<<(std::ostream &out, const PositionEval &PE);
+    friend class BasicMovePicker;
+    friend class ForcefulMovePicker;
+    friend class BasicMovePickerHash;
+
+public:
+    PositionEval();
+    bool operator==(const PositionEval &other) const;
+
+    bool isLessThan(const PositionEval &other, Color side, bool switchSide) const; // "switchSide" is set to true when the two evals were computed from the point of view of the opponent.
+
+private:
+    void constructFromDepthZeroEval(const double &eval);
+    void constructWhenOpponentKingCanBeCaptured();
+    void constructFromEvalAfterBestMovePlayed(const PositionEval &evalAfterBestMovePlayed);
+    void constructFromForceDraw();
+
+    bool forcedMate, forcedGettingMated;
+    uint forcedMateDepth, forcedGettingMatedDepth;
+    double eval;
+    bool forceDraw;
+};
+
+
+
+class PositionEvalRich : PositionEval
+{
+    friend class BasicMovePickerHash;
+
+public:
+    PositionEvalRich() {}
+    PositionEvalRich(const PositionEval &posEval, const std::vector<Move> &bestLine, uint depth) : PositionEval(posEval), bestLine(bestLine), depth(depth) {}
+
+private:
+    std::vector<Move> bestLine;
+    uint depth;
+};
+
+
+
 
 class Evaluator
 {
 public:
     Evaluator() {}
-    virtual double evaluatePosition(const Position &position) const = 0; // Pure virtual function --> Evaluator is an abstract class
+    virtual double evaluatePosition(const Position &position) const = 0;
+
 protected:
-    //std::unordered_map<Position,double> evaluated_res;
 };
 
 
@@ -24,7 +80,7 @@ class BasicEvaluator: public Evaluator
 public:
     BasicEvaluator();
 
-double evaluatePosition(const Position &position) const override;
+    double evaluatePosition(const Position &position) const override;
 
 private:
     std::unordered_map<PieceType, double> pieceValues;

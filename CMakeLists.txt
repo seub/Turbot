@@ -28,6 +28,7 @@ set(SOURCES
     src/position.cpp
     src/square.cpp
     src/tools.cpp
+    src/zobrist.cpp
     )
 
 add_executable(Turbot ${SOURCES})

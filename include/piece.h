@@ -29,8 +29,8 @@ public:
     char toFENchar() const;
 
 private:
-    static inline const std::vector<char> piecenames = {'E', 'K', 'Q', 'R', 'B', 'N', 'P'};
-    static inline const std::vector<char> FENpiecenames = {(char) 0, 'K', 'Q', 'R', 'B', 'N', 'P', (char) 0, 'k', 'q', 'r', 'b', 'n', 'p'};
+    static inline const std::array<char, 7> pieceNames = {'E', 'K', 'Q', 'R', 'B', 'N', 'P'};
+    static inline const std::array<char, 14> FENpieceNames = {(char) 0, 'K', 'Q', 'R', 'B', 'N', 'P', (char) 0, 'k', 'q', 'r', 'b', 'n', 'p'};
     PieceType type;
     Color color;
 };
