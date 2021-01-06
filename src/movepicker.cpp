@@ -424,7 +424,7 @@ bool ForcefulMovePicker::findBestLine(std::vector<Move> &resLine, PositionEval &
     }
 }
 
-BasicMovePickerHash::BasicMovePickerHash(const Evaluator *evaluator, uint depth) : MovePicker(evaluator), depth(depth)
+BasicMovePickerHash::BasicMovePickerHash(const Evaluator *evaluator, uint depth) : MovePicker(evaluator), maxDepth(depth), maxDrawClaimDepth(2)
 {
     if (!Zobrist::ZOBRIST_NUMBERS_GENERATED) {Zobrist::GENERATE_ZOBRIST_NUMBERS();}
 }
@@ -433,7 +433,7 @@ BasicMovePickerHash::BasicMovePickerHash(const Evaluator *evaluator, uint depth)
 std::string BasicMovePickerHash::createName() const
 {
     std::string res = "TurbotBasicHash(";
-    res += Tools::convertToString(depth);
+    res += Tools::convertToString(maxDepth);
     res += ")";
     return res;
 }
@@ -446,7 +446,7 @@ bool BasicMovePickerHash::pickMove(Move &res, bool &claimDraw, const Position &p
 
     std::vector<Move> bestLine;
     PositionEval eval;
-    if (findBestLine(bestLine, eval, claimDraw, position, position, false, depth))
+    if (findBestLine(bestLine, eval, claimDraw, position, position, false, maxDepth, maxDrawClaimDepth))
     {
         if (!claimDraw) {res = bestLine.front();}
         std::string bestLineString;
@@ -465,10 +465,100 @@ bool BasicMovePickerHash::pickMove(Move &res, bool &claimDraw, const Position &p
 }
 
 
-bool BasicMovePickerHash::findBestLine(std::vector<Move> &resLine, PositionEval &resEval, bool &claimDraw,
-                                       const Position &position, const Position &previousPos, bool previousPosAvailable, uint depth)
+bool BasicMovePickerHash::findBestLineNoDrawClaim(std::vector<Move> &resLine, PositionEval &resEval,
+                                                  const Position &position, const Position &previousPos, bool previousPosAvailable, uint depth)
 {
     ++nbPositions;
+
+    resLine.clear();
+
+    auto it = alreadyEvaluated.find(position);
+    if( (it!=alreadyEvaluated.end()) &&  ((it->second).depth >= depth) )
+    {
+        ++nbRepetitions;
+        PositionEval eval(it->second);
+        resLine = it->second.bestLine;
+        resEval = eval;
+        return true;
+    }
+
+    LegalMover mover(&position, false);
+    std::vector<Move> moves = mover.getKCLegalMoves();
+    if (moves.empty())
+    {
+        std::cout << "WARNING in BasicMovePickerHash::findBestLineNoDrawClaim: no KC moves!?" << std::endl;
+        if (mover.isCheck()) {resEval.constructFromMated();}
+        else {resEval.constructFromForceDraw();}
+        alreadyEvaluated[position] = PositionEvalRich(resEval, resLine, depth);
+        return true;
+    }
+    else if (mover.isOpponentKingCapturable())
+    {
+        if (!previousPosAvailable)
+        {
+            std::cout << "WARNING in BasicMovePickerHash::findBestLineNoDrawClaim: Unable to determine stalemate!" << std::endl;
+            resEval.constructWhenOpponentKingCanBeCaptured();
+            alreadyEvaluated[position] = PositionEvalRich(resEval, resLine, depth);
+            return true;
+        }
+        else
+        {
+            LegalMover stale(&previousPos, true);
+            if (stale.isStalemate()) {resEval.constructFromForceDraw();}
+            else {resEval.constructWhenOpponentKingCanBeCaptured();}
+            alreadyEvaluated[position] = PositionEvalRich(resEval, resLine, depth);
+            return true;
+        }
+    }
+    else
+    {
+        Position nextPos;
+        Move bestMove;
+        Color turn = position.getTurn();
+        PositionEval eval, bestEval;
+        std::vector<Move> opponentLine, opponentBestLine;
+        bool first = true;
+
+        for (const auto &move : moves)
+        {
+            nextPos = mover.applyMove(move);
+            if (depth==1)
+            {
+                opponentLine.clear();
+                eval.constructFromDepthZeroEval(evaluator->evaluatePosition(nextPos));
+            }
+            else if (!findBestLineNoDrawClaim(opponentLine, eval, nextPos, position, true, depth-1)) {return false;}
+
+            if (first)
+            {
+                bestMove = move;
+                bestEval = eval;
+                opponentBestLine = opponentLine;
+                first = false;
+            }
+            else if (bestEval.isLessThan(eval, turn, true))
+            {
+                bestMove = move;
+                bestEval = eval;
+                opponentBestLine = opponentLine;
+            }
+        }
+
+        resLine = opponentBestLine;
+        resLine.insert(resLine.begin(), bestMove);
+        resEval.constructFromEvalAfterBestMovePlayed(bestEval);
+
+        alreadyEvaluated[position] = PositionEvalRich(resEval, resLine, depth);
+        return true;
+    }
+}
+
+
+bool BasicMovePickerHash::findBestLine(std::vector<Move> &resLine, PositionEval &resEval, bool &claimDraw, const Position &position,
+                                       const Position &previousPos, bool previousPosAvailable, uint depth, uint drawClaimDepth)
+{
+    ++nbPositions;
+
     resLine.clear();
 
     if (position.getNbReversibleHalfMoves()>74)
@@ -478,143 +568,105 @@ bool BasicMovePickerHash::findBestLine(std::vector<Move> &resLine, PositionEval 
         return true;
     }
 
-    if (depth==0)
+    if (drawClaimDepth==0) {return findBestLineNoDrawClaim(resLine, resEval, position, previousPos, previousPosAvailable, depth);}
+    else
     {
-        std::cout << "WARNING: BasicMovePicker::findBestLine is not supposed to be called for depth 0!" << std::endl;
-        return false;
-    }
 
-    auto it = alreadyEvaluated.find(position);
-    if( (it!=alreadyEvaluated.end()) &&  ((it->second).depth >= depth))
-    {
-        ++nbRepetitions;
-        PositionEval eval(it->second);
-        PositionEval drawEval;
-        drawEval.constructFromForceDraw();
-        if (position.drawCanBeClaimed() && eval.isLessThan(drawEval, position.getTurn(), false))
+        LegalMover mover(&position, false);
+        std::vector<Move> moves = mover.getKCLegalMoves();
+        if (moves.empty())
         {
-            claimDraw = true;
-            resEval = drawEval;
-            resLine.clear();
-            return true;
-        }
-        else
-        {
-            claimDraw = false;
-            resLine = it->second.bestLine;
-            resEval = eval;
-            return true;
-        }
-    }
-
-
-
-    LegalMover mover(&position, false);
-    std::vector<Move> moves = mover.getKCLegalMoves();
-    if (moves.empty())
-    {
-        std::cout << "WARNING in BasicMovePicker::findBestLine: no KC moves!?" << std::endl;
-        claimDraw = false;
-        resEval.constructWhenOpponentKingCanBeCaptured();
-        return true;
-    }
-    else if (mover.isOpponentKingCapturable())
-    {
-        if (!previousPosAvailable)
-        {
-            std::cout << "WARNING: unable to determine stalemate" << std::endl;
-            claimDraw = false;
-            resEval.constructWhenOpponentKingCanBeCaptured();
+            std::cout << "WARNING in BasicMovePickerHash::findBestLine: no KC moves!?" << std::endl;
+            if (mover.isCheck()) {resEval.constructFromMated();}
+            else {resEval.constructFromForceDraw();}
             alreadyEvaluated[position] = PositionEvalRich(resEval, resLine, depth);
             return true;
         }
-        else
+        else if (mover.isOpponentKingCapturable())
         {
-            LegalMover stale(&previousPos, true);
-            if (stale.isStalemate())
+            if (!previousPosAvailable)
             {
-                claimDraw = true;
-                resEval.constructFromForceDraw();
-                alreadyEvaluated[position] = PositionEvalRich(resEval, resLine, depth);
-                return true;
-            }
-            else
-            {
-                claimDraw = false;
+                std::cout << "WARNING in BasicMovePickerHash::findBestLine: Unable to determine stalemate!" << std::endl;
                 resEval.constructWhenOpponentKingCanBeCaptured();
                 alreadyEvaluated[position] = PositionEvalRich(resEval, resLine, depth);
                 return true;
             }
-        }
-    }
-    else
-    {
-
-        Position newPos;
-        Move bestMove;
-        Color turn = position.getTurn();
-        PositionEval eval, bestEval;
-        std::vector<Move> line, bestLine;
-        bool first;
-
-        if (position.drawCanBeClaimed())
-        {
-            claimDraw = true;
-            bestEval.constructFromForceDraw();
-            bestLine = line;
-            first = false;
+            else
+            {
+                LegalMover stale(&previousPos, true);
+                if (stale.isStalemate()) {resEval.constructFromForceDraw();}
+                else {resEval.constructWhenOpponentKingCanBeCaptured();}
+                alreadyEvaluated[position] = PositionEvalRich(resEval, resLine, depth);
+                return true;
+            }
         }
         else
         {
-            claimDraw = false;
-            first = true;
-        }
+            Position nextPos;
+            Move bestMove;
+            Color turn = position.getTurn();
+            PositionEval eval, bestEval;
+            std::vector<Move> opponentLine, opponentBestLine;
+            bool first;
 
-        for (const auto &move : moves)
-        {
-            newPos = mover.applyMove(move);
-            if (depth==1) {eval.constructFromDepthZeroEval(evaluator->evaluatePosition(newPos));}
-            else
+            if (position.drawCanBeClaimed())
             {
-                bool opponentClaimDraw;
-                findBestLine(line, eval, opponentClaimDraw, newPos, position, true, depth-1);
-            }
-
-            if (first)
-            {
-                claimDraw = false;
-                bestMove = move;
-                bestEval = eval;
-                bestLine = line;
+                claimDraw = true;
+                opponentBestLine.clear();
+                bestEval.constructFromForceDraw();
                 first = false;
             }
-            else if (bestEval.isLessThan(eval, turn, true))
-            {
-                claimDraw = false;
-                bestMove = move;
-                bestEval = eval;
-                bestLine = line;
-            }
-        }
-
-        if (claimDraw)
-        {
-            resLine.clear();
-            resEval.constructFromForceDraw();
-        }
-        else
-        {
-            if (depth==1) {resLine = {bestMove};}
             else
             {
-                resLine = bestLine;
-                resLine.insert(resLine.begin(), bestMove);
+                claimDraw = false;
+                first = true;
             }
-            resEval.constructFromEvalAfterBestMovePlayed(bestEval);
+
+            for (const auto &move : moves)
+            {
+                nextPos = mover.applyMove(move);
+                if (depth==1)
+                {
+                    opponentLine.clear();
+                    eval.constructFromDepthZeroEval(evaluator->evaluatePosition(nextPos));
+                }
+                else
+                {
+                    bool opponentClaimDraw;
+                    if (!findBestLine(opponentLine, eval, opponentClaimDraw, nextPos, position, true, depth-1, drawClaimDepth-1)) {return false;}
+                }
+
+                if (first)
+                {
+                    claimDraw = false;
+                    bestMove = move;
+                    bestEval = eval;
+                    opponentBestLine = opponentLine;
+                    first = false;
+                }
+                else if (bestEval.isLessThan(eval, turn, true))
+                {
+                    claimDraw = false;
+                    bestMove = move;
+                    bestEval = eval;
+                    opponentBestLine = opponentLine;
+                }
+            }
+
+
+            if (claimDraw)
+            {
+                resLine.clear();
+                resEval.constructFromForceDraw();
+            }
+            else
+            {
+                resLine = opponentBestLine;
+                resLine.insert(resLine.begin(), bestMove);
+                resEval.constructFromEvalAfterBestMovePlayed(bestEval);
+            }
+
+            return true;
         }
-
-        alreadyEvaluated[position] = PositionEvalRich(resEval, resLine, depth);
-        return true;
-
     }
 }

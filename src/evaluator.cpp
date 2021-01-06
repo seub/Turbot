@@ -79,6 +79,14 @@ void PositionEval::constructWhenOpponentKingCanBeCaptured()
     forceDraw = false;
 }
 
+void PositionEval::constructFromMated()
+{
+    forcedMate = false;
+    forcedGettingMated = true;
+    forcedGettingMatedDepth = 0;
+    forceDraw = false;
+}
+
 void PositionEval::constructFromEvalAfterBestMovePlayed(const PositionEval &evalAfterBestMovePlayed)
 {
     forceDraw = false;

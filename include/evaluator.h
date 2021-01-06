@@ -40,6 +40,7 @@ private:
     void constructWhenOpponentKingCanBeCaptured();
     void constructFromEvalAfterBestMovePlayed(const PositionEval &evalAfterBestMovePlayed);
     void constructFromForceDraw();
+    void constructFromMated();
 
     bool forcedMate, forcedGettingMated;
     uint forcedMateDepth, forcedGettingMatedDepth;

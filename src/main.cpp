@@ -8,15 +8,18 @@ int main()
     {
         
         BasicEvaluator evaluator;
-        BasicMovePicker naive(&evaluator, 4);
-        BasicMovePickerHash naivehash(&evaluator, 4);
+        BasicMovePicker naive(&evaluator, 3);
+        BasicMovePickerHash naivehash(&evaluator, 3);
 
         ComputerPlayer computer1(&naive);
         ComputerPlayer computer2(&naivehash);
         //HumanPlayer human;
 
-        Game game( (Player *) &computer1,  (Player *) &computer2);
+        Game game( (Player *) &computer1,  (Player *) &computer1);
         game.playGame();
+
+        Game game2( (Player *) &computer2,  (Player *) &computer2);
+        game2.playGame();
     }
     catch (char const *errorMessage)
     {

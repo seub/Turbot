@@ -65,12 +65,16 @@ class BasicMovePickerHash: public MovePicker
 public:
     BasicMovePickerHash(const Evaluator *evaluator, uint depth);
     bool pickMove(Move &res, bool &claimDraw, const Position &position) override;
-    bool findBestLine(std::vector<Move> &res, PositionEval &eval, bool &claimDraw, const Position &position,
-                      const Position &previousPos, bool previousPosAvailable, uint depth);
+
     std::string createName() const override;
 
 private:
-    uint depth;
+    bool findBestLineNoDrawClaim(std::vector<Move> &resLine, PositionEval &resEval, const Position &position,
+                      const Position &previousPos, bool previousPosAvailable, uint depth);
+    bool findBestLine(std::vector<Move> &resLine, PositionEval &resEval, bool &claimDraw, const Position &position,
+                      const Position &previousPos, bool previousPosAvailable, uint depth, uint drawClaimDepth); //Possibility of draw claims are ignored for positions at depth drawClaimDepth and beyond
+
+    const uint maxDepth, maxDrawClaimDepth;
     std::unordered_map< Position, PositionEvalRich > alreadyEvaluated;
     uint nbPositions, nbRepetitions;
 };
