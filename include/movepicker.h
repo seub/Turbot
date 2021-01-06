@@ -3,7 +3,7 @@
 
 #include "evaluator.h"
 #include "legalmover.h"
-
+#include "positioneval.h"
 
 class MovePicker
 {
@@ -15,20 +15,6 @@ public:
 
 protected:
     const Evaluator * const evaluator;
-};
-
-
-class MinMaxMovePicker: public MovePicker
-{
-public:
-    MinMaxMovePicker(const Evaluator *evaluator, uint depth);
-    bool pickMove(Move &res, bool &claimDraw, const Position &position) override;
-    bool pickMove(std::vector<Value> &res, const Position &position, const std::vector<Move> &moves, uint depth);
-    std::string createName() const override;
-
-private:
-    std::unordered_map< Position, std::vector<Value> * > evaluated_res;
-    uint depth;
 };
 
 
@@ -69,12 +55,10 @@ public:
     std::string createName() const override;
 
 private:
-    bool findBestLineNoDrawClaim(std::vector<Move> &resLine, PositionEval &resEval, const Position &position,
-                      const Position &previousPos, bool previousPosAvailable, uint depth);
     bool findBestLine(std::vector<Move> &resLine, PositionEval &resEval, bool &claimDraw, const Position &position,
-                      const Position &previousPos, bool previousPosAvailable, uint depth, uint drawClaimDepth); //Possibility of draw claims are ignored for positions at depth drawClaimDepth and beyond
+                      const Position &previousPos, bool previousPosAvailable, uint depth);
 
-    const uint maxDepth, maxDrawClaimDepth;
+    const uint maxDepth;
     std::unordered_map< Position, PositionEvalRich > alreadyEvaluated;
     uint nbPositions, nbRepetitions;
 };

@@ -5,10 +5,12 @@ Game::Game(const Player * const whitePlayer, const Player * const blackPlayer) :
 {
     moves.clear();
     movePGNs.clear();
+    pastBoards.clear();
     moveTimes.clear();
     turn = Color::WHITE;
     currentPosition = Position(true);
     moveNumber = 1;
+    drawOffered = false;
     result = GameResult::NOT_FINISHED;
 
     date = Tools::currentDate();
@@ -54,6 +56,9 @@ bool Game::playMove(const Move &move, const bool &forceDraw, std::chrono::durati
             if (newMover.isCheckmate()) {result = (turn==Color::WHITE) ? GameResult::BLACK_WINS : GameResult::WHITE_WINS;}
             else if (newMover.isStalemate()) {result = GameResult::DRAW;}
             else if (newPosition.getNbReversibleHalfMoves()>74) {result = GameResult::DRAW;}
+
+            pastBoards.push_back(newPosition.getBoard());
+            newPosition.setDrawClaimable((newPosition.getNbReversibleHalfMoves()>49) || drawOffered || Tools::containsTriplicates(pastBoards));
 
             currentPosition = newPosition;
 

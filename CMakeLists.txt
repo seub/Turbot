@@ -26,6 +26,7 @@ set(SOURCES
     src/piece.cpp
     src/player.cpp
     src/position.cpp
+    src/positioneval.cpp
     src/square.cpp
     src/tools.cpp
     src/zobrist.cpp

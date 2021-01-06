@@ -11,7 +11,7 @@ class BoardHelper
 {
     friend class LegalMover;
     friend class MovePGN;
-    friend class ZobristPosition;
+    friend class PositionZobrist;
 
 public:
     explicit BoardHelper(const Board * const board);

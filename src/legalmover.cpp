@@ -28,13 +28,13 @@ bool LegalMover::initialize()
 
     if (position->turn==Color::WHITE)
     {
-        opponentKsideCastleUnderAttack = (squaresAttacked[60] || squaresAttacked[61] || squaresAttacked[62]);
-        opponentQsideCastleUnderAttack = (squaresAttacked[58] || squaresAttacked[59] || squaresAttacked[60]);
+        opponentShortCastleUnderAttack = (squaresAttacked[60] || squaresAttacked[61] || squaresAttacked[62]);
+        opponentLongCastleUnderAttack = (squaresAttacked[58] || squaresAttacked[59] || squaresAttacked[60]);
     }
     else
     {
-        opponentKsideCastleUnderAttack = (squaresAttacked[4] || squaresAttacked[5] || squaresAttacked[6]);
-        opponentQsideCastleUnderAttack = (squaresAttacked[2] || squaresAttacked[3] || squaresAttacked[4]);
+        opponentShortCastleUnderAttack = (squaresAttacked[4] || squaresAttacked[5] || squaresAttacked[6]);
+        opponentLongCastleUnderAttack = (squaresAttacked[2] || squaresAttacked[3] || squaresAttacked[4]);
     }
     return res;
 }
@@ -603,21 +603,21 @@ Position LegalMover::applyMove(const Move &m) const
     }
 
     //Castling and losing castling rights with King move
-    res.enPassantKingCapturePossibleK = false;
-    res.enPassantKingCapturePossibleQ = false;
+    res.enPassantKingShort = false;
+    res.enPassantKingLong = false;
     if (p.isKing())
     {
         if (target==origin-2)
         {
             res.board.pieces[target+1] = res.board.pieces[target-2];
             res.board.pieces[target-2] = Piece();
-            res.enPassantKingCapturePossibleQ = true;
+            res.enPassantKingLong = true;
         }
         else if (target==origin+2)
         {
             res.board.pieces[target-1] = res.board.pieces[target+1];
             res.board.pieces[target+1] = Piece();
-            res.enPassantKingCapturePossibleK = true;
+            res.enPassantKingShort = true;
         }
 
         if (white)
@@ -642,7 +642,7 @@ Position LegalMover::applyMove(const Move &m) const
     }
 
     //En Passant King Capture
-    if (position->enPassantKingCapturePossibleK)
+    if (position->enPassantKingShort)
     {
         if (white)
         {
@@ -653,7 +653,7 @@ Position LegalMover::applyMove(const Move &m) const
             if ((target==4) || (target==5)) {res.board.pieces[6] = Piece();}
         }
     }
-    else if (position->enPassantKingCapturePossibleQ)
+    else if (position->enPassantKingLong)
     {
         if (white)
         {
@@ -665,8 +665,8 @@ Position LegalMover::applyMove(const Move &m) const
         }
     }
 
-    res.pastBoards = position->pastBoards;
-    res.pastBoards.push_back(res.board);
+    // Update isDrawClaimable will be handled by the class Game!
+
 
     return res;
 }
@@ -697,7 +697,7 @@ bool LegalMover::isLegalConstruct(const Move &m, bool checkKClegal) //NB: Legal 
 bool LegalMover::isOpponentKingCapturable() const
 {
     return (opponentKingUnderAttack
-            || (position->enPassantKingCapturePossibleK && opponentKsideCastleUnderAttack) || (position->enPassantKingCapturePossibleQ && opponentQsideCastleUnderAttack));
+            || (position->enPassantKingShort && opponentShortCastleUnderAttack) || (position->enPassantKingLong && opponentLongCastleUnderAttack));
 }
 
 

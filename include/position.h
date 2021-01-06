@@ -11,7 +11,7 @@ class Position
 {
     friend std::ostream & operator<<(std::ostream &out, const Position &p);
     friend class LegalMover;
-    friend class ZobristPosition;
+    friend class PositionZobrist;
 
 public:
     Position(bool gamestart=false);
@@ -37,8 +37,8 @@ public:
     bool printPGN(std::string &res, const Move &move, bool printMoveNumber) const;
     bool printPGN(std::string &res, const std::vector<Move> &line) const;
 
-    bool threeFoldRepetition() const; // Says whether a 3-fold repetition has occurred at any points in the past
-    bool drawCanBeClaimed() const;
+    void setDrawClaimable(bool b);
+    bool getDrawClaimable() const;
 
     std::size_t getHash() const;
 
@@ -57,37 +57,75 @@ private:
     uint nbReversibleHalfMoves; // For 50 and 75 move rules for draw
 
     // The information below is usually not included in a "position", but we need it for our implementation
-    bool enPassantKingCapturePossibleK, enPassantKingCapturePossibleQ; // In "KC chess", we're allowing "en passant king capture" when the opponent king castled illegally.
-    std::vector<Board> pastBoards; // Necessary for threefold repetition rule
-    bool drawOffered; // Records whether a draw offer is on the table
+    bool enPassantKingShort, enPassantKingLong; // In "KC chess", we're allowing "en passant king capture" when the opponent king castled illegally.
+    bool drawClaimable; // Records whether a draw can be claimed
 };
 
 
-class ZobristPosition
+namespace std
+{
+template<> struct hash<Position>
+{
+    std::size_t operator()(Position const& position) const noexcept
+    {
+        return position.getHash();
+    }
+};
+}
+
+
+class PositionZobrist
 {
 
 public:
-    ZobristPosition() {}
-    ZobristPosition(const Position *position, const BoardHelper &helper);
+    PositionZobrist() {}
+    PositionZobrist(const Position *position, const BoardHelper &helper);
+
+    std::size_t recalculateHash() const;
+
+private:
+    bool pieces[6][2][64]; // [piece type][side to move][square] !!! 0=Black, 1=White !!!
+    bool castlingRights[4]; // White short, White long, Black short, Black long
+    bool enPassantFile[8]; // En passant file where capture is possible
+    bool side; // !!! true=White, false=Black !!!
+    bool drawClaimable; // Records whether a draw can be claimed
+};
+
+
+
+class PositionZ
+{
+public:
+    PositionZ(std::vector<boardZ> *pastBoards = nullptr);
+
 
     std::size_t getHash() const;
 
 private:
-    bool pieces[6][2][64]; // [piece type][side to move][square]
+    void resetBoard();
+
+    std::size_t recalculateHash() const;
+
+
+
+    boardZ board; // [piece type][side to move][square] !!! 0=Black, 1=White !!!
     bool castlingRights[4]; // White short, White long, Black short, Black long
     bool enPassantFile[8]; // En passant file where capture is possible
-    bool side; // 0=White, 1=Black
+    bool turn; // !!! true=White, false=Black !!!
+
+    uint moveNumber;
+    uint nbReversibleHalfMoves; // For 50 and 75 move rules for draw
+
+    // The information below is usually not included in a "position", but we need it for our implementation
+    bool enPassantKingShort, enPassantKingLong; // In "KC chess", we're allowing "en passant king capture" when the opponent king castled illegally.
+    std::vector<boardZ> * const pastBoards; // Necessary for threefold repetition rule
+    bool drawClaimable; // Records whether a draw can be claimed
+
+    std::size_t hash;
 };
 
-namespace std
-{
-    template<> struct hash<Position>
-    {
-        std::size_t operator()(Position const& position) const noexcept
-        {
-            return position.getHash();
-        }
-    };
-}
+
+
+
 
 #endif // POSITION_H

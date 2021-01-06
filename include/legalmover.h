@@ -68,7 +68,7 @@ private:
     std::vector<Move> kCLegalMoves, legalMoves; // We call "KC Chess" the variation of chess where king capture is allowed.
     bool kCLegalMovesGenerated, legalMovesGenerated;
     bitboard squaresAttacked;
-    bool opponentKingUnderAttack, opponentKsideCastleUnderAttack, opponentQsideCastleUnderAttack;
+    bool opponentKingUnderAttack, opponentShortCastleUnderAttack, opponentLongCastleUnderAttack;
 
     const Position * const position;
     const BoardHelper boardHelper;

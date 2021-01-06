@@ -57,7 +57,7 @@ bool HumanPlayer::nextMove(Move &res, bool &forceDraw, std::chrono::duration<dou
         }
         else if (moveString=="draw")
         {
-            if (position.drawCanBeClaimed())
+            if (position.getDrawClaimable())
             {
                 forceDraw = true;
                 auto end = std::chrono::steady_clock::now();

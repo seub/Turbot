@@ -33,11 +33,14 @@ private:
 
     std::vector<Move> moves;
     std::vector<MovePGN> movePGNs;
+    std::vector<Board> pastBoards;
     std::vector< std::chrono::duration<double> > moveTimes;
     Position currentPosition;
     Color turn;
     uint moveNumber;
+    bool drawOffered;
     GameResult result;
+
 
     const Player * const whitePlayer, * const blackPlayer;
     std::string date, time;

@@ -8,8 +8,8 @@ int main()
     {
         
         BasicEvaluator evaluator;
-        BasicMovePicker naive(&evaluator, 3);
-        BasicMovePickerHash naivehash(&evaluator, 3);
+        BasicMovePicker naive(&evaluator, 4);
+        BasicMovePickerHash naivehash(&evaluator, 4);
 
         ComputerPlayer computer1(&naive);
         ComputerPlayer computer2(&naivehash);
