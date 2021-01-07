@@ -11,7 +11,8 @@ bool pickBestMove(Move &res, bool &bestMoveIsForceDraw, MovePicker *picker) cons
 bool getLegalMoves(std::vector<Move> &res) const;
 bool getKCLegalMoves(std::vector<Move> &res) const;
 
-
+Question : c'est con quand même que le hash ne soit pas unique non ? Du coup à chaque fois qu'il trouve une position déjà calculée
+il doit vérifier qu'elle est vraiment la même, mais c'est couteux toutes ces comparaisons !?
 
 
 PROPOSITIONS DE CLASSES

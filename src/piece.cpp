@@ -80,3 +80,86 @@ std::ostream & operator <<(std::ostream &out, const Piece &piece)
     out << (piece.color==Color::WHITE ? "White" : "Black") << " " << piece.name();
     return out;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+PieceZ::PieceZ(PieceType type, Color color)
+{
+    num = (uint8f) type;
+    num <<= 1;
+    if (color==Color::WHITE) {++num;}
+    num <<= 1;
+    if (type!=PieceType::EMPTY) {++num;}
+}
+
+PieceType PieceZ::getType() const
+{
+    return (PieceType) (num >> 2);
+}
+
+char PieceZ::name(PieceType type)
+{
+    return pieceNames[uint(type)];
+}
+
+char PieceZ::name() const
+{
+    return name(getType());
+}
+
+bool PieceZ::fromName(PieceType &res, char c)
+{
+    switch(c)
+    {
+    case 'E': res=PieceType::EMPTY; return true;
+    case 'K': res=PieceType::KING; return true;
+    case 'Q': res=PieceType::QUEEN; return true;
+    case 'R': res=PieceType::ROOK; return true;
+    case 'B': res=PieceType::BISHOP; return true;
+    case 'N': res=PieceType::KNIGHT; return true;
+    case 'P': res=PieceType::PAWN; return true;
+    default: return false;
+    }
+}
+
+bool PieceZ::isWhite() const
+{
+    return (num & 2) == 2;
+}
+
+bool PieceZ::isEmpty() const
+{
+    return num == 0;
+}
+
+bool PieceZ::isKing() const
+{
+    return (num >> 2) == 1;
+}
+
+bool PieceZ::isPawn() const
+{
+    return (num >> 2) == 6;
+}
+
+bool PieceZ::isRook() const
+{
+    return (num >> 2) == 3;
+}
+
+char PieceZ::toFENchar() const
+{
+    return FENpieceNames[(num >> 2) + 7*( (num & 2)==0 )];
+}

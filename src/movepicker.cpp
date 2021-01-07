@@ -90,7 +90,7 @@ bool BasicMovePicker::findBestLine(std::vector<Move> &resLine, PositionEval &res
     else
     {
 
-        Position newPos;
+        Position nextPos(false);
         Move bestMove;
         Color turn = position.getTurn();
         PositionEval eval, bestEval;
@@ -112,12 +112,12 @@ bool BasicMovePicker::findBestLine(std::vector<Move> &resLine, PositionEval &res
 
         for (const auto &move : moves)
         {
-            newPos = mover.applyMove(move);
-            if (depth==1) {eval.constructFromDepthZeroEval(evaluator->evaluatePosition(newPos));}
+            nextPos = mover.applyMove(move);
+            if (depth==1) {eval.constructFromDepthZeroEval(evaluator->evaluatePosition(nextPos));}
             else
             {
                 bool opponentClaimDraw;
-                findBestLine(line, eval, opponentClaimDraw, newPos, position, true, depth-1);
+                findBestLine(line, eval, opponentClaimDraw, nextPos, position, true, depth-1);
             }
 
             if (first)
@@ -241,7 +241,7 @@ bool ForcefulMovePicker::findBestLine(std::vector<Move> &resLine, PositionEval &
     }
     else
     {
-        Position nextPos;
+        Position nextPos(false);
         Move bestMove;
         Color turn = position.getTurn();
         PositionEval eval, bestEval;
@@ -403,7 +403,7 @@ bool BasicMovePickerHash::findBestLine(std::vector<Move> &resLine, PositionEval 
     }
     else
     {
-        Position nextPos;
+        Position nextPos(false);
         Move bestMove;
         Color turn = position.getTurn();
         PositionEval eval, bestEval;

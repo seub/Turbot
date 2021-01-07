@@ -1,14 +1,13 @@
 #include "game.h"
 #include <fstream>
 
-Game::Game(const Player * const whitePlayer, const Player * const blackPlayer) : whitePlayer(whitePlayer), blackPlayer(blackPlayer)
+Game::Game(const Player * const whitePlayer, const Player * const blackPlayer) : currentPosition(true), whitePlayer(whitePlayer), blackPlayer(blackPlayer)
 {
     moves.clear();
     movePGNs.clear();
     pastBoards.clear();
     moveTimes.clear();
     turn = Color::WHITE;
-    currentPosition = Position(true);
     moveNumber = 1;
     drawOffered = false;
     result = GameResult::NOT_FINISHED;
@@ -40,7 +39,7 @@ bool Game::playMove(const Move &move, const bool &forceDraw, std::chrono::durati
     }
     else
     {
-        Position newPosition;
+        Position newPosition(false);
         LegalMover currentMover(&currentPosition, true);
 
 
@@ -178,7 +177,7 @@ void Game::startGame()
 
 void Game::play()
 {
-    Position position;
+    Position position(false);
     MovePGN movePGN;
     Move move;
     std::chrono::duration<double> moveTime;

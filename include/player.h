@@ -33,7 +33,7 @@ public:
 
 private:
     MovePicker *picker;
-    bool findBestMove(Move &res, bool &bestMoveIsForceDraw, const Position &position) const;
+    bool findBestMove(Move &res, bool &claimDraw, const Position &position) const;
 };
 
 

@@ -8,11 +8,11 @@ ComputerPlayer::ComputerPlayer(MovePicker *picker) : picker(picker)
 }
 
 
-bool ComputerPlayer::findBestMove(Move &res, bool &bestMoveIsForceDraw, const Position &position) const
+bool ComputerPlayer::findBestMove(Move &res, bool &claimDraw, const Position &position) const
 {
     bool success = false;
 
-    if (position.pickBestMove(res, bestMoveIsForceDraw, picker))
+    if (position.pickBestMove(res, claimDraw, picker))
     {
         success = true;
     }
