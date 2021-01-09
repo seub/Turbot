@@ -88,25 +88,29 @@ std::ostream & operator <<(std::ostream &out, const Piece &piece)
 
 
 
-
-
-
-
-
-
-
-PieceZ::PieceZ(PieceType type, Color color)
+PieceZ::PieceZ(uint8f type, bool color)
 {
-    num = (uint8f) type;
+    num = type;
     num <<= 1;
-    if (color==Color::WHITE) {++num;}
+    if (color) {++num;}
     num <<= 1;
-    if (type!=PieceType::EMPTY) {++num;}
+    if (type) {++num;}
+}
+
+
+
+PieceZ::PieceZ(PieceType type, Color color) : PieceZ((uint8f) type, color==Color::WHITE)
+{
 }
 
 PieceType PieceZ::getType() const
 {
     return (PieceType) (num >> 2);
+}
+
+uint8f PieceZ::getNum() const
+{
+    return num;
 }
 
 char PieceZ::name(PieceType type)
@@ -132,11 +136,6 @@ bool PieceZ::fromName(PieceType &res, char c)
     case 'P': res=PieceType::PAWN; return true;
     default: return false;
     }
-}
-
-bool PieceZ::isWhite() const
-{
-    return (num & 2) == 2;
 }
 
 bool PieceZ::isEmpty() const

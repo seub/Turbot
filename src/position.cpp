@@ -360,6 +360,8 @@ PositionZobrist::PositionZobrist(const Position *position, const BoardHelper &he
 
     side = (position->turn==Color::WHITE);
 
+    enPassantKingShort = position->enPassantKingShort;
+    enPassantKingLong = position->enPassantKingLong;
     drawClaimable = position->getDrawClaimable();
 }
 
@@ -371,10 +373,13 @@ std::size_t PositionZobrist::recalculateHash() const
 
     if (!Zobrist::ZOBRIST_NUMBERS_GENERATED) {throw("Zobrist numbers have not been generated");}
 
-    for (uint i=0; i!=64; ++i) {for (uint j=0; j!=6; ++j) {for (uint k=0; k!=2; ++k) {if (pieces[i][j][k]) {res ^= Zobrist::ZOBRIST_BOARD[i][j][k];}}}}
-    for (uint i=0; i!=4; ++i) {if (castlingRights[i]) {res ^= Zobrist::ZOBRIST_CASTLING_RIGHTS[i];}}
-    for (uint i=0; i!=8; ++i) {if (enPassantFile[i]) {res ^= Zobrist::ZOBRIST_EN_PASSANT_FILE[i];}}
+    for (uint i=0; i<64; ++i) {for (uint j=0; j<6; ++j) {for (uint k=0; k<2; ++k) {if (pieces[i][j][k]) {res ^= Zobrist::ZOBRIST_BOARD[i][j][k];}}}}
+    for (uint i=0; i<4; ++i) {if (castlingRights[i]) {res ^= Zobrist::ZOBRIST_CASTLING_RIGHTS[i];}}
+    for (uint i=0; i<8; ++i) {if (enPassantFile[i]) {res ^= Zobrist::ZOBRIST_EN_PASSANT_FILE[i];}}
     if (side) {res ^= Zobrist::ZOBRIST_SIDE;}
+
+    if (enPassantKingShort) {res ^= Zobrist::ZOBRIST_EN_PASSANT_KING_SHORT;}
+    if (enPassantKingLong) {res ^= Zobrist::ZOBRIST_EN_PASSANT_KING_LONG;}
     if (drawClaimable) {res ^= Zobrist::ZOBRIST_DRAW_CLAIMABLE;}
 
     return res;
@@ -393,68 +398,21 @@ std::size_t PositionZobrist::recalculateHash() const
 
 
 
-
-
-
-
-
-
-/*
-PositionZ::PositionZ()
+PositionZ::PositionZ(bool gamestart) : board(BoardZ(gamestart))
 {
-    resetBoard();
-
     turn = true;
-    for (uint i=0; i!=4; ++i) {castlingRights[i] = true;}
-    for (uint i=0; i!=8; ++i) {enPassantFile[i] = false;}
-    moveNumber = 1;
+    castlingRights = 0b1111;
+    enPassant = 0;
 
-    nbReversibleHalfMoves = 0;
-    enPassantKingShort = false;
-    enPassantKingLong = false;
+    enPassantKing = 0;
     drawClaimable = false;
-}
-
-void PositionZ::resetBoard()
-{
-    for (uint i=0; i!=64; ++i) {for (uint j=0; j!=6; ++j) {for (uint k=0; k!=2; ++k) {board[i][j][k] = false;}}}
-
-    board[0][2][1] = true;
-    board[1][4][1] = true;
-    board[2][3][1] = true;
-    board[3][1][1] = true;
-    board[4][0][1] = true;
-    board[5][3][1] = true;
-    board[6][4][1] = true;
-    board[7][2][1] = true;
-
-    board[56][2][0] = true;
-    board[57][4][0] = true;
-    board[58][3][0] = true;
-    board[59][1][0] = true;
-    board[60][0][0] = true;
-    board[61][3][0] = true;
-    board[62][4][0] = true;
-    board[63][2][0] = true;
-
-    for (uint i=8; i!=16; ++i) {{for (uint k=8; k!=16; ++k) {board[i][5][1] = true;}}}
-    for (uint i=48; i!=56; ++i) {{for (uint k=8; k!=16; ++k) {board[i][5][0] = true;}}}
+    recalculateHash();
 }
 
 bool PositionZ::operator==(const PositionZ &other) const
 {
-    return isEqual(other);
-}
-
-bool PositionZ::isEqual(const PositionZ &other) const
-{
-    for (uint i=0; i!=64; ++i) {for (uint j=0; j!=6; ++j) {for (uint k=0; k!=2; ++k) {if (other.board[i][j][k]!=board[i][j][k]) {return false;}}}}
-    for (uint i=0; i!=4; ++i) {if (other.castlingRights[i]!=castlingRights[i]) {return false;}}
-    for (uint i=0; i!=8; ++i) {if (other.enPassantFile[i]!=enPassantFile[i]) {return false;}}
-    if (other.turn!=turn) {return false;}
-    if (other.drawClaimable!=drawClaimable) {return false;}
-
-    return true;
+    return (other.turn==turn) && (other.castlingRights==castlingRights) && (other.enPassant==enPassant)
+            && (enPassantKing==other.enPassantKing) && (other.drawClaimable==drawClaimable) && (other.board==board);
 }
 
 
@@ -468,18 +426,15 @@ std::size_t PositionZ::recalculateHash() const
 {
     std::size_t res = 0;
 
-    if (!Zobrist::ZOBRIST_NUMBERS_GENERATED) {throw("Zobrist numbers have not been generated");}
+    if (!Zobrist::ZZOBRIST_NUMBERS_GENERATED) {throw("ERROR in PositionZ::recalculateHash: Zobrist numbers have not been generated");}
 
-    for (uint i=0; i!=64; ++i) {for (uint j=0; j!=6; ++j) {for (uint k=0; k!=2; ++k) {if (board[i][j][k]) {res ^= Zobrist::ZOBRIST_BOARD[i][j][k];}}}}
-    for (uint i=0; i!=4; ++i) {if (castlingRights[i]) {res ^= Zobrist::ZOBRIST_CASTLING_RIGHTS[i];}}
-    for (uint i=0; i!=8; ++i) {if (enPassantFile[i]) {res ^= Zobrist::ZOBRIST_EN_PASSANT_FILE[i];}}
-    if (turn) {res ^= Zobrist::ZOBRIST_SIDE;}
-    if (drawClaimable) {res ^= Zobrist::ZOBRIST_DRAW_CLAIMABLE;}
+    for (uint i=0; i<64; ++i) {if (board.pieces[i]) {res ^= Zobrist::ZZOBRIST_PIECES[i][board.pieces[i]];}}
+    if (turn) {res ^= Zobrist::ZZOBRIST_TURN;}
+    res ^= Zobrist::ZZOBRIST_CASTLING_RIGHTS[castlingRights];
+    res ^= Zobrist::ZZOBRIST_EN_PASSANT[enPassant];
 
+    res ^= Zobrist::ZZOBRIST_EN_PASSANT_KING[enPassantKing];
+    if (drawClaimable) {res ^= Zobrist::ZZOBRIST_DRAW_CLAIMABLE;}
 
-    return res;
+return res;
 }
-*/
-
-
-

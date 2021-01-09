@@ -15,7 +15,7 @@ class LegalMover
     friend class BasicMovePickerHash;
 
 public:
-    explicit LegalMover(const Position * const position, bool generateLegalMoves = true);
+    explicit LegalMover(const Position *position, bool generateLegalMoves = true);
     LegalMover() = delete;
     LegalMover(const LegalMover &) = delete;
     LegalMover & operator=(LegalMover) = delete;
@@ -73,5 +73,86 @@ private:
     const Position * const position;
     const BoardHelper boardHelper;
 };
+
+
+
+
+
+
+
+
+
+class PositionZ;
+
+class LegalMoverZ
+{
+
+public:
+    explicit LegalMoverZ(const PositionZ *position, bool generateLegalMoves = true);
+    LegalMoverZ() = delete;
+    LegalMoverZ(const LegalMover &) = delete;
+    LegalMoverZ & operator=(LegalMoverZ) = delete;
+
+    bool isCapture(const MoveZ &move) const;
+    bool isOpponentKingCapturable() const;
+    bool isPawnMove(const MoveZ &move) const;
+    bool isKingMove(const MoveZ &move) const;
+    bool isRookMove(const MoveZ &move) const;
+    bool isReversible(const MoveZ &move) const;
+    bool isInLegalMovesList(const MoveZ &move) const;
+    bool isInPseudoLegalMovesList(const MoveZ &move) const;
+    bool isCheck() const;
+    bool isCheck(const MoveZ &move) const;
+    bool isCheckmate() const;
+    bool isCheckmate(const MoveZ &move) const;
+    bool isStalemate() const;
+    bool isCastleShort(const MoveZ &move) const;
+    bool isCastleLong(const MoveZ &move) const;
+
+    // Shouldn't these be methods of board??
+    //bool uniqueOrigin(Square &resOrigin, const Square &target, PieceType type) const;
+    //bool uniqueOriginOnFile(Square &resOrigin, const Square &target, uint fileIndex, PieceType type) const;
+    //bool uniqueOriginOnRank(Square &resOrigin, const Square &target, uint rankIndex, PieceType type) const;
+
+private:
+    bool initialize();
+    bool updatePseudoLegalMoves();
+    void updateLegalMoves();
+    bool isLegalConstruct(const MoveZ &move, bool checkPseudoLegal = true);
+
+    void addPseudoLegalMove(uint8f origin, uint8f target, bool attack=true);
+    void addPseudoLegalMovePromotions(uint8f origin, uint8f target, bool attack);
+    void addPseudoLegalMovesKing(uint8f origin);
+    void addPseudoLegalMovesQueen(uint8f origin);
+    void addPseudoLegalMovesRook(uint8f origin);
+    void addPseudoLegalMovesBishop(uint8f origin);
+    void addPseudoLegalMovesKnight(uint8f origin);
+    void addPseudoLegalMovesPawn(uint8f origin);
+    void addPseudoLegalMovesRow(uint8f origin, const std::vector<uint8f> &row);
+
+    PositionZ applyMove(const MoveZ &move) const;
+
+    std::vector<MoveZ> pseudoLegalMoves, legalMoves; // "pseudo-legal move" = leaves the king on capture
+    bool pseudoLegalMovesGenerated, legalMovesGenerated;
+    bitboard squaresAttacked;
+    bool opponentKingUnderAttack, opponentShortCastleUnderAttack, opponentLongCastleUnderAttack;
+
+    const PositionZ * const position;
+    bool turn;
+    const BoardZ * const board;
+    const boardZ &pieces;
+};
+
+
+
+
+
+
+
+
+
+
+
+
 
 #endif // LEGALMOVER_H

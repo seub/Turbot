@@ -354,7 +354,34 @@ bool BoardZ::rankIndex(uint8f &res, const char &c)
     }
 }
 
-uint8f BoardZ::getPiece(uint8f square) const
+bool BoardZ::getKingSquare(uint8f &res, bool side) const
 {
-    return pieces[square];
+    uint8f kingNum = (side ? 7 : 5);
+    res = 0;
+    while(res<64)
+    {
+        if (pieces[res] == kingNum) {break;}
+        ++res;
+    }
+    return (res!=64);
+}
+
+bool BoardZ::hasPiece(uint8f square, bool color) const
+{
+    return (pieces[square]) && (((pieces[square] & 2) >> 1) == color);
+}
+
+bool BoardZ::isKing(uint8f square) const
+{
+    return (pieces[square] >> 2) == 1;
+}
+
+bool BoardZ::isRook(uint8f square) const
+{
+    return (pieces[square] >> 2) == 3;
+}
+
+bool BoardZ::isPawn(uint8f square) const
+{
+    return (pieces[square] >> 2) == 6;
 }

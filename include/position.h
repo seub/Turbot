@@ -55,7 +55,7 @@ private:
     uint nbReversibleHalfMoves; // For 50 and 75 move rules for draw
 
     // The information below is usually not included in a "position", but we need it for our implementation
-    bool enPassantKingShort, enPassantKingLong; // In "KC chess", we're allowing "en passant king capture" when the opponent king castled illegally.
+    bool enPassantKingShort, enPassantKingLong; // For capturing the king after a pseudo-legal castle
     bool drawClaimable; // Records whether a draw can be claimed
 };
 
@@ -86,46 +86,60 @@ private:
     bool castlingRights[4]; // White short, White long, Black short, Black long
     bool enPassantFile[8]; // En passant file where capture is possible
     bool side; // !!! true=White, false=Black !!!
+    bool enPassantKingShort, enPassantKingLong; // For capturing the king after a pseudo-legal castle
     bool drawClaimable; // Records whether a draw can be claimed
 };
 
 
 
-/*
+
 class PositionZ
 {
+    friend class LegalMoverZ;
+
 public:
-    PositionZ();
+    PositionZ(bool gamestart);
 
     bool operator==(PositionZ const& other) const;
-    bool isEqual(PositionZ const &other) const;
-
 
     std::size_t getHash() const;
 
 private:
-    void resetBoard();
-
     std::size_t recalculateHash() const;
 
+    BoardZ board;
 
+    bool turn;
+    // true=White, false=Black
+    uint8f castlingRights;
+    // 4-bit integer: bit #0 is White short, bit #1 is White Long, bit #2 is Black Short, bit #3 is Black Long. //
+    // Example: castlingRights = 6 = 0110 means White Long + Black Short
+    uint8f enPassant;
+    // 4-bit integer: bit #0 is whether or not en Passant is possible, bits #1--#3 contain the index of the file of the target square
+    // Example: enPassant = 13 = 1101 means en Passant is possible, and target file is 110 = 6 = g
 
-    boardZ board; // [square][piece type][side to move] !!! 0=Black, 1=White !!!
-    bool castlingRights[4]; // White short, White long, Black short, Black long
-    bool enPassantFile[8]; // En passant file where capture is possible
-    bool turn; // !!! true=White, false=Black !!!
+    uint8f enPassantKing;
+    // Records whether the opponent king castled illegally (but pseudo-legally) on the previous move.
+    // 2-bit integer: bit #0 is enPassantKingShort, bit #1 is enPassantKingLong
+    // Example: enPassantKing = 2 = 10 means en Passant Long king capture is possible
 
-    uint moveNumber;
-    uint nbReversibleHalfMoves; // For 50 and 75 move rules for draw
-
-    // The information below is usually not included in a "position", but we need it for our implementation
-    bool enPassantKingShort, enPassantKingLong; // In "KC chess", we're allowing "en passant king capture" when the opponent king castled illegally.
-    bool drawClaimable; // Records whether a draw can be claimed
+    bool drawClaimable;
+    // Records whether a draw can be claimed
 
     std::size_t hash;
-};*/
+    // This can be calculated from the other member variables but is it easy to update after playing a move so we store it for speed
+};
 
-
+namespace std
+{
+template<> struct hash<PositionZ>
+{
+    std::size_t operator()(PositionZ const& position) const noexcept
+    {
+        return position.getHash();
+    }
+};
+}
 
 
 

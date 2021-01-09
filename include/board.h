@@ -47,7 +47,12 @@ public:
     BoardZ(bool gamestart);
     bool operator==(BoardZ const& other) const;
 
-    uint8f getPiece(uint8f square) const;
+    bool getKingSquare(uint8f &res, bool side) const;
+    bool hasPiece(uint8f square, bool color) const; // true = White, false = Black
+    bool isKing(uint8f square) const;
+    bool isRook(uint8f square) const;
+    bool isPawn(uint8f square) const;
+
 
     std::string toFENstring() const;
     static bool fromFENstring(BoardZ &res, const std::string &str);

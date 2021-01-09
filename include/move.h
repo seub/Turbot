@@ -66,4 +66,31 @@ private:
 
 
 
+
+
+
+
+class MoveZ
+{
+    friend class LegalMoverZ;
+
+public:
+    MoveZ() {}
+    MoveZ(uint8f origin, uint8f target, uint8f promotion = 0) : origin(origin), target(target), promotion(promotion) {}
+    bool operator==(const MoveZ &other) const;
+
+protected:
+    uint8f origin, target;
+    uint8f promotion;
+    // 4-bit integer: the 0-bit says whether the move is a promotion, and the 1,2,3-bits say he type of the promoted piece
+    // promotion = 5 = 0101 means that the move is a promotion, and the promoted piece is 010 = 2 = Queen
+    // promotion = 7 = 0111 means that the move is a promotion, and the promoted piece is 011 = 3 = Rook
+    // promotion = 9 = 1001 means that the move is a promotion, and the promoted piece is 100 = 4 = Bishop
+    // promotion = 11 = 1011 means that the move is a promotion, and the promoted piece is 101 = 5 = Knight
+};
+
+
+
+
+
 #endif // MOVE_H

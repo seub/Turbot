@@ -380,3 +380,24 @@ bool MovePGN::operator==(const MovePGN &other) const
     res &= other.checkmate==checkmate;
     return res;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+bool MoveZ::operator==(const MoveZ &other) const
+{
+    return (other.origin==origin) && (other.target==target) && (other.promotion==promotion);
+}
