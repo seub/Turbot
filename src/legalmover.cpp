@@ -560,7 +560,7 @@ bool LegalMover::isForceful(const Move &move) const
     return (isCapture(move) || isCheck(move));
 }
 
-Position LegalMover::applyMove(const Move &m) const
+Position LegalMover::applyMove(const Move &move) const
 {
     Position res(*position);
 
@@ -568,14 +568,14 @@ Position LegalMover::applyMove(const Move &m) const
     res.turn = white ? Color::BLACK : Color::WHITE;
 
     if (res.turn==Color::WHITE) res.moveNumber++;
-    if (isReversible(m)) res.nbReversibleHalfMoves++;
+    if (isReversible(move)) res.nbReversibleHalfMoves++;
     else res.nbReversibleHalfMoves = 0;
-    uint origin = m.origin.getIndex();
-    uint target = m.target.getIndex();
+    uint origin = move.origin.getIndex();
+    uint target = move.target.getIndex();
     Piece p = position->board.pieces[origin];
 
     res.board.pieces[origin] = Piece();
-    if (m.promotion) res.board.pieces[target] = Piece(m.promotedPiece, white ? Color::WHITE : Color::BLACK);
+    if (move.promotion) res.board.pieces[target] = Piece(move.promotedPiece, white ? Color::WHITE : Color::BLACK);
     else res.board.pieces[target] = p;
 
 
@@ -662,7 +662,7 @@ Position LegalMover::applyMove(const Move &m) const
         }
         else
         {
-            if ((target==3) || (target==4)) {res.board.pieces[52] = Piece();}
+            if ((target==3) || (target==4)) {res.board.pieces[2] = Piece();}
         }
     }
 
@@ -670,6 +670,20 @@ Position LegalMover::applyMove(const Move &m) const
 
 
     return res;
+}
+
+bool LegalMover::applyMove(Position &res, const Move &move, bool checkLegal, bool checkKCLegal) const
+{
+    if (legalMovesGenerated)
+    {
+        if (checkLegal) {if (!isInLegalMovesList(move)) {return false;}}
+        if (checkKCLegal) {if (!isInKCLegalMovesList(move)) {return false;}}
+
+        res = applyMove(move);
+
+        return true;
+    }
+    else {throw("ERROR in LegalMover::applyMove: Legal moves have not been generated!"); return false;}
 }
 
 bool LegalMover::isInLegalMovesList(const Move &m) const
@@ -798,19 +812,31 @@ bool LegalMover::isCastleLong(const Move &move) const
     return isKingMove(move) && (((position->turn==Color::WHITE) && (move==Move(4, 2))) || ((position->turn==Color::BLACK) && (move==Move(60, 58))));
 }
 
-bool LegalMover::applyMove(Position &res, const Move &m, bool checkLegal, bool checkKCLegal) const
-{
-    if (legalMovesGenerated)
-    {
-        if (checkLegal) {if (!isInLegalMovesList(m)) {return false;}}
-        if (checkKCLegal) {if (!isInKCLegalMovesList(m)) {return false;}}
 
-        res = applyMove(m);
 
-        return true;
-    }
-    else {throw("ERROR in LegalMover::applyMove: Legal moves have not been generated!");}
-}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1272,7 +1298,8 @@ bool LegalMoverZ::isCheck() const
 
 bool LegalMoverZ::isCheck(const MoveZ &move) const
 {
-    PositionZ newPos = applyMove(move);
+    PositionZ newPos;
+    applyMove(move, newPos, false);
     return LegalMoverZ(&newPos, false).isCheck();
 }
 
@@ -1290,34 +1317,38 @@ bool LegalMoverZ::isStalemate() const
 
 bool LegalMoverZ::isCheckmate(const MoveZ &move) const
 {
-    PositionZ newPos = applyMove(move);
+    PositionZ newPos;
+    applyMove(move, newPos, false);
     return LegalMoverZ(&newPos, true).isCheckmate();
 }
 
+bool LegalMoverZ::isCastleShort(const MoveZ &move) const
+{
+    return isKingMove(move) && (((position->turn) && (move==MoveZ(4, 6))) || ((!position->turn) && (move==MoveZ(60, 62))));
+}
 
-PositionZ LegalMoverZ::applyMove(const MoveZ &move) const
+bool LegalMoverZ::isCastleLong(const MoveZ &move) const
+{
+    return isKingMove(move) && (((position->turn) && (move==MoveZ(4, 2))) || ((!position->turn) && (move==MoveZ(60, 58))));
+}
+
+
+void LegalMoverZ::applyMove(const MoveZ &move, PositionZ &res, bool updateFull) const
 {
     if (!Zobrist::ZZOBRIST_NUMBERS_GENERATED) {throw("ERROR in LegalMoverZ::applyMove: Zobrist numbers have not been generated");}
 
-    PositionZ res(*position);
-
+    res.board = position->board;
     res.turn = !turn;
-    res.hash = position->hash;
+    res.castlingRights = position->castlingRights;
+    res.drawClaimable = false;
 
-    res.board.pieces[move.origin] = 0;
-    res.hash ^= Zobrist::ZZOBRIST_PIECES[move.origin][pieces[move.origin]];
-    res.hash ^= Zobrist::ZZOBRIST_PIECES[move.target][pieces[move.target]];
+    res.board.removePiece(move.origin);
 
-    if (move.promotion) {res.board.pieces[move.target] = PieceZ(move.promotion >> 1, turn).getNum();}
-    else {res.board.pieces[move.target] = pieces[move.origin];}
-    res.hash ^= Zobrist::ZZOBRIST_PIECES[move.target][res.board.pieces[move.target]];
+    if (move.promotion) {res.board.addPiece(move.target, PieceZ(move.promotion >> 1, turn).getNum());}
+    else {res.board.addPiece(move.target, pieces[move.origin]);}
 
     // En passant move
-    if (isPawnMove(move) && (position->enPassant == 1 + ((move.target % 8) << 1)))
-    {
-        res.board.pieces[turn ? move.target-8 : move.target+8] = 0;
-        res.hash ^= Zobrist::ZZOBRIST_PIECES[turn ? move.target-8 : move.target+8][pieces[turn ? move.target-8 : move.target+8]];
-    }
+    if (isPawnMove(move) && (position->enPassant == 1 + ((move.target % 8) << 1))){res.board.removePiece(turn ? move.target-8 : move.target+8);}
 
     // Pawn move allowing en passant or not
     if (isPawnMove(move) && ((move.target==move.origin+16) || (move.origin==move.target+16))){res.enPassant = 1 + ((move.origin % 8) << 1);}
@@ -1329,18 +1360,14 @@ PositionZ LegalMoverZ::applyMove(const MoveZ &move) const
     {
         if (move.target==move.origin-2)
         {
-            res.board.pieces[move.target+1] = res.board.pieces[move.target-2];
-            res.hash ^= Zobrist::ZZOBRIST_PIECES[move.target+1][pieces[move.target-2]];
-            res.board.pieces[move.target-2] = 0;
-            res.hash ^= Zobrist::ZZOBRIST_PIECES[move.target-2][pieces[move.target-2]];
+            res.board.addPiece(move.target+1, pieces[move.target-2]);
+            res.board.removePiece(move.target-2);
             res.enPassantKing = 2;
         }
         else if (move.target==move.origin+2)
         {
-            res.board.pieces[move.target-1] = res.board.pieces[move.target+1];
-            res.hash ^= Zobrist::ZZOBRIST_PIECES[move.target-1][pieces[move.target+1]];
-            res.board.pieces[move.target+1] = 0;
-            res.hash ^= Zobrist::ZZOBRIST_PIECES[move.target+1][pieces[move.target+1]];
+            res.board.addPiece(move.target-1, pieces[move.target+1]);
+            res.board.removePiece(move.target+1);
             res.enPassantKing = 1;
         }
 
@@ -1360,34 +1387,40 @@ PositionZ LegalMoverZ::applyMove(const MoveZ &move) const
     //En Passant King Capture
     if (position->enPassantKing & 1)
     {
-        if (turn) {if ((move.target==60) || (move.target==61))
-            {
-                res.board.pieces[62] = 0;
-                res.hash ^= Zobrist::ZZOBRIST_PIECES[62][pieces[62]];
-            }}
-        else if ((move.target==4) || (move.target==5))
-        {
-            res.board.pieces[6] = 0;
-            res.hash ^= Zobrist::ZZOBRIST_PIECES[6][pieces[6]];
-        }
+        if (turn) {if ((move.target==60) || (move.target==61)) {res.board.removePiece(62);}}
+        else if ((move.target==4) || (move.target==5)) {res.board.removePiece(6);}
     }
     else if (position->enPassantKing & 2)
     {
-        if (turn) {if ((move.target==59) || (move.target==60))
-            {
-                res.board.pieces[58] = 0;
-                res.hash ^= Zobrist::ZZOBRIST_PIECES[58][pieces[58]];
-            }}
-        else if ((move.target==3) || (move.target==4))
-        {
-            res.board.pieces[52] = 0;
-            res.hash ^= Zobrist::ZZOBRIST_PIECES[52][pieces[52]];
-        }
+        if (turn) {if ((move.target==59) || (move.target==60)) {res.board.removePiece(58);}}
+        else if ((move.target==3) || (move.target==4)) {res.board.removePiece(2);}
     }
 
-    // Update isDrawClaimable will be handled by the class GameZ!
+    res.hash = res.recalculateHash(false);
 
-    return res;
+    if (updateFull)
+    {
+        res.moveNumber = turn ? position->moveNumber : position->moveNumber+1;
+        res.nbReversiblePlies = isReversible(move) ? position->nbReversiblePlies+1 : 0;
+
+        res.fiftyDraw = position->fiftyDraw;
+        if (res.nbReversiblePlies>49) {res.fiftyDraw = true;}
+
+        res.threeFoldDraw = position->threeFoldDraw;
+        if (!res.threeFoldDraw)
+        {
+            BoardZ board = res.board;
+            res.repetitions = position->repetitions;
+            if(res.repetitions.find(board)!=res.repetitions.end())
+            {
+                res.repetitions[board]++;
+                if(res.repetitions[board]==3) {res.threeFoldDraw=true;}
+            }
+            else {res.repetitions[board]=1;}
+        }
+
+        res.updateDrawClaimable();
+    }
 }
 
 bool LegalMoverZ::isInLegalMovesList(const MoveZ &move) const
@@ -1407,6 +1440,69 @@ bool LegalMoverZ::isLegalConstruct(const MoveZ &move, bool checkPseudoLegal)
         if  (!isInPseudoLegalMovesList(move)) return false;
     }
 
-    PositionZ newPos = applyMove(move);
+    PositionZ newPos;
+    applyMove(move, newPos, false);
     return !LegalMoverZ(&newPos, false).isOpponentKingCapturable();
+}
+
+
+bool LegalMoverZ::uniqueOrigin(uint8f &resOrigin, const uint8f &target, PieceType type) const
+{
+    if (legalMovesGenerated)
+    {
+        uint nbOccurrences = 0;
+        resOrigin = 64;
+        for (const auto &move : legalMoves)
+        {
+            if ((move.target==target) && ((pieces[move.origin] >> 2) == (uint8f) type))
+            {
+                ++nbOccurrences;
+                if (nbOccurrences==1) {resOrigin=move.origin;}
+            }
+        }
+        return (nbOccurrences==1);
+    }
+    else {throw("Legal moves have not been generated!");}
+}
+
+
+bool LegalMoverZ::uniqueOriginOnFile(uint8f &resOrigin, const uint8f &target, uint8f fileIndex, PieceType type) const
+{
+    if (legalMovesGenerated)
+    {
+        uint nbOccurrences = 0;
+        resOrigin = 64;
+        for (const auto &move : legalMoves)
+        {
+            if ((move.target==target) && ((pieces[move.origin] >> 2) == (uint8f) type) && ((move.origin % 8)==fileIndex))
+            {
+                ++nbOccurrences;
+                if (nbOccurrences==1) {resOrigin=move.origin;}
+            }
+        }
+        return (nbOccurrences==1);
+    }
+    else {throw("ERROR in LegalMover::uniqueOriginOnFile: Legal moves have not been generated!");}
+}
+
+
+
+bool LegalMoverZ::uniqueOriginOnRank(uint8f &resOrigin, const uint8f &target, uint8f rankIndex, PieceType type) const
+{
+    if (legalMovesGenerated)
+    {
+        uint nbOccurrences = 0;
+        resOrigin = 64;
+        for (const auto &move : legalMoves)
+        {
+            if ((move.target==target) && ((pieces[move.origin] >> 2) == (uint8f) type) && ((move.origin / 8)==rankIndex))
+            {
+                ++nbOccurrences;
+                if (nbOccurrences==1) {resOrigin=move.origin;}
+            }
+
+        }
+        return (nbOccurrences==1);
+    }
+    else {throw("ERROR in LegalMover::uniqueOriginOnRank: Legal moves have not been generated!");}
 }

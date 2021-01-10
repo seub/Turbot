@@ -98,14 +98,27 @@ class PositionZ
     friend class LegalMoverZ;
 
 public:
+    PositionZ();
     PositionZ(bool gamestart);
 
     bool operator==(PositionZ const& other) const;
 
     std::size_t getHash() const;
+    BoardZ getBoard() const {return board;}
+    bool getDrawClaimable() const {return drawClaimable;}
+    uint getNbReversiblePlies() const {return nbReversiblePlies;}
+    uint getMoveNumber() const {return moveNumber;}
+    bool getTurn() const {return turn;}
+    uint8f getPiece(uint8f square) const {return board.pieces[square];}
+    std::size_t recalculateHash(bool recalculateBoardHash) const;
+
+    bool printPGN(std::string &res, const MoveZ &move, bool printMoveNumber) const;
+    bool printPGN(std::string &res, const std::vector<MoveZ> &line) const;
 
 private:
-    std::size_t recalculateHash() const;
+    void updateDrawClaimable();
+
+    void applyMove(PositionZ &res, const MoveZ &move) const;
 
     BoardZ board;
 
@@ -128,6 +141,11 @@ private:
 
     std::size_t hash;
     // This can be calculated from the other member variables but is it easy to update after playing a move so we store it for speed
+
+    uint moveNumber, nbReversiblePlies;
+    bool fiftyDraw, threeFoldDraw;
+    std::unordered_map<BoardZ, uint> repetitions;
+    // These are inessential and not taken into account in the hash
 };
 
 namespace std

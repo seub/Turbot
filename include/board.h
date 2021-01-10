@@ -44,6 +44,7 @@ class BoardZ
     friend class LegalMoverZ;
 
 public:
+    BoardZ();
     BoardZ(bool gamestart);
     bool operator==(BoardZ const& other) const;
 
@@ -60,10 +61,18 @@ public:
     static bool fileIndex(uint8f &res, const char &fileName);
     static bool rankIndex(uint8f &res, const char &rankName);
 
+    std::size_t getHash() const {return hash;}
+
 private:
     void clear();
     void reset();
 
+    void addPiece(uint8f square, uint8f piece);
+    void removePiece(uint8f square);
+
+    std::size_t recalculateHash() const;
+
+    std::size_t hash;
     boardZ pieces;
 };
 
@@ -94,6 +103,16 @@ private:
 // Black Knight = 10101 = 21
 // Black Pawn   = 11001 = 25
 
+namespace std
+{
+template<> struct hash<BoardZ>
+{
+    std::size_t operator()(BoardZ const& board) const noexcept
+    {
+        return board.getHash();
+    }
+};
+}
 
 
 #endif // BOARD_H

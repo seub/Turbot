@@ -32,20 +32,6 @@ private:
 };
 
 
-class ForcefulMovePicker: public MovePicker
-{
-public:
-    ForcefulMovePicker(const Evaluator *evaluator, uint depth, uint fdepth, uint gdepth): MovePicker(evaluator), depth(depth), fdepth(fdepth), gdepth(gdepth) {}
-    bool pickMove(Move &res, bool &claimDraw, const Position &position) override;
-    bool findBestLine(std::vector<Move> &res, PositionEval &eval, bool &claimDraw, const Position &position,
-                      const Position &previousPos, bool previousPosAvailable, uint depth, uint fdepth, uint gdepth) const;
-    std::string createName() const override;
-
-
-private:
-    uint depth, fdepth, gdepth;
-};
-
 class BasicMovePickerHash: public MovePicker
 {
 public:
@@ -60,6 +46,58 @@ private:
 
     const uint maxDepth;
     std::unordered_map< Position, PositionEvalRich > alreadyEvaluated;
+    uint nbPositions, nbRepetitions;
+};
+
+
+
+
+
+
+
+
+
+
+class MovePickerZ
+{
+public:
+    MovePickerZ() : evaluator(nullptr) {}
+    MovePickerZ(const EvaluatorZ *evaluator) : evaluator(evaluator) {}
+    virtual bool pickMove(MoveZ &res, bool &claimDraw, const PositionZ &position) = 0;
+    virtual std::string createName() const = 0;
+
+protected:
+    const EvaluatorZ * const evaluator;
+};
+
+class BasicMovePickerZ: public MovePickerZ
+{
+public:
+    BasicMovePickerZ(const EvaluatorZ *evaluator, uint depth): MovePickerZ(evaluator), maxDepth(depth) {}
+    bool pickMove(MoveZ &res, bool &claimDraw, const PositionZ &position) override;
+    bool findBestLine(std::vector<MoveZ> &res, PositionEvalZ &eval, bool &claimDraw, const PositionZ &position,
+                      const PositionZ &previousPos, bool previousPosAvailable, uint depth) const; //NB: Previous position is only needed to deal with stalemate :(
+    std::string createName() const override;
+
+private:
+    uint maxDepth;
+};
+
+
+class BasicMovePickerHashZ: public MovePickerZ
+{
+public:
+    BasicMovePickerHashZ(const EvaluatorZ *evaluator, uint depth);
+    bool pickMove(MoveZ &res, bool &claimDraw, const PositionZ &position) override;
+
+    std::string createName() const override;
+
+private:
+    bool findBestLine(std::vector<MoveZ> &resLine, PositionEvalZ &resEval, bool &claimDraw, const PositionZ &position,
+                      const PositionZ &previousPos, bool previousPosAvailable, uint depth);
+
+    const uint maxDepth;
+    std::unordered_map< PositionZ, PositionEvalRichZ > alreadyEvaluated;
     uint nbPositions, nbRepetitions;
 };
 

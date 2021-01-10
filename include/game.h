@@ -3,8 +3,6 @@
 
 #include "player.h"
 
-
-
 class Game
 {
     friend std::ostream & operator<<(std::ostream &out, const Game &game);
@@ -43,6 +41,42 @@ private:
 
 
     const Player * const whitePlayer, * const blackPlayer;
+    std::string date, time;
+};
+
+
+
+class GameZ
+{
+public:
+    GameZ(const PlayerZ * const whitePlayer, const PlayerZ * const blackPlayer);
+
+    std::string printPGN(bool printTagRoster = true) const;
+    bool exportPGN(bool printTagRoster = true) const;
+    std::string printTagRoster() const;
+    std::string printResult() const;
+    bool isFinished() const;
+    void averageMoveTime(std::chrono::duration<double> &white, std::chrono::duration<double> &black) const;
+    std::string createFilename() const;
+
+    void playMove(const MoveZ &move, const bool &claimDraw, std::chrono::duration<double> moveTime);
+    void playGame();
+
+private:
+    void startGame();
+    void play();
+    void finishGame();
+
+
+    std::vector<MoveZ> moves;
+    std::vector<MovePGNZ> movePGNs;
+    std::vector< std::chrono::duration<double> > moveTimes;
+
+    PositionZ currentPosition;
+    bool turn;
+    GameResult result;
+
+    const PlayerZ * const whitePlayer, * const blackPlayer;
     std::string date, time;
 };
 

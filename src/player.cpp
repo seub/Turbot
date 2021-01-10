@@ -101,3 +101,125 @@ bool ComputerPlayer::nextMove(Move &res, bool &forceDraw, std::chrono::duration<
     time = end-start;
     return success;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ComputerPlayerZ::ComputerPlayerZ(MovePickerZ *picker) : picker(picker)
+{
+    name = picker->createName();
+    std::cout << "Computer player was set as \"" << name << "\"." << std::endl;
+}
+
+
+bool ComputerPlayerZ::findBestMove(MoveZ &res, bool &claimDraw, const PositionZ &position) const
+{
+    bool success = false;
+
+    if (picker->pickMove(res, claimDraw, position))
+    {
+        success = true;
+    }
+    else
+    {
+        std::cout << "Error: failed to pick best move" << std::endl;
+    }
+
+
+    return success;
+}
+
+HumanPlayerZ::HumanPlayerZ()
+{
+    std::cout << "Hi there! What is your name? ";
+    std::cin >> name;
+    std::cout << "Okay " << name << ", let's go!" << std::endl << std::endl;
+}
+
+HumanPlayerZ::HumanPlayerZ(const std::string &name)
+{
+    this->name = name;
+    std::cout << "Hello " << name << ", let's go!" << std::endl << std::endl;
+}
+
+bool HumanPlayerZ::nextMove(MoveZ &res, bool &claimDraw, std::chrono::duration<double> &time, const PositionZ &position) const
+{
+    auto start = std::chrono::steady_clock::now();
+    LegalMoverZ mover1(&position, true);
+    std::string moveString;
+    bool first = (position.getMoveNumber()==1);
+    while(true)
+    {
+        std::cout << std::endl;
+        std::cout << name << ", what is your " << (first ? "first" : "next") << " move? "
+                  << (first ? "Enter it in PGN notation. " : "")
+                  << position.getMoveNumber() << ((position.getTurn()) ? ". " : "... ");
+        std::cin >> moveString;
+        if (moveString=="exit")
+        {
+            return false;
+        }
+        else if (moveString=="draw")
+        {
+            if (position.getDrawClaimable())
+            {
+                claimDraw = true;
+                auto end = std::chrono::steady_clock::now();
+                time = end-start;
+                return true;
+            }
+            else
+            {
+                std::cout << "Sorry, you cannot claim a draw in this position. Try again: (Enter \"exit\" to exit, \"draw\" to claim draw)" << std::endl;
+                continue;
+            }
+        }
+        if (MovePGNZ::fromPGN(res, moveString, &mover1))
+        {
+            if (mover1.isInLegalMovesList(res))
+            {
+                claimDraw = false;
+                auto end = std::chrono::steady_clock::now();
+                time = end-start;
+                return true;
+            }
+            else
+            {
+                std::cout << "Sorry, that's an illegal move. Try again: (Enter \"exit\" to exit, \"draw\" to claim draw)" << std::endl;
+                continue;
+            }
+        }
+        else
+        {
+            std::cout << "Sorry, that didn't work. Try again: (Enter \"exit\" to exit, \"draw\" to claim draw)" << std::endl;
+            continue;
+        }
+    }
+}
+
+bool ComputerPlayerZ::nextMove(MoveZ &res, bool &claimDraw, std::chrono::duration<double> &time, const PositionZ &position) const
+{
+    auto start = std::chrono::steady_clock::now();
+    bool success = findBestMove(res, claimDraw, position);
+    auto end = std::chrono::steady_clock::now();
+    time = end-start;
+    return success;
+}

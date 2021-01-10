@@ -1,5 +1,8 @@
 TODO
 
+General C++ question: is it ok to have uninitialized constructors (e.g. PositionZ), even though I would never want such objects to be used, so that I can apply methods
+like bool applyMove(Position &res)?
+
 Test number of collisions
 
 Remove from position:

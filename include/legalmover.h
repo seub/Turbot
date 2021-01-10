@@ -45,7 +45,7 @@ public:
     bool uniqueOriginOnFile(Square &resOrigin, const Square &target, uint fileIndex, PieceType type) const;
     bool uniqueOriginOnRank(Square &resOrigin, const Square &target, uint rankIndex, PieceType type) const;
 
-    bool applyMove(Position &res, const Move &m, bool checkLegal = false, bool checkKCLegal = false) const;
+    bool applyMove(Position &res, const Move &move, bool checkLegal = false, bool checkKCLegal = false) const;
 
 private:
     bool initialize();
@@ -63,7 +63,7 @@ private:
     void addKCLegalMovesPawn(uint i);
     void addKCLegalMovesRow(uint i, const std::vector<uint> row);
 
-    Position applyMove(const Move &m) const;
+    Position applyMove(const Move &move) const;
 
     std::vector<Move> kCLegalMoves, legalMoves; // We call "KC Chess" the variation of chess where king capture is allowed.
     bool kCLegalMovesGenerated, legalMovesGenerated;
@@ -86,6 +86,8 @@ class PositionZ;
 
 class LegalMoverZ
 {
+    friend class MovePGNZ;
+    friend class PositionZ;
 
 public:
     explicit LegalMoverZ(const PositionZ *position, bool generateLegalMoves = true);
@@ -108,11 +110,13 @@ public:
     bool isStalemate() const;
     bool isCastleShort(const MoveZ &move) const;
     bool isCastleLong(const MoveZ &move) const;
+    std::vector<MoveZ> getPseudoLegalMoves() const {return pseudoLegalMoves;}
 
-    // Shouldn't these be methods of board??
-    //bool uniqueOrigin(Square &resOrigin, const Square &target, PieceType type) const;
-    //bool uniqueOriginOnFile(Square &resOrigin, const Square &target, uint fileIndex, PieceType type) const;
-    //bool uniqueOriginOnRank(Square &resOrigin, const Square &target, uint rankIndex, PieceType type) const;
+    bool uniqueOrigin(uint8f &resOrigin, const uint8f &target, PieceType type) const;
+    bool uniqueOriginOnFile(uint8f &resOrigin, const uint8f &target, uint8f fileIndex, PieceType type) const;
+    bool uniqueOriginOnRank(uint8f &resOrigin, const uint8f &target, uint8f rankIndex, PieceType type) const;
+
+    void applyMove(const MoveZ &move, PositionZ &res, bool updateFull) const;
 
 private:
     bool initialize();
@@ -129,8 +133,6 @@ private:
     void addPseudoLegalMovesKnight(uint8f origin);
     void addPseudoLegalMovesPawn(uint8f origin);
     void addPseudoLegalMovesRow(uint8f origin, const std::vector<uint8f> &row);
-
-    PositionZ applyMove(const MoveZ &move) const;
 
     std::vector<MoveZ> pseudoLegalMoves, legalMoves; // "pseudo-legal move" = leaves the king on capture
     bool pseudoLegalMovesGenerated, legalMovesGenerated;

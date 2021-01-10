@@ -8,8 +8,8 @@ int main()
     {
         
         /*BasicEvaluator evaluator;
-        BasicMovePicker naive(&evaluator, 3);
-        BasicMovePickerHash naivehash(&evaluator, 3);
+        BasicMovePicker naive(&evaluator, 4);
+        BasicMovePickerHash naivehash(&evaluator, 4);
 
         ComputerPlayer computer1(&naive);
         ComputerPlayer computer2(&naivehash);
@@ -20,6 +20,22 @@ int main()
 
         Game game2( (Player *) &computer2,  (Player *) &computer2);
         game2.playGame();*/
+
+
+
+        BasicEvaluatorZ evaluatorZ;
+        BasicMovePickerZ basic(&evaluatorZ, 5);
+        BasicMovePickerHashZ basicHash(&evaluatorZ, 5);
+
+        ComputerPlayerZ computerZ1(&basic);
+        ComputerPlayerZ computerZ2(&basicHash);
+        //HumanPlayerZ human;
+
+        //GameZ gameZ( (PlayerZ *) &computerZ1,  (PlayerZ *) &computerZ1);
+        //gameZ.playGame();
+
+        GameZ gameZ2( (PlayerZ *) &computerZ2,  (PlayerZ *) &computerZ2);
+        gameZ2.playGame();
 
 
 

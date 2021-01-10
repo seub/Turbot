@@ -33,6 +33,8 @@ protected:
 };
 
 
+
+
 class LegalMover;
 
 class MovePGN : public Move
@@ -72,6 +74,7 @@ private:
 
 class MoveZ
 {
+    friend class MovePGNZ;
     friend class LegalMoverZ;
 
 public:
@@ -89,6 +92,38 @@ protected:
     // promotion = 11 = 1011 means that the move is a promotion, and the promoted piece is 101 = 5 = Knight
 };
 
+
+
+class LegalMoverZ;
+
+class MovePGNZ : public MoveZ
+{
+    // Remark: The MovePGNZ class is not responsible for writing the move number, any draw offers (=) before or after playing a move,
+    // nor the move annotation symbols (https://en.wikipedia.org/wiki/Chess_annotation_symbols), nor the game result (1-0, 0-1, or 1/2-1/2).
+    friend std::ostream & operator<<(std::ostream &out, const MovePGNZ &M);
+
+public:
+    MovePGNZ() {}
+    MovePGNZ(const MoveZ &move, const LegalMoverZ *mover);
+    bool operator==(const MovePGNZ &other) const;
+
+    static bool fromPGN(MovePGNZ &res, const std::string &PGNstring, const LegalMoverZ *mover);
+    static bool fromPGN(MoveZ &res, const std::string &PGNstring, const LegalMoverZ *mover);
+    static bool fromMove(MovePGNZ &res, const MoveZ &move, const LegalMoverZ *mover);
+
+    bool getTurn() const {return turn;}
+
+    std::string toPGN() const;
+    std::string toPGN(uint moveNum) const;
+
+private:
+    PieceType piecetype;
+    bool turn;
+    bool pieceOriginAmbiguous, ambiguityLiftedByFile, ambiguityLiftedByRank;
+    bool capture;
+    bool castleShort, castleLong;
+    bool check, checkmate;
+};
 
 
 

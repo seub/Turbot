@@ -392,21 +392,29 @@ std::size_t PositionZobrist::recalculateHash() const
 
 
 
-
-
-
-
-
+PositionZ::PositionZ()
+{
+    if (!Zobrist::ZZOBRIST_NUMBERS_GENERATED) {Zobrist::GENERATE_ZZOBRIST_NUMBERS();}
+}
 
 PositionZ::PositionZ(bool gamestart) : board(BoardZ(gamestart))
 {
+    if (!Zobrist::ZZOBRIST_NUMBERS_GENERATED) {Zobrist::GENERATE_ZZOBRIST_NUMBERS();}
+
     turn = true;
     castlingRights = 0b1111;
     enPassant = 0;
 
     enPassantKing = 0;
     drawClaimable = false;
-    recalculateHash();
+    hash = recalculateHash(false);
+
+    moveNumber = 1;
+    nbReversiblePlies = 0;
+    fiftyDraw = false;
+    threeFoldDraw = false;
+    repetitions.clear();
+    repetitions[board] = 1;
 }
 
 bool PositionZ::operator==(const PositionZ &other) const
@@ -421,14 +429,21 @@ std::size_t PositionZ::getHash() const
     return hash;
 }
 
-
-std::size_t PositionZ::recalculateHash() const
+void PositionZ::updateDrawClaimable()
 {
-    std::size_t res = 0;
+    bool b = fiftyDraw || threeFoldDraw;
+    if (b != drawClaimable)
+    {
+        drawClaimable = b;
+        hash ^= Zobrist::ZZOBRIST_DRAW_CLAIMABLE;
+    }
+}
 
-    if (!Zobrist::ZZOBRIST_NUMBERS_GENERATED) {throw("ERROR in PositionZ::recalculateHash: Zobrist numbers have not been generated");}
 
-    for (uint i=0; i<64; ++i) {if (board.pieces[i]) {res ^= Zobrist::ZZOBRIST_PIECES[i][board.pieces[i]];}}
+std::size_t PositionZ::recalculateHash(bool recalculateBoardHash) const
+{
+    std::size_t res = recalculateBoardHash ? board.recalculateHash() : board.hash;
+
     if (turn) {res ^= Zobrist::ZZOBRIST_TURN;}
     res ^= Zobrist::ZZOBRIST_CASTLING_RIGHTS[castlingRights];
     res ^= Zobrist::ZZOBRIST_EN_PASSANT[enPassant];
@@ -436,5 +451,65 @@ std::size_t PositionZ::recalculateHash() const
     res ^= Zobrist::ZZOBRIST_EN_PASSANT_KING[enPassantKing];
     if (drawClaimable) {res ^= Zobrist::ZZOBRIST_DRAW_CLAIMABLE;}
 
-return res;
+    return res;
+}
+
+bool PositionZ::printPGN(std::string &res, const std::vector<MoveZ> &line) const
+{
+    res.clear();
+    PositionZ pos(*this), nextPos(false);
+    uint N = line.size();
+    if (N==0) {return true;}
+
+    MoveZ move;
+    std::string moveStr;
+
+    move = line.front();
+    if (!pos.printPGN(moveStr, move, true)) {return false;}
+    else {res += moveStr;}
+    if (N==1) {return true;}
+
+    pos.applyMove(nextPos, move);
+    pos = nextPos;
+
+    for (uint i=1; i<N-1; ++i)
+    {
+        move = line[i];
+        if (!pos.printPGN(moveStr, move, pos.turn)) {return false;}
+        else
+        {
+            res += " ";
+            res += moveStr;
+        }
+        pos.applyMove(nextPos, move);
+        pos = nextPos;
+    }
+
+    move = line.back();
+    if (!pos.printPGN(moveStr, move, pos.turn)) {return false;}
+    else
+    {
+        res += " ";
+        res += moveStr;
+    }
+
+    return true;
+}
+
+bool PositionZ::printPGN(std::string &res, const MoveZ &move, bool printMoveNumber) const
+{
+    LegalMoverZ mover(this, true);
+    MovePGNZ movePGN;
+    bool success = MovePGNZ::fromMove(movePGN, move, &mover);
+    if (success)
+    {
+        if (printMoveNumber) {res = movePGN.toPGN(moveNumber);}
+        else {res = movePGN.toPGN();}
+    }
+    return success;
+}
+
+void PositionZ::applyMove(PositionZ &res, const MoveZ &move) const
+{
+    LegalMoverZ(this, false).applyMove(move, res, true);
 }

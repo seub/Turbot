@@ -1,4 +1,5 @@
 #include "board.h"
+#include "zobrist.h"
 
 Board::Board(bool gamestart)
 {
@@ -202,12 +203,16 @@ std::ostream & operator <<(std::ostream &out, const Board &B)
 
 
 
-
-
+BoardZ::BoardZ()
+{
+    if (!Zobrist::ZZOBRIST_NUMBERS_GENERATED) {Zobrist::GENERATE_ZZOBRIST_NUMBERS();}
+}
 
 
 BoardZ::BoardZ(bool gamestart)
 {
+    if (!Zobrist::ZZOBRIST_NUMBERS_GENERATED) {Zobrist::GENERATE_ZZOBRIST_NUMBERS();}
+
     if (gamestart)
     {
         reset();
@@ -233,16 +238,19 @@ void BoardZ::reset()
 
     for (uint i=0; i!=8; ++i)
     {
-        pieces[i] = 27;
-        pieces[8+i] = firstRank[i];
-        pieces[56+i] = lastRank[i];
+        pieces[i] = firstRank[i];
+        pieces[8+i] = 27;
         pieces[48+i] = 25;
+        pieces[56+i] = lastRank[i];
     }
+
+    hash = recalculateHash();
 }
 
 void BoardZ::clear()
 {
     pieces.fill(0);
+    hash = recalculateHash();
 }
 
 
@@ -385,3 +393,29 @@ bool BoardZ::isPawn(uint8f square) const
 {
     return (pieces[square] >> 2) == 6;
 }
+
+void BoardZ::addPiece(uint8f square, uint8f piece)
+{
+    if (pieces[square]) {hash ^= Zobrist::ZZOBRIST_PIECES[square][pieces[square]];}
+    hash ^= Zobrist::ZZOBRIST_PIECES[square][piece];
+    pieces[square] = piece;
+}
+
+void BoardZ::removePiece(uint8f square)
+{
+    if (pieces[square])
+    {
+        hash ^= Zobrist::ZZOBRIST_PIECES[square][pieces[square]];
+        pieces[square] = 0;
+    }
+}
+
+
+std::size_t BoardZ::recalculateHash() const
+{
+    std::size_t res = 0;
+    for (uint i=0; i<64; ++i) {if (pieces[i]) {res ^= Zobrist::ZZOBRIST_PIECES[i][pieces[i]];}}
+
+    return res;
+}
+
