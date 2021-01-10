@@ -96,6 +96,7 @@ public:
     LegalMoverZ & operator=(LegalMoverZ) = delete;
 
     bool isCapture(const MoveZ &move) const;
+    bool isEnPassantPawnMove(const MoveZ &move) const;
     bool isOpponentKingCapturable() const;
     bool isPawnMove(const MoveZ &move) const;
     bool isKingMove(const MoveZ &move) const;

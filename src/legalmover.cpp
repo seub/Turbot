@@ -1201,7 +1201,7 @@ void LegalMoverZ::addPseudoLegalMovesPawn(uint8f origin)
         if (file>0)
         {
             target = origin+7;
-            if ((board->hasPiece(target, false)) || (position->enPassant == 1 + ((target % 8) << 1)))
+            if ((board->hasPiece(target, false)) || ((target/8 == 5) && (position->enPassant == 1 + ((target % 8) << 1))))
             {
                 if (rank==6) {addPseudoLegalMovePromotions(origin, target, true);}
                 else {addPseudoLegalMove(origin, target);}
@@ -1212,7 +1212,7 @@ void LegalMoverZ::addPseudoLegalMovesPawn(uint8f origin)
         if (file<7)
         {
             target = origin+9;
-            if ((board->hasPiece(target, false)) || (position->enPassant == 1 + ((target % 8) << 1)))
+            if ((board->hasPiece(target, false)) || ((target/8 == 5) && (position->enPassant == 1 + ((target % 8) << 1))))
             {
                 if (rank==6) addPseudoLegalMovePromotions(origin,target, true);
                 else addPseudoLegalMove(origin, target);
@@ -1237,7 +1237,7 @@ void LegalMoverZ::addPseudoLegalMovesPawn(uint8f origin)
         if (file>0)
         {
             target = origin-9;
-            if (board->hasPiece(target, true) || (position->enPassant == 1 + ((target % 8) << 1)))
+            if (board->hasPiece(target, true) || ((target/8 == 2) && (position->enPassant == 1 + ((target % 8) << 1))))
             {
                 if (rank==1) {addPseudoLegalMovePromotions(origin, target, true);}
                 else {addPseudoLegalMove(origin, target);}
@@ -1247,7 +1247,7 @@ void LegalMoverZ::addPseudoLegalMovesPawn(uint8f origin)
         if (file<7)
         {
             target = origin-7;
-            if (board->hasPiece(target, true) || (position->enPassant == 1 + ((target % 8) << 1)))
+            if (board->hasPiece(target, true) || ((target/8 == 2) && (position->enPassant == 1 + ((target % 8) << 1))))
             {
                 if (rank==1) {addPseudoLegalMovePromotions(origin, target, true);}
                 else {addPseudoLegalMove(origin, target);}
@@ -1260,7 +1260,12 @@ void LegalMoverZ::addPseudoLegalMovesPawn(uint8f origin)
 
 bool LegalMoverZ::isCapture(const MoveZ &move) const
 {
-    return pieces[move.target] || (isPawnMove(move) && (position->enPassant == 1 + ((move.target % 8) << 1)));
+    return (pieces[move.target] & 1) || (isEnPassantPawnMove(move));
+}
+
+bool LegalMoverZ::isEnPassantPawnMove(const MoveZ &move) const
+{
+    return isPawnMove(move) && (move.target/8 == (turn ? 5 : 2)) && (position->enPassant == 1 + ((move.target % 8) << 1));
 }
 
 bool LegalMoverZ::isOpponentKingCapturable() const
@@ -1348,7 +1353,7 @@ void LegalMoverZ::applyMove(const MoveZ &move, PositionZ &res, bool updateFull) 
     else {res.board.addPiece(move.target, pieces[move.origin]);}
 
     // En passant move
-    if (isPawnMove(move) && (position->enPassant == 1 + ((move.target % 8) << 1))){res.board.removePiece(turn ? move.target-8 : move.target+8);}
+    if (isEnPassantPawnMove(move)){res.board.removePiece(turn ? move.target-8 : move.target+8);}
 
     // Pawn move allowing en passant or not
     if (isPawnMove(move) && ((move.target==move.origin+16) || (move.origin==move.target+16))){res.enPassant = 1 + ((move.origin % 8) << 1);}

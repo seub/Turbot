@@ -414,6 +414,53 @@ bool MoveZ::operator==(const MoveZ &other) const
 }
 
 
+bool MoveZ::fromLAN(MoveZ &res, std::string &LANstring)
+{
+    uint size = LANstring.size();
+    if (!(size==4 || size==6)) return false;
+
+    SquareZ::fromName(res.origin, LANstring.substr(0, 2));
+    SquareZ::fromName(res.target, LANstring.substr(2, 2));
+
+    if (size==4)
+    {
+        res.promotion=0;
+    }
+    else
+    {
+        char c = LANstring[4];
+        if (c!='=') return false;
+        c = LANstring[5];
+        switch (c)
+        {
+        case 'Q' : res.promotion = 1 + (2 << 1); break;
+        case 'R' : res.promotion = 1 + (3 << 1); break;
+        case 'B' : res.promotion = 1 + (4 << 1); break;
+        case 'N' : res.promotion = 1 + (5 << 1); break;
+        default : return false; break;
+        }
+    }
+
+    return true;
+}
+
+std::string MoveZ::toLAN() const
+{
+    std::string res = SquareZ(origin).name()+SquareZ(target).name();
+    if (promotion)
+    {
+        res += "=";
+        res += PieceZ::name((PieceType) (promotion >> 1));
+    }
+    return res;
+}
+
+std::ostream & operator <<(std::ostream &out, const MoveZ &move)
+{
+    out << move.toLAN();
+    return out;
+}
+
 
 
 

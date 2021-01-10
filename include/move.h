@@ -76,11 +76,15 @@ class MoveZ
 {
     friend class MovePGNZ;
     friend class LegalMoverZ;
+    friend std::ostream & operator<<(std::ostream &out, const MoveZ &move);
 
 public:
     MoveZ() {}
     MoveZ(uint8f origin, uint8f target, uint8f promotion = 0) : origin(origin), target(target), promotion(promotion) {}
     bool operator==(const MoveZ &other) const;
+
+    static bool fromLAN(MoveZ & , std::string &LANstring); // LAN = Long Algebraic Notation // NB: static const function not possible in C++ :/
+    std::string toLAN() const;
 
 protected:
     uint8f origin, target;

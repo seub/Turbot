@@ -25,16 +25,16 @@ int main()
 
         BasicEvaluatorZ evaluatorZ;
         BasicMovePickerZ basic(&evaluatorZ, 5);
-        BasicMovePickerHashZ basicHash(&evaluatorZ, 5);
+        BasicMovePickerHashZ basicHash(&evaluatorZ, 6);
 
         ComputerPlayerZ computerZ1(&basic);
         ComputerPlayerZ computerZ2(&basicHash);
-        //HumanPlayerZ human;
+        HumanPlayerZ human;
 
         //GameZ gameZ( (PlayerZ *) &computerZ1,  (PlayerZ *) &computerZ1);
         //gameZ.playGame();
 
-        GameZ gameZ2( (PlayerZ *) &computerZ2,  (PlayerZ *) &computerZ2);
+        GameZ gameZ2( (PlayerZ *) &human,  (PlayerZ *) &computerZ2);
         gameZ2.playGame();
 
 
