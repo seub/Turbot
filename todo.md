@@ -5,16 +5,11 @@ like bool applyMove(Position &res)?
 
 Test number of collisions
 
-Remove from position:
-uint moveNumber;
-uint nbReversibleHalfMoves; // For 50 and 75 move rules for draw
-bool applyMove(Position &res, const Move &m, bool checkLegal = false, bool checkKCLegal = false) const;
-bool pickBestMove(Move &res, bool &bestMoveIsForceDraw, MovePicker *picker) const;
-bool getLegalMoves(std::vector<Move> &res) const;
-bool getKCLegalMoves(std::vector<Move> &res) const;
 
 
-Decide whether PositionZ should contain a boardZ or a BoardZ
+BUGS
+BasicMovePickerZ does not play the same moves as BasicMovePickerHashZ ?? Test depth 4, play against itself.
+Oh no that's normal! It's because it->second).depth >= depth is not ==
 
 
 PROPOSITIONS DE CLASSES

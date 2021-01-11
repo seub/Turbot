@@ -4,49 +4,18 @@
 # include "tools.h"
 # include "piece.h"
 # include "square.h"
-# include "boardhelper.h"
 # include "move.h"
+
 
 class Board
 {
     friend class Position;
-    friend class BoardHelper;
     friend class LegalMover;
-    friend std::ostream & operator<<(std::ostream &out, const Board &B);
 
 public:
+    Board();
     Board(bool gamestart);
-
     bool operator==(Board const& other) const;
-
-    bool getPiece(Piece &res, const Square &square) const;
-
-    std::string printString() const;
-    std::string toFENstring() const;
-    static bool fromFENstring(Board &res, const std::string &str);
-
-    static bool fileIndex(uint &res, const char &c);
-    static bool rankIndex(uint &res, const char &c);
-
-
-private:
-    void clear();
-    void reset();
-
-    std::array<Piece, 64> pieces;
-};
-
-
-
-class BoardZ
-{
-    friend class PositionZ;
-    friend class LegalMoverZ;
-
-public:
-    BoardZ();
-    BoardZ(bool gamestart);
-    bool operator==(BoardZ const& other) const;
 
     bool getKingSquare(uint8f &res, bool side) const;
     bool hasPiece(uint8f square, bool color) const; // true = White, false = Black
@@ -56,7 +25,7 @@ public:
 
 
     std::string toFENstring() const;
-    static bool fromFENstring(BoardZ &res, const std::string &str);
+    static bool fromFENstring(Board &res, const std::string &str);
 
     static bool fileIndex(uint8f &res, const char &fileName);
     static bool rankIndex(uint8f &res, const char &rankName);
@@ -105,9 +74,9 @@ private:
 
 namespace std
 {
-template<> struct hash<BoardZ>
+template<> struct hash<Board>
 {
-    std::size_t operator()(BoardZ const& board) const noexcept
+    std::size_t operator()(Board const& board) const noexcept
     {
         return board.getHash();
     }

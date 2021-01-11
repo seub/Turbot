@@ -1,6 +1,8 @@
 #include "player.h"
 #include "movepicker.h"
 
+
+/*
 ComputerPlayer::ComputerPlayer(MovePicker *picker) : picker(picker)
 {
     name = picker->createName();
@@ -101,6 +103,7 @@ bool ComputerPlayer::nextMove(Move &res, bool &forceDraw, std::chrono::duration<
     time = end-start;
     return success;
 }
+*/
 
 
 
@@ -122,15 +125,14 @@ bool ComputerPlayer::nextMove(Move &res, bool &forceDraw, std::chrono::duration<
 
 
 
-
-ComputerPlayerZ::ComputerPlayerZ(MovePickerZ *picker) : picker(picker)
+ComputerPlayer::ComputerPlayer(MovePicker *picker) : picker(picker)
 {
     name = picker->createName();
     std::cout << "Computer player was set as \"" << name << "\"." << std::endl;
 }
 
 
-bool ComputerPlayerZ::findBestMove(MoveZ &res, bool &claimDraw, const PositionZ &position) const
+bool ComputerPlayer::findBestMove(Move &res, bool &claimDraw, const Position &position) const
 {
     bool success = false;
 
@@ -147,23 +149,23 @@ bool ComputerPlayerZ::findBestMove(MoveZ &res, bool &claimDraw, const PositionZ 
     return success;
 }
 
-HumanPlayerZ::HumanPlayerZ()
+HumanPlayer::HumanPlayer()
 {
     std::cout << "Hi there! What is your name? ";
     std::cin >> name;
     std::cout << "Okay " << name << ", let's go!" << std::endl << std::endl;
 }
 
-HumanPlayerZ::HumanPlayerZ(const std::string &name)
+HumanPlayer::HumanPlayer(const std::string &name)
 {
     this->name = name;
     std::cout << "Hello " << name << ", let's go!" << std::endl << std::endl;
 }
 
-bool HumanPlayerZ::nextMove(MoveZ &res, bool &claimDraw, std::chrono::duration<double> &time, const PositionZ &position) const
+bool HumanPlayer::nextMove(Move &res, bool &claimDraw, std::chrono::duration<double> &time, const Position &position) const
 {
     auto start = std::chrono::steady_clock::now();
-    LegalMoverZ mover1(&position, true);
+    LegalMover mover1(&position, true);
     std::string moveString;
     bool first = (position.getMoveNumber()==1);
     while(true)
@@ -192,7 +194,7 @@ bool HumanPlayerZ::nextMove(MoveZ &res, bool &claimDraw, std::chrono::duration<d
                 continue;
             }
         }
-        if (MovePGNZ::fromPGN(res, moveString, &mover1))
+        if (MovePGN::fromPGN(res, moveString, &mover1))
         {
             if (mover1.isInLegalMovesList(res))
             {
@@ -215,7 +217,7 @@ bool HumanPlayerZ::nextMove(MoveZ &res, bool &claimDraw, std::chrono::duration<d
     }
 }
 
-bool ComputerPlayerZ::nextMove(MoveZ &res, bool &claimDraw, std::chrono::duration<double> &time, const PositionZ &position) const
+bool ComputerPlayer::nextMove(Move &res, bool &claimDraw, std::chrono::duration<double> &time, const Position &position) const
 {
     auto start = std::chrono::steady_clock::now();
     bool success = findBestMove(res, claimDraw, position);

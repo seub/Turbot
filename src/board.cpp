@@ -1,8 +1,17 @@
 #include "board.h"
 #include "zobrist.h"
 
+
+Board::Board()
+{
+    if (!Zobrist::ZOBRIST_NUMBERS_GENERATED) {Zobrist::GENERATE_ZOBRIST_NUMBERS();}
+}
+
+
 Board::Board(bool gamestart)
 {
+    if (!Zobrist::ZOBRIST_NUMBERS_GENERATED) {Zobrist::GENERATE_ZOBRIST_NUMBERS();}
+
     if (gamestart)
     {
         reset();
@@ -18,218 +27,8 @@ bool Board::operator==(const Board &other) const
     return (pieces==other.pieces);
 }
 
+
 void Board::reset()
-{
-    pieces.fill(Piece());
-
-    std::vector<PieceType> firstRank = {PieceType::ROOK, PieceType::KNIGHT, PieceType::BISHOP, PieceType::QUEEN, PieceType::KING, PieceType::BISHOP, PieceType::KNIGHT, PieceType::ROOK};
-
-    for (uint i=0; i!=8; ++i)
-    {
-        pieces[i] = Piece(firstRank[i], Color::WHITE);
-        pieces[8+i] = Piece(PieceType::PAWN, Color::WHITE);
-        pieces[56+i] = Piece(firstRank[i], Color::BLACK);
-        pieces[48+i] = Piece(PieceType::PAWN, Color::BLACK);
-    }
-}
-
-void Board::clear()
-{
-    pieces.fill(Piece());
-}
-
-std::string Board::printString() const
-{
-    std::string res = {};
-    std::vector< std::string > whitePieces, blackPieces;
-
-    Piece piece;
-    for (uint i=0; i!=64; ++i)
-    {
-        piece = pieces[i];
-        if (!piece.isEmpty())
-        {
-            if (piece.getColor() == Color::WHITE) whitePieces.push_back(piece.name()+Square(i).name());
-            if (piece.getColor() == Color::BLACK) blackPieces.push_back(piece.name()+Square(i).name());
-        }
-    }
-
-    res += "White pieces: ";
-    for (const auto &p : whitePieces)
-    {
-        res += p;
-        res += ", ";
-    }
-    if (!whitePieces.empty()) res.erase (res.end()-2, res.end());
-    res += "\n";
-
-    res += "Black pieces: ";
-    for (const auto &p : blackPieces)
-    {
-        res += p;
-        res += ", ";
-    }
-    if (!blackPieces.empty()) res.erase (res.end()-2, res.end());
-
-    return res;
-}
-
-std::string Board::toFENstring() const
-{
-    std::string res = {};
-
-    Piece piece;
-    int rank=7, file=0;
-    uint emptySquares = 0;
-    while (rank!=-1)
-    {
-        piece = pieces[file + 8*rank];
-        if (piece.isEmpty())
-        {
-            ++emptySquares;
-        }
-        else
-        {
-            if (emptySquares>0)
-            {
-                res += Tools::convertToString(emptySquares);
-            }
-            res += piece.toFENchar();
-            emptySquares=0;
-        }
-        ++file;
-        if (file==8)
-        {
-            --rank;
-            file=0;
-            if (emptySquares>0) res += Tools::convertToString(emptySquares);
-            emptySquares=0;
-            res += '/';
-        }
-    }
-    res.pop_back();
-
-    return res;
-}
-
-bool Board::fromFENstring(Board &res, const std::string &str)
-{
-    res.clear();
-
-    int rank=7, file=0;
-    for (const auto & letter : str)
-    {
-        switch (letter)
-        {
-        case ' ' : break;
-        case 'K' : res.pieces[file + 8*rank] = Piece(PieceType::KING, Color::WHITE); ++file; break;
-        case 'Q' : res.pieces[file + 8*rank] = Piece(PieceType::QUEEN, Color::WHITE);  ++file; break;
-        case 'R' : res.pieces[file + 8*rank] = Piece(PieceType::ROOK, Color::WHITE);  ++file; break;
-        case 'B' : res.pieces[file + 8*rank] = Piece(PieceType::BISHOP, Color::WHITE);  ++file; break;
-        case 'N' : res.pieces[file + 8*rank] = Piece(PieceType::KNIGHT, Color::WHITE);  ++file ;break;
-        case 'P' : res.pieces[file + 8*rank] = Piece(PieceType::PAWN, Color::WHITE);  ++file; break;
-        case 'k' : res.pieces[file + 8*rank] = Piece(PieceType::KING, Color::BLACK); ++file; break;
-        case 'q' : res.pieces[file + 8*rank] = Piece(PieceType::QUEEN, Color::BLACK);  ++file; break;
-        case 'r' : res.pieces[file + 8*rank] = Piece(PieceType::ROOK, Color::BLACK);  ++file; break;
-        case 'b' : res.pieces[file + 8*rank] = Piece(PieceType::BISHOP, Color::BLACK);  ++file; break;
-        case 'n' : res.pieces[file + 8*rank] = Piece(PieceType::KNIGHT, Color::BLACK);  ++file ;break;
-        case 'p' : res.pieces[file + 8*rank] = Piece(PieceType::PAWN, Color::BLACK);  ++file; break;
-        case '1' : file += 1; break;
-        case '2' : file += 2; break;
-        case '3' : file += 3; break;
-        case '4' : file += 4; break;
-        case '5' : file += 5; break;
-        case '6' : file += 6; break;
-        case '7' : file += 7; break;
-        case '8' : file += 8; break;
-        case '/' : file = 0; --rank; break;
-        default : return false;
-        }
-    }
-
-    return true;
-}
-
-bool Board::fileIndex(uint &res, const char &c)
-{
-    switch (c)
-    {
-    case 'a' : res = 0; return true; break;
-    case 'b' : res = 1; return true; break;
-    case 'c' : res = 2; return true; break;
-    case 'd' : res = 3; return true; break;
-    case 'e' : res = 4; return true; break;
-    case 'f' : res = 5; return true; break;
-    case 'g' : res = 6; return true; break;
-    case 'h' : res = 7; return true; break;
-    default : return false;
-    }
-}
-
-bool Board::rankIndex(uint &res, const char &c)
-{
-    switch (c)
-    {
-    case '1' : res = 0; return true; break;
-    case '2' : res = 1; return true; break;
-    case '3' : res = 2; return true; break;
-    case '4' : res = 3; return true; break;
-    case '5' : res = 4; return true; break;
-    case '6' : res = 5; return true; break;
-    case '7' : res = 6; return true; break;
-    case '8' : res = 7; return true; break;
-    default : return false;
-    }
-}
-
-bool Board::getPiece(Piece &res, const Square &square) const
-{
-    res = pieces[square.getIndex()];
-    return !(res.isEmpty());
-}
-
-
-
-std::ostream & operator <<(std::ostream &out, const Board &B)
-{
-    out << B.printString();
-    return out;
-}
-
-
-
-
-
-
-
-
-BoardZ::BoardZ()
-{
-    if (!Zobrist::ZZOBRIST_NUMBERS_GENERATED) {Zobrist::GENERATE_ZZOBRIST_NUMBERS();}
-}
-
-
-BoardZ::BoardZ(bool gamestart)
-{
-    if (!Zobrist::ZZOBRIST_NUMBERS_GENERATED) {Zobrist::GENERATE_ZZOBRIST_NUMBERS();}
-
-    if (gamestart)
-    {
-        reset();
-    }
-    else
-    {
-        clear();
-    }
-}
-
-bool BoardZ::operator==(const BoardZ &other) const
-{
-    return (pieces==other.pieces);
-}
-
-
-void BoardZ::reset()
 {
     pieces.fill(0);
 
@@ -247,14 +46,14 @@ void BoardZ::reset()
     hash = recalculateHash();
 }
 
-void BoardZ::clear()
+void Board::clear()
 {
     pieces.fill(0);
     hash = recalculateHash();
 }
 
 
-std::string BoardZ::toFENstring() const
+std::string Board::toFENstring() const
 {
     std::string res = {};
 
@@ -274,7 +73,7 @@ std::string BoardZ::toFENstring() const
             {
                 res += Tools::convertToString(emptySquares);
             }
-            res += PieceZ(piece).toFENchar();
+            res += Piece(piece).toFENchar();
             emptySquares=0;
         }
         ++file;
@@ -292,7 +91,7 @@ std::string BoardZ::toFENstring() const
     return res;
 }
 
-bool BoardZ::fromFENstring(BoardZ &res, const std::string &str)
+bool Board::fromFENstring(Board &res, const std::string &str)
 {
     res.clear();
 
@@ -330,7 +129,7 @@ bool BoardZ::fromFENstring(BoardZ &res, const std::string &str)
     return true;
 }
 
-bool BoardZ::fileIndex(uint8f &res, const char &c)
+bool Board::fileIndex(uint8f &res, const char &c)
 {
     switch (c)
     {
@@ -346,7 +145,7 @@ bool BoardZ::fileIndex(uint8f &res, const char &c)
     }
 }
 
-bool BoardZ::rankIndex(uint8f &res, const char &c)
+bool Board::rankIndex(uint8f &res, const char &c)
 {
     switch (c)
     {
@@ -362,7 +161,7 @@ bool BoardZ::rankIndex(uint8f &res, const char &c)
     }
 }
 
-bool BoardZ::getKingSquare(uint8f &res, bool side) const
+bool Board::getKingSquare(uint8f &res, bool side) const
 {
     uint8f kingNum = (side ? 7 : 5);
     res = 0;
@@ -374,47 +173,47 @@ bool BoardZ::getKingSquare(uint8f &res, bool side) const
     return (res!=64);
 }
 
-bool BoardZ::hasPiece(uint8f square, bool color) const
+bool Board::hasPiece(uint8f square, bool color) const
 {
     return (pieces[square]) && (((pieces[square] & 2) >> 1) == color);
 }
 
-bool BoardZ::isKing(uint8f square) const
+bool Board::isKing(uint8f square) const
 {
     return (pieces[square] >> 2) == 1;
 }
 
-bool BoardZ::isRook(uint8f square) const
+bool Board::isRook(uint8f square) const
 {
     return (pieces[square] >> 2) == 3;
 }
 
-bool BoardZ::isPawn(uint8f square) const
+bool Board::isPawn(uint8f square) const
 {
     return (pieces[square] >> 2) == 6;
 }
 
-void BoardZ::addPiece(uint8f square, uint8f piece)
+void Board::addPiece(uint8f square, uint8f piece)
 {
-    if (pieces[square]) {hash ^= Zobrist::ZZOBRIST_PIECES[square][pieces[square]];}
-    hash ^= Zobrist::ZZOBRIST_PIECES[square][piece];
+    if (pieces[square]) {hash ^= Zobrist::ZOBRIST_PIECES[square][pieces[square]];}
+    hash ^= Zobrist::ZOBRIST_PIECES[square][piece];
     pieces[square] = piece;
 }
 
-void BoardZ::removePiece(uint8f square)
+void Board::removePiece(uint8f square)
 {
     if (pieces[square])
     {
-        hash ^= Zobrist::ZZOBRIST_PIECES[square][pieces[square]];
+        hash ^= Zobrist::ZOBRIST_PIECES[square][pieces[square]];
         pieces[square] = 0;
     }
 }
 
 
-std::size_t BoardZ::recalculateHash() const
+std::size_t Board::recalculateHash() const
 {
     std::size_t res = 0;
-    for (uint i=0; i<64; ++i) {if (pieces[i]) {res ^= Zobrist::ZZOBRIST_PIECES[i][pieces[i]];}}
+    for (uint i=0; i<64; ++i) {if (pieces[i]) {res ^= Zobrist::ZOBRIST_PIECES[i][pieces[i]];}}
 
     return res;
 }

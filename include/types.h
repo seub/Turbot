@@ -23,6 +23,6 @@ typedef std::array<uint8f, 64> boardZ;
 
 enum class GameResult {NOT_FINISHED, WHITE_WINS, BLACK_WINS, DRAW};
 enum class PieceType {EMPTY, KING, QUEEN, ROOK, BISHOP, KNIGHT, PAWN};
-enum class Color {WHITE, BLACK};
+//enum class Color {WHITE, BLACK};
 
 #endif // TYPES_H

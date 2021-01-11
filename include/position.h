@@ -5,106 +5,20 @@
 # include "move.h"
 # include "legalmover.h"
 
-class MovePicker;
+
 
 class Position
 {
-    friend std::ostream & operator<<(std::ostream &out, const Position &p);
     friend class LegalMover;
-    friend class PositionZobrist;
 
 public:
-    Position(bool initialize);
+    Position();
+    Position(bool gamestart);
 
     bool operator==(Position const& other) const;
 
-    std::string printString() const;
-    std::string toFENstring() const;
-    std::string toLichessURL() const;
-    static bool fromFENstring(Position &res, const std::string &FENstr);
-    uint getMoveNumber() const {return moveNumber;}
-    bool getPiece(Piece &res, const Square &square) const {return board.getPiece(res, square);}
-    Color getTurn() const {return turn;}
-    uint getNbReversibleHalfMoves() const {return nbReversibleHalfMoves;}
+    std::size_t getHash() const;
     Board getBoard() const {return board;}
-
-    bool applyMove(Position &res, const Move &m, bool checkLegal = false, bool checkKCLegal = false) const;
-    bool pickBestMove(Move &res, bool &bestMoveIsForceDraw, MovePicker *picker) const;
-    bool getLegalMoves(std::vector<Move> &res) const;
-
-    bool printPGN(std::string &res, const Move &move, bool printMoveNumber) const;
-    bool printPGN(std::string &res, const std::vector<Move> &line) const;
-
-    void setDrawClaimable(bool b);
-    bool getDrawClaimable() const;
-
-    std::size_t getHash() const;
-
-private:
-    void clear();
-    void reset();
-    void commonReset();
-    void resetPieces();
-
-    Board board;
-    Color turn;
-    std::array<bool, 4> castlingRights; // White short, White long, Black short, Black long
-    bool enPassantPossible;
-    uint enPassantTargetSquare;
-    uint moveNumber;
-    uint nbReversibleHalfMoves; // For 50 and 75 move rules for draw
-
-    // The information below is usually not included in a "position", but we need it for our implementation
-    bool enPassantKingShort, enPassantKingLong; // For capturing the king after a pseudo-legal castle
-    bool drawClaimable; // Records whether a draw can be claimed
-};
-
-
-namespace std
-{
-template<> struct hash<Position>
-{
-    std::size_t operator()(Position const& position) const noexcept
-    {
-        return position.getHash();
-    }
-};
-}
-
-
-class PositionZobrist
-{
-
-public:
-    PositionZobrist() {}
-    PositionZobrist(const Position *position, const BoardHelper &helper);
-
-    std::size_t recalculateHash() const;
-
-private:
-    bool pieces[64][6][2]; // [square][piece type][side to move] !!! 0=Black, 1=White !!!
-    bool castlingRights[4]; // White short, White long, Black short, Black long
-    bool enPassantFile[8]; // En passant file where capture is possible
-    bool side; // !!! true=White, false=Black !!!
-    bool enPassantKingShort, enPassantKingLong; // For capturing the king after a pseudo-legal castle
-    bool drawClaimable; // Records whether a draw can be claimed
-};
-
-
-
-
-class PositionZ
-{
-    friend class LegalMoverZ;
-
-public:
-    PositionZ();
-    PositionZ(bool gamestart);
-
-    bool operator==(PositionZ const& other) const;
-
-    std::size_t getHash() const;
-    BoardZ getBoard() const {return board;}
     bool getDrawClaimable() const {return drawClaimable;}
     uint getNbReversiblePlies() const {return nbReversiblePlies;}
     uint getMoveNumber() const {return moveNumber;}
@@ -112,15 +26,18 @@ public:
     uint8f getPiece(uint8f square) const {return board.pieces[square];}
     std::size_t recalculateHash(bool recalculateBoardHash) const;
 
-    bool printPGN(std::string &res, const MoveZ &move, bool printMoveNumber) const;
-    bool printPGN(std::string &res, const std::vector<MoveZ> &line) const;
+    bool printMovePGN(std::string &res, const Move &move, bool printMoveNumber) const;
+    bool printLinePGN(std::string &res, const std::vector<Move> &line) const;
+    std::string toFENstring() const;
+    std::string toLichessURL() const;
+    static bool fromFENstring(Position &res, const std::string &FENstr);
 
 private:
     void updateDrawClaimable();
 
-    void applyMove(PositionZ &res, const MoveZ &move) const;
+    void applyMove(Position &res, const Move &move) const;
 
-    BoardZ board;
+    Board board;
 
     bool turn;
     // true=White, false=Black
@@ -144,15 +61,15 @@ private:
 
     uint moveNumber, nbReversiblePlies;
     bool fiftyDraw, threeFoldDraw;
-    std::unordered_map<BoardZ, uint> repetitions;
+    std::unordered_map<Board, uint> repetitions;
     // These are inessential and not taken into account in the hash
 };
 
 namespace std
 {
-template<> struct hash<PositionZ>
+template<> struct hash<Position>
 {
-    std::size_t operator()(PositionZ const& position) const noexcept
+    std::size_t operator()(Position const& position) const noexcept
     {
         return position.getHash();
     }

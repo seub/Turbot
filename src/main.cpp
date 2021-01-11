@@ -6,35 +6,19 @@ int main()
 {
     try
     {
-        
+
         BasicEvaluator evaluator;
-        BasicMovePicker naive(&evaluator, 4);
-        BasicMovePickerHash naivehash(&evaluator, 4);
+        BasicMovePicker basic(&evaluator, 4);
+        BasicMovePickerHash basicHash(&evaluator, 4);
 
-        ComputerPlayer computer1(&naive);
-        ComputerPlayer computer2(&naivehash);
-        //HumanPlayer human;
-
-        Game game( (Player *) &computer1,  (Player *) &computer1);
-        game.playGame();
-
-        Game game2( (Player *) &computer2,  (Player *) &computer2);
-        game2.playGame();
-
-
-
-        BasicEvaluatorZ evaluatorZ;
-        BasicMovePickerZ basic(&evaluatorZ, 4);
-        BasicMovePickerHashZ basicHash(&evaluatorZ, 4);
-
-        ComputerPlayerZ computerZ1(&basic);
-        ComputerPlayerZ computerZ2(&basicHash);
+        ComputerPlayer computer1(&basic);
+        ComputerPlayer computer2(&basicHash);
         //HumanPlayerZ human;
 
-        GameZ gameZ( (PlayerZ *) &computerZ1,  (PlayerZ *) &computerZ1);
+        Game gameZ( (Player *) &computer1,  (Player *) &computer1);
         gameZ.playGame();
 
-        GameZ gameZ2( (PlayerZ *) &computerZ2,  (PlayerZ *) &computerZ2);
+        Game gameZ2( (Player *) &computer2,  (Player *) &computer2);
         gameZ2.playGame();
 
 

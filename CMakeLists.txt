@@ -16,7 +16,6 @@ include_directories(include)
 
 set(SOURCES
     src/board.cpp
-    src/boardhelper.cpp    
     src/evaluator.cpp
     src/game.cpp
     src/legalmover.cpp
